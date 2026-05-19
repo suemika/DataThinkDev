@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     console.log('📊 解析的数据结构:', personData);
 
                     // 确保有默认数据
-                    personData.persons = personData.persons || ['张赛三', '李四', '王五', '赵六', '钱七', '孙八', '周九', '吴十'];
+                    personData.persons = personData.persons || ['张赛', '李四', '王五', '赵六', '钱七', '孙八', '周九', '吴十'];
                     personData.leaders = personData.leaders || ['张赛领导', '李领导', '王领导'];
 
                     // 处理节假日数据
