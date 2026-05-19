@@ -292,7 +292,11 @@
 <script src="vendor/elementui/js/vue.js"></script>
 <script src="vendor/easyui/js-easyui/axios.min.js"></script>
 <script src="vendor/easyui/js-easyui/index.js"></script>
-<script src="js/fuel_cost_calculator.js"></script>
+<script>
+var s = document.createElement('script');
+s.src = 'js/fuel_cost_calculator.js?v=' + new Date().toISOString().slice(0,10).replace(/-/g,'');
+document.body.appendChild(s);
+</script>
 
 </body>
 </html>
