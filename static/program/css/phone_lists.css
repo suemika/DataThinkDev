@@ -34,8 +34,8 @@
 }
 
 .input-group-t .form-control:focus {
-    border-color: #4361ee;
-    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.12);
+    border-color: #0092ff;
+    box-shadow: 0 0 0 3px rgba(0, 146, 255, 0.12);
     outline: none;
 }
 
@@ -85,7 +85,7 @@
     z-index: 10;
 }
 
-#department-buttons button {
+.dept-btn {
     border: 1.5px solid #dee2e6;
     background: #fff;
     color: #495057;
@@ -97,15 +97,15 @@
     cursor: pointer;
 }
 
-#department-buttons button:hover {
-    background: linear-gradient(135deg, #4361ee, #4cc9f0);
+.dept-btn:hover {
+    background: linear-gradient(to right, #0092ff, #20c997);
     color: #fff;
-    border-color: transparent;
+    border-color: #0092ff;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 146, 255, 0.3);
 }
 
-#department-buttons button:active {
+.dept-btn:active {
     transform: translateY(0);
 }
 
@@ -129,7 +129,7 @@
 }
 
 .department-table thead {
-    background: linear-gradient(135deg, #4361ee, #4cc9f0) !important;
+    background: linear-gradient(to right, #0092ff, #20c997) !important;
     color: #fff;
 }
 
@@ -156,8 +156,11 @@
 }
 
 .department-table tbody tr:hover {
-    background-color: #eef2ff;
-    transition: background-color 0.2s;
+    background-color: #20c997;
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.05em;
+    transition: background-color 0.2s, font-weight 0.2s, color 0.2s, font-size 0.2s;
 }
 
 /* --- 列宽 --- */
@@ -218,7 +221,7 @@
         gap: 6px;
     }
 
-    #department-buttons button {
+    .dept-btn {
         padding: 6px 14px;
         font-size: 0.8rem;
     }

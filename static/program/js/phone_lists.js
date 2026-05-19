@@ -5,17 +5,6 @@ let token = '';
 
 // 数据获取
 function fetchData() {
-    const tableContainer = document.getElementById('table-container');
-    const departmentWrapper = document.getElementById('department-wrapper');
-    const backgroundContainer = document.getElementById('background-container');
-    const containerNav = document.getElementById('container-nav');
-
-    // 在开始获取数据和生成表格前，先隐藏容器
-    if (tableContainer) tableContainer.style.display = 'none';
-    if (departmentWrapper) departmentWrapper.style.display = 'none'; // 隐藏部门按钮和表格的整体容器
-    if (backgroundContainer) backgroundContainer.style.display = 'none'; //
-    if (containerNav) containerNav.style.display = 'none'; //
-
     return axios.post('/imc/customOpt', {
         req: '475',
         data: {}
@@ -24,20 +13,10 @@ function fetchData() {
             data = response.data.data.data;
             populateDepartmentDropdown(data);
             generateTable(data);
-            // 数据加载和表格生成完成后，再显示容器
-            if (tableContainer) tableContainer.style.display = ''; // 或者 'block', 'flex' 取决于你原来的布局
-            if (departmentWrapper) departmentWrapper.style.display = 'flex'; // 或者 'block'
-            if (backgroundContainer) backgroundContainer.style.display = 'flex'; // 或者 'block'
-            if (containerNav) containerNav.style.display = '';
         })
         .catch(function (error) {
             console.error('Error fetching data:', error);
             document.getElementById('table-container').innerText = '获取数据失败，请稍后重试。';
-            // 即使失败，也需要确保容器处于可见状态，或者显示错误信息
-            if (tableContainer) tableContainer.style.display = '';
-            if (departmentWrapper) departmentWrapper.style.display = 'flex';
-            if (backgroundContainer) backgroundContainer.style.display = 'flex'; // 或者 'block'
-            if (containerNav) containerNav.style.display = '';
         });
 }
 
@@ -51,7 +30,7 @@ function populateDepartmentDropdown(data) {
 
     // 生成 "全部" 按钮
     let allButton = document.createElement('button');
-    allButton.className = 'btn btn-outline-primary rounded-pill shadow-sm';
+    allButton.className = 'dept-btn';
     allButton.innerHTML = '<i class="bi bi-collection me-1"></i>全部';
     allButton.onclick = () => filterAllDepartments();
     buttonsContainer.appendChild(allButton);
@@ -60,7 +39,7 @@ function populateDepartmentDropdown(data) {
     data.forEach(department => {
         if (department.is_visible) {
             let button = document.createElement('button');
-            button.className = 'btn btn-outline-primary rounded-pill shadow-sm';
+            button.className = 'dept-btn';
             button.innerHTML = `<i class="bi bi-building me-1"></i>${department.name}`;
             button.onclick = () => showRelatedDepartments(department.name);
             buttonsContainer.appendChild(button);
@@ -376,7 +355,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     token = getNameFromUrl('token');
     if (token) {
 
-        // 然后初始化应用
+        // 有 token：走水印认证流程
         await fetchWatermark();
 
     } else {
