@@ -13,6 +13,11 @@
 <body>
 <div id="oilPriceChart" style="width: 100%; height: 60vh;"></div>
 
-<script src="js/oil_price.js"></script>
+<script>
+(function(){
+var v = new Date().toISOString().slice(0,10).replace(/-/g,'');
+document.write('<script src="js/oil_price.js?v='+v+'"><\/script>');
+})();
+</script>
 </body>
 </html>

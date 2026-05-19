@@ -137,9 +137,19 @@
 <script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js"></script>
 <script src="../vendor/easyui/js-easyui/axios.min.js"></script>
 <script src="../vendor/elementui/js/jquery-3.7.0.min.js"></script>
-<script src="js/util.js"></script>
+<script>
+(function(){
+var v = new Date().toISOString().slice(0,10).replace(/-/g,'');
+document.write('<script src="js/util.js?v='+v+'"><\/script>');
+})();
+</script>
 <script src="fullcalendar-6.1.19/dist/index.global.min.js"></script>
 <script src="../xlsx/xlsx.full.min.js"></script>
-<script src="js/duty_date.js"></script>
+<script>
+(function(){
+var v = new Date().toISOString().slice(0,10).replace(/-/g,'');
+document.write('<script src="js/duty_date.js?v='+v+'"><\/script>');
+})();
+</script>
 </body>
 </html>

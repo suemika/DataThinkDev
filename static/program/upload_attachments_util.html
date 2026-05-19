@@ -37,6 +37,11 @@
 
 </div>
 
-<script src="js/upload_attachments_util.js"></script>
+<script>
+(function(){
+var v = new Date().toISOString().slice(0,10).replace(/-/g,'');
+document.write('<script src="js/upload_attachments_util.js?v='+v+'"><\/script>');
+})();
+</script>
 </body>
 </html>
