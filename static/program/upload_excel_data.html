@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>上传Excel文件</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="./css/util.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="vendor/bootstrap5/css/bootstrap.css?v=' + randomVersion + '">');
+        document.write('<script src="vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/bootstrap5/js/bootstrap.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="js/util.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="js/upload_excel_data.js?v=' + randomVersion + '"><\/script>');
+    </script>
+    <style>
+        .mt-5 {
+            margin-top: 0 !important;
+        }
+    </style>
+</head>
+<body>
+<header class="background-container">
+    <a href="http://edi.sdstg.com/" target="_self" rel="noopener">
+        <img id="header-img" src="" alt="ST">
+    </a>
+    <h2 class="h2-container">石横特钢集团有限公司上传文件</h2>
+</header>
+<main>
+    <div class="container mt-5">
+        <h2 class="mb-4">上传Excel文件</h2>
+
+        <div id="error-container"></div>
+
+        <div class="mb-3">
+            <label for="module_select" class="form-label">选择模块</label>
+            <select class="form-select" id="module_select">
+                <option selected disabled>请选择模块</option>
+                <option value="history">历史数据</option>
+                <option value="air">废气数据</option>
+                <option value="unorganized">无组织数据</option>
+                <option value="wastewater">废水数据</option>
+                <option value="noise">噪音数据</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="excel_file" class="form-label">选择Excel文件</label>
+            <input type="file" class="form-control" id="excel_file" accept=".xlsx,.xls">
+        </div>
+        <button type="button" class="btn btn-primary" id="upload-button">上传Excel文件</button>
+
+        <div id="uploading-container" style="display: none;" class="alert alert-info" role="alert">上传中，请等待...
+        </div>
+        <div id="success-container" style="display: none;" class="alert alert-success" role="alert">上传成功！</div>
+        <div id="waiting-container" style="display: none;" class="alert alert-warning" role="alert">数据量较多，请稍等...
+        </div>
+    </div>
+</main>
+</body>
+</html>

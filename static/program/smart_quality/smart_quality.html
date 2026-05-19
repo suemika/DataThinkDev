@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="3600">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品质量现场监督抽查</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../vendor/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="../bootstrap-icons-1.11.3/font/bootstrap-icons.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./css/smart_quality.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./util/util_smart_quality.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="../select2/select2.css?v=' + randomVersion + '">');
+        document.write('<script src="../vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/util/util_link.js"?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="js/smart_quality.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="./js/wgs84togcj02.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../select2/select2.js?v=' + randomVersion + '"><\/script>');
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
+</head>
+<body class="poppins-bold">
+<!-- 遮罩层 -->
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-content">
+
+        <div class="diamond-loader">
+            <!-- 静态阴影 -->
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+        </div>
+        <div class="shadow"></div>
+        <p class="mt-3">正在加载，请稍候...</p>
+    </div>
+</div>
+
+<header class="background-container">
+    <img id="header-img" src="" alt="ST" class="me-3">
+    <h2 class="h2-container">产品质量现场监督抽查</h2>
+
+</header>
+
+<main class="container_main" id="mainContent">
+    <div>
+        <!-- 位置信息 -->
+        <div class="location-info">
+            <i class="bi bi-geo-alt-fill"></i>
+            <span id="locationText">当前位置: 加载中...</span>
+            <button id="endCheckBtn" class="action-btn end-check-btn">
+                <i class="bi bi-stop-circle me-2"></i>结束检查
+            </button>
+        </div>
+
+        <!-- 消息提示 -->
+        <div id="messageAlert" class="alert-custom d-none">
+            <i class="bi bi-info-circle"></i>
+            <span id="messageText"></span>
+        </div>
+
+        <!-- 主卡片 -->
+        <div class="main-card">
+            <div class="card-header">
+                <h3><i class="bi bi-building"></i><span id="workshopName">加载中...</span></h3>
+            </div>
+
+
+            <div class="card-body">
+                <form id="qualityForm">
+
+                    <!-- 品类选择 -->
+                    <div class="form-group">
+                        <label for="brand" class="form-label">
+                            <i class="bi bi-tags"></i>品类
+                        </label>
+                        <select id="brand" class="form-control" required>
+                            <option value="" disabled selected>请选择牌号</option>
+                            <option value="牌号1">牌号1</option>
+                            <option value="牌号2">牌号2</option>
+                            <option value="牌号3">牌号3</option>
+                            <option value="牌号4">牌号4</option>
+                            <option value="牌号5">牌号5</option>
+                        </select>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- 问题组将在这里动态生成 -->
+                    <div id="issueGroupsContainer"></div>
+                </form>
+
+                <!-- 操作按钮 -->
+                <div class="action-buttons">
+                    <button type="button" id="submitBtn" class="action-btn submit-btn">
+                        <i class="bi bi-send-check me-2"></i>提交检查
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 提交模态框 -->
+    <div class="modal fade" id="submissionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="loading-spinner">
+                        <span class="spinner-grow text-primary" role="status"></span>
+                        <span class="ms-3">正在提交，请稍候...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 结束检查确认模态框 -->
+    <div class="modal fade" id="endCheckModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle"></i>确认结束检查
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>您确定要结束本次检查吗？结束检查后，当前未提交的数据将不会被保存。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" id="confirmEndCheck">确认结束</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

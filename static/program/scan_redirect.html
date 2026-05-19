@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>石横特钢一卡通扫码跳转</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #007bff, #26d0ce);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #007bff, #26d0ce);
+            border-radius: 50%;
+            color: white;
+            font-size: 50px;
+        }
+
+        h1 {
+            color: #007bff;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .message-box {
+            background-color: #f0f8ff;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 5px solid #007bff;
+        }
+
+        .message-box.warning {
+            background-color: #fff8e1;
+            border-left-color: #ff9800;
+        }
+
+        .message-box.success {
+            background-color: #e8f5e9;
+            border-left-color: #4caf50;
+        }
+
+        .message-icon {
+            font-size: 40px;
+            color: #007bff;
+            margin-bottom: 15px;
+        }
+
+        .warning .message-icon {
+            color: #ff9800;
+        }
+
+        .success .message-icon {
+            color: #4caf50;
+        }
+
+        .message-text {
+            color: #333;
+            font-size: 18px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .detail-text {
+            color: #666;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+
+        .qrcode-placeholder {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #999;
+        }
+
+        .qrcode-placeholder i {
+            font-size: 60px;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(26, 41, 128, 0.2);
+            border-top: 5px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .countdown {
+            font-size: 16px;
+            color: #007bff;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        .params-info {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: left;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .params-info h3 {
+            color: #007bff;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .param-item {
+            display: flex;
+            margin-bottom: 8px;
+        }
+
+        .param-name {
+            font-weight: bold;
+            width: 100px;
+        }
+
+        .param-value {
+            flex: 1;
+            word-break: break-all;
+        }
+
+        .footer {
+            margin-top: 30px;
+            color: #888;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .message-text {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+
+            <div id="messageBox" class="message-box">
+                <!-- 动态内容将由JavaScript填充 -->
+            </div>
+
+            <div id="qrcodePlaceholder" class="qrcode-placeholder" style="display: none;">
+                <i class="fas fa-qrcode"></i>
+                <span>请使用石横特钢一卡通扫一扫</span>
+            </div>
+
+            <div id="loading" class="loading" style="display: none;">
+                <div class="spinner"></div>
+            </div>
+
+            <div id="countdown" class="countdown" style="display: none;">
+                <!-- 倒计时信息 -->
+            </div>
+
+            <div id="paramsInfo" class="params-info" style="display: none;">
+                <!-- 参数信息 -->
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 解析URL参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const typeName = urlParams.get('typeName');
+            const oid = urlParams.get('oid');
+
+            const messageBox = document.getElementById('messageBox');
+            const qrcodePlaceholder = document.getElementById('qrcodePlaceholder');
+            const loading = document.getElementById('loading');
+            const countdownElement = document.getElementById('countdown');
+            const paramsInfo = document.getElementById('paramsInfo');
+
+            // 显示URL参数信息（调试用）
+            let paramsHtml = '<h3>URL参数信息</h3>';
+            let hasParams = false;
+
+            for (let [key, value] of urlParams.entries()) {
+                paramsHtml += `
+                    <div class="param-item">
+                        <div class="param-name">${key}:</div>
+                        <div class="param-value">${value || '<span style="color:#999">(空)</span>'}</div>
+                    </div>
+                `;
+                hasParams = true;
+            }
+
+            // if (hasParams) {
+            //     paramsInfo.innerHTML = paramsHtml;
+            //     paramsInfo.style.display = 'block';
+            // }
+
+            // 检查typeName参数
+            if (!typeName) {
+                // 没有typeName，显示提示信息
+                messageBox.className = 'message-box warning';
+                messageBox.innerHTML = `
+                    <div class="message-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <p class="message-text">请使用石横特钢一卡通扫一扫 扫码</p>
+                    <p class="detail-text">此页面需要从一卡通扫码进入，请使用正确的二维码进行扫描。</p>
+                `;
+
+                qrcodePlaceholder.style.display = 'flex';
+            } else if (oid) {
+                // 有typeName和oid，准备跳转
+                messageBox.className = 'message-box success';
+                messageBox.innerHTML = `
+                    <div class="message-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <p class="message-text">扫码成功，正在跳转到系统...</p>
+                `;
+
+                loading.style.display = 'flex';
+                countdownElement.style.display = 'block';
+
+                // 倒计时跳转
+                let countdown = 5;
+                countdownElement.textContent = `${countdown}秒后自动跳转...`;
+
+                const countdownInterval = setInterval(() => {
+                    countdown--;
+                    countdownElement.textContent = `${countdown}秒后自动跳转...`;
+
+                    if (countdown <= 0) {
+                        clearInterval(countdownInterval);
+                        performRedirect(oid);
+                    }
+                }, 1000);
+
+                // 也可以立即跳转
+                // 延时1秒后跳转，让用户看到提示信息
+                setTimeout(() => {
+                    performRedirect(oid);
+                }, 1000);
+            } else {
+                // 有typeName但没有oid，显示错误
+                messageBox.className = 'message-box warning';
+                messageBox.innerHTML = `
+                    <div class="message-icon">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <p class="message-text">参数不完整，无法跳转</p>
+                    <p class="detail-text">检测到typeName但缺少oid参数，请检查扫码链接是否正确。</p>
+                `;
+            }
+
+            // 执行跳转函数
+            function performRedirect(oid) {
+                const redirectUrl = `https://ems.sdstg.com/program/smart_quality/smart_quality.html?oid=${oid}`;
+                console.log(`跳转到: ${redirectUrl}`);
+                window.location.href = redirectUrl;
+            }
+
+            // 添加手动跳转按钮（备用）
+            if (oid) {
+                const manualRedirectBtn = document.createElement('button');
+                manualRedirectBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> 立即跳转';
+                manualRedirectBtn.style.cssText = `
+                    background: linear-gradient(to right, #007bff, #26d0ce);
+                    color: white;
+                    border: none;
+                    padding: 12px 30px;
+                    border-radius: 50px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    margin-top: 20px;
+                    transition: all 0.3s;
+                    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+                `;
+                manualRedirectBtn.onmouseover = function() {
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 6px 15px rgba(0,0,0,0.3)';
+                };
+                manualRedirectBtn.onmouseout = function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 4px 10px rgba(0,0,0,0.2)';
+                };
+                manualRedirectBtn.onclick = function() {
+                    performRedirect(oid);
+                };
+
+                messageBox.appendChild(manualRedirectBtn);
+            }
+        });
+    </script>
+</body>
+</html>

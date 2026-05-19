@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品质量现场监督抽查</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../vendor/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./util/util_smart_quality.css?v=' + randomVersion + '">');
+        document.write('<script src="../vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<link rel="stylesheet" href="../select2/select2.css?v=' + randomVersion + '">');
+        document.write('<script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/util/util_link.js"?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../js/smart_quality.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="./js/wgs84togcj02.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../select2/select2.js?v=' + randomVersion + '"><\/script>');
+    </script>
+    <style>
+        /* 表单样式 */
+        .container-content {
+            z-index: 2;
+            position: relative;
+            text-align: left;
+            background-color: #f8f9fa;
+        }
+
+        .alert-custom {
+            padding: 10px;
+            margin-bottom: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .alert-custom.success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-custom.error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-custom.fade-in {
+            opacity: 1;
+        }
+
+        .form-inline .form-control, .form-inline .form-label {
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .form-inline .form-control {
+            width: auto;
+            flex: 1;
+        }
+
+        .star {
+            color: red;
+        }
+
+        .form-label {
+            width: 100px;
+            text-align: right;
+            margin-right: 10px;
+        }
+
+        .form-inline {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .form-container {
+            text-align: left;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .submit-btn {
+            width: 100px;
+            height: 50px;
+            font-size: 20px;
+        }
+
+        h5, #workshopTitle {
+            background-color: #4285f4;
+            padding: 10px;
+            border-radius: 5px;
+            color: #ffffff;
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .alert {
+            margin-top: 20px;
+        }
+
+        .issue-section {
+            display: none;
+            margin-top: 10px;
+        }
+
+        .issue-section textarea {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .issue-section input[type="file"] {
+            margin-top: 5px;
+        }
+
+        .btn-primary {
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #0069d9;
+            border-color: #0062cc;
+        }
+
+    </style>
+</head>
+<body class="poppins-bold">
+
+<header class="background-container">
+    <img id="header-img" src="" alt="ST">
+    <h2 class="poppins-bold-italic">产品质量现场监督抽查</h2>
+</header>
+
+<div id="errorAlert" class="alert alert-danger d-none" role="alert"></div>
+
+<main>
+    <div class="container">
+        <h5 id="workshopTitle">车间名称: 加载中...</h5>
+        <form id="qualityForm">
+            <!-- 品类 -->
+            <div class="form-group">
+                <label for="brand" class="mr-2">品类：</label>
+                <select id="brand" name="brand" class="form-control" required>
+                    <option value="" disabled selected>请选择牌号</option>
+                    <option value="牌号1">牌号1</option>
+                    <option value="牌号2">牌号2</option>
+                    <option value="牌号3">牌号3</option>
+                    <option value="牌号4">牌号4</option>
+                    <option value="牌号5">牌号5</option>
+                </select>
+            </div>
+
+            <hr>
+
+            <div class="issue-group">
+                <h5>外形尺寸</h5>
+
+                <div class="form-group">
+                    <label for="innerDiameter_shape" class="mr-3">内径：</label>
+                    <div>
+                        <label class="radio-inline mr-2">
+                            <input type="radio" name="innerDiameter" value="是" required
+                                   onchange="toggleSection(this, 'innerDiameterDesc')"> 是
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="innerDiameter" value="否" required
+                                   onchange="toggleSection(this, 'innerDiameterDesc')"> 否
+                        </label>
+                    </div>
+                    <div id="innerDiameterDesc" class="issue-section">
+                        <textarea class="form-control" placeholder="请填写问题描述"></textarea>
+                        <input type="file" class="form-control-file" name="innerDiameterFile" multiple
+                               accept="image/*,.pdf,.doc,.docx,.txt">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="ribSpacing_shape" class="mr-3">横肋间距：</label>
+                    <div>
+                        <label class="radio-inline mr-2">
+                            <input type="radio" name="ribSpacing" value="是" required
+                                   onchange="toggleSection(this, 'ribSpacingDesc')"> 是
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="ribSpacing" value="否" required
+                                   onchange="toggleSection(this, 'ribSpacingDesc')"> 否
+                        </label>
+                    </div>
+                    <div id="ribSpacingDesc" class="issue-section">
+                        <textarea class="form-control" placeholder="请填写问题描述"></textarea>
+                        <input type="file" class="form-control-file" name="ribSpacingFile" multiple
+                               accept="image/*,.pdf,.doc,.docx,.txt">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="ribHeight_shape" class="mr-3">横肋高：</label>
+                    <div>
+                        <label class="radio-inline mr-2">
+                            <input type="radio" name="ribHeight" value="是" required
+                                   onchange="toggleSection(this, 'ribHeightDesc')"> 是
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="ribHeight" value="否" required
+                                   onchange="toggleSection(this, 'ribHeightDesc')"> 否
+                        </label>
+                    </div>
+                    <div id="ribHeightDesc" class="issue-section">
+                        <textarea class="form-control" placeholder="请填写问题描述"></textarea>
+                        <input type="file" class="form-control-file" name="ribHeightFile" multiple
+                               accept="image/*,.pdf,.doc,.docx,.txt">
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-group">
+                <h5>表面质量</h5>
+
+                <div class="form-group">
+                    <label for="scab_surface" class="mr-3">结疤：</label>
+                    <div>
+                        <label class="radio-inline mr-2">
+                            <input type="radio" name="scab" value="是" required
+                                   onchange="toggleSection(this, 'scabDesc')"> 是
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="scab" value="否" required
+                                   onchange="toggleSection(this, 'scabDesc')"> 否
+                        </label>
+                    </div>
+                    <div id="scabDesc" class="issue-section">
+                        <textarea class="form-control" placeholder="请填写问题描述"></textarea>
+                        <input type="file" class="form-control-file" name="scabFile" multiple
+                               accept="image/*,.pdf,.doc,.docx,.txt">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="crack_surface" class="mr-3">裂纹：</label>
+                    <div>
+                        <label class="radio-inline mr-2">
+                            <input type="radio" name="crack" value="是" required
+                                   onchange="toggleSection(this, 'crackDesc')"> 是
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="crack" value="否" required
+                                   onchange="toggleSection(this, 'crackDesc')"> 否
+                        </label>
+                    </div>
+                    <div id="crackDesc" class="issue-section">
+                        <textarea class="form-control" placeholder="请填写问题描述"></textarea>
+                        <input type="file" class="form-control-file" name="crackFile" multiple
+                               accept="image/*,.pdf,.doc,.docx,.txt">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="winding_surface" class="mr-3">缠绕：</label>
+                    <div>
+                        <label class="radio-inline mr-2">
+                            <input type="radio" name="winding" value="是" required
+                                   onchange="toggleSection(this, 'windingDesc')"> 是
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="winding" value="否" required
+                                   onchange="toggleSection(this, 'windingDesc')"> 否
+                        </label>
+                    </div>
+                    <div id="windingDesc" class="issue-section">
+                        <textarea class="form-control" placeholder="请填写问题描述"></textarea>
+                        <input type="file" class="form-control-file" name="windingFile" multiple
+                               accept="image/*,.pdf,.doc,.docx,.txt">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="otherSurface_surface" class="mr-3">其它：</label>
+                    <div>
+                        <label class="radio-inline mr-2">
+                            <input type="radio" name="otherSurface" value="是" required
+                                   onchange="toggleSection(this, 'otherSurfaceDesc')"> 是
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="otherSurface" value="否" required
+                                   onchange="toggleSection(this, 'otherSurfaceDesc')"> 否
+                        </label>
+                    </div>
+                    <div id="otherSurfaceDesc" class="issue-section">
+                        <textarea class="form-control" placeholder="请填写问题描述"></textarea>
+                        <input type="file" class="form-control-file" name="otherSurfaceFile" multiple
+                               accept="image/*,.pdf,.doc,.docx,.txt">
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-group">
+                <h5>包装标识</h5>
+
+                <div class="form-group">
+                    <label for="nameplate_packagingLabel" class="mr-3">标牌：</label>
+                    <div>
+                        <label class="radio-inline mr-2">
+                            <input type="radio" name="nameplate" value="是" required
+                                   onchange="toggleSection(this, 'nameplateDesc')"> 是
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="nameplate" value="否" required
+                                   onchange="toggleSection(this, 'nameplateDesc')"> 否
+                        </label>
+                    </div>
+                    <div id="nameplateDesc" class="issue-section">
+                        <textarea class="form-control" placeholder="请填写问题描述"></textarea>
+                        <input type="file" class="form-control-file" name="nameplateFile" multiple
+                               accept="image/*,.pdf,.doc,.docx,.txt">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="endUneven_packagingLabel" class="mr-3">端部不齐：</label>
+                    <div>
+                        <label class="radio-inline mr-2">
+                            <input type="radio" name="endUneven" value="是" required
+                                   onchange="toggleSection(this, 'endUnevenDesc')"> 是
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="endUneven" value="否" required
+                                   onchange="toggleSection(this, 'endUnevenDesc')"> 否
+                        </label>
+                    </div>
+                    <div id="endUnevenDesc" class="issue-section">
+                        <textarea class="form-control" placeholder="请填写问题描述"></textarea>
+                        <input type="file" class="form-control-file" name="endUnevenFile" multiple
+                               accept="image/*,.pdf,.doc,.docx,.txt">
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-group">
+                <h5>力学性能</h5>
+
+                <div class="form-group">
+                    <label for="yield_mechanicalProperties" class="mr-3">屈服：</label>
+                    <div>
+                        <label class="radio-inline mr-2">
+                            <input type="radio" name="yield" value="是" required
+                                   onchange="toggleSection(this, 'yieldDesc')"> 是
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="yield" value="否" required
+                                   onchange="toggleSection(this, 'yieldDesc')"> 否
+                        </label>
+                    </div>
+                    <div id="yieldDesc" class="issue-section">
+                        <textarea class="form-control" placeholder="请填写问题描述"></textarea>
+                        <input type="file" class="form-control-file" name="yieldFile" multiple
+                               accept="image/*,.pdf,.doc,.docx,.txt">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="tensile_mechanicalProperties" class="mr-3">抗拉：</label>
+                    <div>
+                        <label class="radio-inline mr-2">
+                            <input type="radio" name="tensile" value="是" required
+                                   onchange="toggleSection(this, 'tensileDesc')"> 是
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="tensile" value="否" required
+                                   onchange="toggleSection(this, 'tensileDesc')"> 否
+                        </label>
+                    </div>
+                    <div id="tensileDesc" class="issue-section">
+                        <textarea class="form-control" placeholder="请填写问题描述"></textarea>
+                        <input type="file" class="form-control-file" name="tensileFile" multiple
+                               accept="image/*,.pdf,.doc,.docx,.txt">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="elongation_mechanicalProperties" class="mr-3">延伸：</label>
+                    <div>
+                        <label class="radio-inline mr-2">
+                            <input type="radio" name="elongation" value="是" required
+                                   onchange="toggleSection(this, 'elongationDesc')"> 是
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="elongation" value="否" required
+                                   onchange="toggleSection(this, 'elongationDesc')"> 否
+                        </label>
+                    </div>
+                    <div id="elongationDesc" class="issue-section">
+                        <textarea class="form-control" placeholder="请填写问题描述"></textarea>
+                        <input type="file" class="form-control-file" name="elongationFile" multiple
+                               accept="image/*,.pdf,.doc,.docx,.txt">
+                    </div>
+                </div>
+            </div>
+
+            <div id="locationResult" class="alert alert-info" role="alert">当前位置: 待加载...</div>
+        </form>
+
+        <div style="text-align: center;">
+            <button type="button" id="submitBtn" class="btn btn-primary submit-btn" onclick="submitSmartQuality(this)">
+                提交
+            </button>
+        </div>
+    </div>
+</main>
+
+<script>
+    let workshopName = ''
+
+    document.addEventListener('DOMContentLoaded', async function () {
+        $('#brand').select2({
+            placeholder: "请选择", // 提示信息
+            allowClear: true // 允许清除选择
+        });
+
+        await getLocation();
+        // 禁用按钮
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true; // 禁用提交按钮
+        const response = await loadList();
+
+        // 成功后启用按钮
+        if (response !== null) {
+            const data = response.data.data;
+            const brandSelect = $('#brand');
+            brandSelect.empty();
+            brandSelect.append('<option value="">请选择</option>');
+            data.forEach(item => {
+                brandSelect.append(`<option value="${item.id}">${item.name}</option>`);
+            });
+            brandSelect.select2();
+            submitBtn.disabled = false; // 启用提交按钮
+        } else {
+            console.error('未找到数据');
+            showMsg('未找到数据');
+            submitBtn.disabled = true; // 确保在未找到数据的情况下继续禁用按钮
+        }
+    });
+
+    async function getLocation() {
+        return new Promise((resolve, reject) => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async function (position) {
+                    const lon = position.coords.longitude; // 经度
+                    const lat = position.coords.latitude; // 纬度
+                    const point = wgs84togcj02(lon, lat); // 经纬度转换
+
+                    document.getElementById('locationResult').innerText = `您的当前位置: 经度: ${point.lon}, 纬度: ${point.lat}`;
+
+                    point.lon = point.lon.toFixed(3);
+                    point.lat = point.lat.toFixed(3);
+                    // 发送经纬度到后端并获取车间名称
+                    try {
+                        const response = await fetchDataFromAPI('639', {
+                            lat: point.lat,
+                            lon: point.lon,
+                        });
+                        workshopName = response.data.workshopName || '未知车间';
+                        document.getElementById('workshopTitle').innerText = `车间名称: ${workshopName}`; // 更新页面标题
+                        resolve(); // 成功获取位置，解析 Promise
+                    } catch (error) {
+                        showMsg('获取车间名称失败: ' + error.message);
+                        reject(error); // 发生错误，拒绝 Promise
+                    }
+                }, function (error) {
+                    showMsg(`获取位置失败: ${error.message}`);
+                    reject(error); // 发生错误，拒绝 Promise
+                }, {
+                    enableHighAccuracy: true,  // 请求高精度
+                    timeout: 5000,  // 设置超时
+                    maximumAge: 0   // 不使用缓存
+                });
+            } else {
+                showMsg("抱歉，您的浏览器不支持地理定位");
+                reject(new Error("浏览器不支持地理定位")); // 拒绝 Promise
+            }
+        });
+    }
+
+    async function loadList() {
+        const response = await fetchDataFromAPI('671', workshopName);
+        if (response.data.status === 0) {
+            return response; // 返回响应数据
+        }
+        return null;
+    }
+
+    // 显示和隐藏描述和文件上传框
+    function toggleSection(radio, sectionId) {
+        const section = document.getElementById(sectionId);
+        section.style.display = (radio.value === '是') ? 'block' : 'none';
+    }
+
+    // 处理表单提交
+    async function submitSmartQuality(button) {
+        const form = document.getElementById('qualityForm');
+        const rows = form.querySelectorAll('.issue-group'); // 获取所有表单组
+        const formData = new FormData();
+
+        const selectedValue = document.getElementById('brand').value;
+        console.log('当前所选牌号:', selectedValue);
+        formData.append('brand', selectedValue);
+
+        // 从当前位置中提取经纬度
+        const locationResultText = document.getElementById('locationResult').innerText;
+        const match = locationResultText.match(/经度: (.+), 纬度: (.+)/);
+        if (match) {
+            formData.append('lon', match[1]); // 将经度添加到 formData
+            formData.append('lat', match[2]); // 将纬度添加到 formData
+        }
+        button.disabled = true; // 禁用按钮，防止重复提交
+// 收集有问题的行数据和文件
+        let hasDataToSubmit = false; // 标记是否有数据要提交
+        // 收集有问题的行数据和文件
+        for (let row of rows) {
+            const h5Element = row.querySelector('h5'); // 获取当前组的 h5 元素
+            const h5Value = h5Element ? h5Element.innerText.trim() : ''; // h5 的文本内容
+
+            const formGroups = row.querySelectorAll('.form-group'); // 当前组内的所有表单组
+            for (let formGroup of formGroups) {
+                // 获取该行的label元素
+                const labelElement = formGroup.querySelector('label');
+
+                if (labelElement) {
+                    const issueName = labelElement.innerText.replace('：', '').trim(); // 去掉冒号并修剪空格
+
+                    if (issueName.includes("品类")) {
+                        continue; // 跳过当前循环，进入下一个
+                    }
+
+                    const hasIssueRadio = formGroup.querySelector('input[type="radio"]:checked');
+                    // 问题描述
+                    const description = formGroup.querySelector('textarea') ? formGroup.querySelector('textarea').value : '';
+
+                    // 将问题名称、for属性值和h5的值添加到formData
+                    formData.append('h5Value', h5Value); // 将h5的值添加到formData
+                    formData.append('issueName', issueName);
+
+                    // 收集描述和是否有问题的信息
+                    formData.append('description', description);
+                    // 检查是否有选择和填写
+                    if (!hasIssueRadio) {
+                        continue; // 跳过当前循环，进入下一个
+                    } else if (hasIssueRadio && hasIssueRadio.value === '是' && !description) {
+                        showMsg('请填写问题描述: ' + issueName);
+                        return; // 如果选了“Yes”，但没有填写描述，阻止提交并提示
+                    }
+                    if (hasIssueRadio && hasIssueRadio.value === '是') {
+                        formData.append('hasIssue', '是');
+                    } else {
+                        formData.append('hasIssue', '否');
+                    }
+
+                    // 处理后端API请求
+                    try {
+                        const response = await fetchDataFromAPI('643', Object.fromEntries(formData));
+
+                        if (response.data.status === 0) {
+                            const data = response.data.msg;
+
+                            const fileInput = formGroup.querySelector('input[type="file"]');
+                            const files = fileInput ? fileInput.files : []; // 获取文件
+
+                            if (files.length > 0) {
+                                await uploadFiles(data, files);
+                            } else {
+                                console.log(h5Value + "-->" + issueName + "-->" + data + "：没有选择文件，跳过上传。");
+                            }
+
+                        }
+                    } catch (error) {
+                        console.error('请求失败:', error);
+                        showMsg('提交失败！');
+                    } finally {
+                        button.disabled = false; // 向用户恢复按钮状态
+                    }
+                }
+            }
+        }
+        form.reset(); // 重置表单
+        // 手动重置选中值
+        const brandSelect = document.getElementById('brand');
+        brandSelect.value = ""; // 将下拉框的值重置为空
+        $(brandSelect).val('').trigger('change'); // 确保 Select2 更新
+        // 滚动到页面顶部
+        window.scrollTo(0, 0);
+        showMsg('提交成功！', true);
+    }
+
+    function uploadFiles(data, fileInputs) {
+        const promises = [];
+
+        // 选择所有文件输入
+        const allFileInputs = document.querySelectorAll('input[type="file"]:not([disabled])');
+
+        allFileInputs.forEach(fileInput => {
+            if (fileInput.files.length > 0) {
+                const files = Array.from(fileInput.files); // 将文件列表转换为数组
+                files.forEach(file => {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('filterRules', JSON.stringify([
+                        {field: "table_id", op: "equal", value: "863"},
+                        {field: "row_id", op: "equal", value: data},
+                        {field: "uploadType", op: "equal", value: ""}
+                    ]));
+
+                    // 发送文件上传请求
+                    const uploadPromise = axios.post('/imc/uploadAttachments', formData);
+                    promises.push(uploadPromise);
+                });
+            }
+        });
+
+        // 等待所有文件上传完成
+        Promise.all(promises)
+            .then(responses => {
+                responses.forEach(response => console.log('上传成功:', response.data));
+            })
+            .catch(error => {
+                console.error('上传失败:', error);
+            });
+    }
+</script>
+</body>
+</html>

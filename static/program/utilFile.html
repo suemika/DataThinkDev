@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>通用文件上传</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="/logo.png?v=' + randomVersion + '"  type="image/png">');
+        document.write('<link rel="stylesheet" href="bootstrap5/css/bootstrap.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="program/css/util.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="js/webuploader/webuploader.css?v=' + randomVersion + '">');
+        document.write('<script src="bootstrap5/js/bootstrap.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="js/jquery-3.6.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="program/js/util_189.js?v=' + randomVersion + '"><\/script>');
+        document.write(`<script src="js/webuploader/webuploader.js?v=${randomVersion}"><\/script>`);
+        document.write(`<script src="program/js/popper.js?v=${randomVersion}"><\/script>`);
+    </script>
+
+    <style>
+        .wu-example {
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #thelist .card {
+            margin: 10px 0;
+        }
+
+        #picker {
+            background-color: transparent; /* 取消背景颜色 */
+            border: none; /* 取消边框样式（可选） */
+            color: #007bff; /* 设置文字颜色 */
+        }
+
+        #picker:hover {
+            background-color: rgba(0, 123, 255, 0.1); /* 悬停效果 */
+        }
+
+    </style>
+
+</head>
+<body>
+<header class="background-container">
+    <a href="http://edi.sdstg.com/" target="_self" rel="noopener">
+        <img id="header-img" src="" alt="ST">
+    </a>
+    <h2 class="h2-container">石横特钢集团有限公司通用文件上传</h2>
+</header>
+<main>
+    <div class="container mt-5">
+        <div id="uploader" class="wu-example">
+            <div class="btn" id="picker">选择文件</div>
+            <div id="thelist" class="uploader-list mt-3"></div>
+        </div>
+    </div>
+</main>
+
+<script>
+    $(function () {
+        var uploader = WebUploader.create({
+            auto: true,
+            swf: 'js/webuploader/Uploader.swf',
+            server: 'upload/utilFile',
+            pick: '#picker',
+            formData: {
+                pid: getQueryVariable('pid'),
+                suffix: getQueryVariable('suffix')
+            }
+        });
+
+        var $list = $('#thelist');
+
+        // 处理文件选择
+        uploader.on('fileQueued', function (file) {
+            // 清除之前的上传信息
+            $list.empty();
+
+            $list.append('<div id="' + file.id + '" class="card">'
+                + '<div class="card-body">'
+                + '<h5 class="card-title">' + file.name + '</h5>'
+                + '<p class="card-text state">等待上传...</p>'
+                + '<div class="progress">'
+                + '<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;"></div>'
+                + '</div>'
+                + '</div>'
+                + '</div>');
+        });
+
+        uploader.on('uploadProgress', function (file, percentage) {
+            var $li = $('#' + file.id);
+            var $percent = $li.find('.progress-bar');
+
+            $li.find('p.state').text('上传中');
+            $percent.css('width', percentage * 100 + '%');
+        });
+
+        uploader.on('uploadSuccess', function (file) {
+            $('#' + file.id).find('p.state').text('文件上传成功，可以选择新文件进行重新上传！');
+            // 在上传成功后，可以收集上传的信息以便后续使用
+            uploader.reset(); // 重置 uploader 以允许重新选择
+        });
+
+        uploader.on('uploadError', function (file) {
+            $('#' + file.id).find('p.state').text('上传出错');
+        });
+
+        uploader.on('uploadComplete', function (file) {
+            $('#' + file.id).find('.progress').fadeOut();
+        });
+    });
+
+    function getQueryVariable(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+        var r = window.location.search.substr(1).match(reg);
+        return r ? decodeURI(r[2]) : null;
+    }
+</script>
+</body>
+</html>

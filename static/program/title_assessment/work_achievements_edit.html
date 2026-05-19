@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>近2年工作专业成果填报</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <script>
+        // 获取当前时间戳作为版本号
+        const version = Date.now();
+    </script>
+
+    <link rel="icon" href="../vendor/logo.png?v=1" type="image/png">
+    <link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.css?v=${version}">
+    <link rel="stylesheet" href="vendor/css/util.css"?v=${version}">
+    <script src="../vendor/easyui/js-easyui/axios.min.js?v=${version}"></script>
+    <script src="../vendor/bootstrap5/js/bootstrap.js?v=${version}"></script>
+    <script src="vendor/util/util_link.js"?v=${version}"></script>
+    <script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=${version}"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+            margin-bottom: 20px;
+        }
+
+        .module {
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+        }
+
+        .info-icon {
+            cursor: pointer;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+
+<body>
+<header class="background-container">
+    <a href="http://edi.sdstg.com/" target="_self" rel="noopener">
+        <img id="header-img" src="" alt="ST">
+    </a>
+    <h2 class="h2-container">近2年工作专业成果填报</h2>
+</header>
+<main class="container mt-4">
+    <div class="d-flex justify-content-between mb-3">
+        <button onclick="goBack()" class="btn btn-info">返回</button>
+        <button type="button" id="submitBtn" class="btn btn-success" onclick="submitFeedback(this)">
+            提交
+        </button>
+    </div>
+
+    <div id="errorAlert" class="alert alert-danger d-none" role="alert"></div>
+
+    <div class="module">
+        <form id="feedbackForm">
+            <div class="mb-3">
+                <label for="projectType">项目类别</label>
+                <span class="info-icon" data-bs-toggle="modal" data-bs-target="#infoModal">❓</span>
+                <select class="form-select" id="projectType" name="projectType" required
+                        onchange="updateModalContent()">
+                    <option value="">-- 选择类别 --</option>
+                    <option value="工艺类">工艺类</option>
+                    <option value="装备类">装备类</option>
+                    <option value="其他工程类">其他工程类</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="projectName">项目名称</label>
+                <input type="text" class="form-control" id="projectName" name="projectName" required>
+            </div>
+            <div class="mb-3">
+                <label for="measures">采取的措施</label>
+                <textarea class="form-control" id="measures" name="measures" rows="3" maxlength="300"
+                          required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="effect">实施后效果</label>
+                <textarea class="form-control" id="effect" name="effect" rows="3" maxlength="200" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="role">个人承担的角色 (填写规则（*/*），如2/3)</label>
+                <input type="text" class="form-control" id="role" name="role" required pattern="\d+/\d+" value="1/1">
+            </div>
+            <div class="mb-3">
+                <label for="completionDate">完成时间</label>
+                <input type="month" class="form-control" id="datePicker" name="completionDate" required>
+            </div>
+        </form>
+    </div>
+</main>
+
+<!-- 模态框 -->
+<div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="infoModalLabel">详细说明</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="infoModalBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const uuid = getNameFromUrl('uuid');
+    const workID = getNameFromUrl('workID');
+    const edit_name = 'work_achievements';
+    const itemId = getNameFromUrl('itemId');
+
+    $(document).ready(function () {
+        if (workID === "null") {
+            window.location.href = 'main.html?uuid=' + encodeURIComponent(uuid);
+        } else if (itemId) {
+            loadProjectData(itemId); // 如果有 itemId，加载数据
+        }
+
+        updateModalContent()
+
+    });
+
+    function goBack() {
+        window.location.href = `${edit_name}.html?uuid=${encodeURIComponent(uuid)}&workID=${encodeURIComponent(workID)}&refresh=true`;
+    }
+
+    async function loadProjectData(id) {
+        try {
+            // 使用 FormData 取得表单数据
+            const formData = new FormData();
+            formData.append('name', edit_name);
+            formData.append('workID', workID);
+            formData.append('pid', uuid);
+            formData.append('itemId', id); // 添加 itemId 用于修改数据
+
+            const response = await fetchDataFromAPI('638', Object.fromEntries(formData)); // 根据实际 API 进行更改
+            if (response.data.data.item) {
+                const project = response.data.data.item[0];
+                // 填充表单数据
+                document.getElementById('projectType').value = project[0];
+                document.getElementById('projectName').value = project[1];
+                document.getElementById('measures').value = project[2];
+                document.getElementById('effect').value = project[3];
+                document.getElementById('role').value = project[4];
+                document.getElementById('datePicker').value = project[5];
+                updateModalContent()
+            } else {
+                showMsg('未找到项目数据！');
+            }
+        } catch (error) {
+            showMsg('加载项目数据时发生错误。');
+        }
+    }
+
+    async function submitFeedback(button) {
+        const form = document.getElementById('feedbackForm');
+
+        const roleInput = document.getElementById('role').value;
+        const rolePattern = /^\d+\/\d+$/;
+
+        if (!rolePattern.test(roleInput)) {
+            showMsg('格式不正确，请按照规则填写，如2/3。');
+            return;
+        }
+
+        if (!form.checkValidity()) {
+            showMsg('请填写所有必填项！');
+            return;
+        }
+
+        // 使用 FormData 取得表单数据
+        const formData = new FormData(form);
+        formData.append('name', edit_name);
+        formData.append('workID', workID);
+        formData.append('pid', uuid);
+        formData.append('itemId', itemId); // 添加 itemId 用于修改数据
+        button.disabled = true; // 禁用按钮，防止重复提交
+
+        // 打印 FormData 中的所有条目
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+        const apiAction = itemId ? '637' : '630'; // 修改和新增 API 接口的示例
+        const response = await fetchDataFromAPI(apiAction, Object.fromEntries(formData));
+        if (response.data.msg !== 0) {
+            showMsg('提交成功！',true);
+            goBack();
+        } else {
+            showMsg('提交失败！');
+        }
+    }
+
+    function updateModalContent() {
+        const projectTypeSelect = document.getElementById("projectType");
+        const infoModalBody = document.getElementById("infoModalBody");
+        const selectedType = projectTypeSelect.value;
+
+        let content = "";
+        switch (selectedType) {
+            case "工艺类":
+                content = `
+                    <p>1. 主持或作为技术骨干（排名1～3位），完成技术优化方案或新工艺试验方案、新材料试用方案、新产品开发方案等。</p>
+                    <p>2. 能够独立制定开停机（炉）方案。</p>
+                    <p>3. 能够独立制定工艺指导卡。</p>
+                    <p>4. 能够独立制定工艺技术操作规程、安全技术操作规程等。</p>
+                    <p>5. 能够组织工程项目交接验收。</p>
+                    <p>6. 能够制定事故预控预案、隐患排查方案等，掌握隐患或关键控制点。</p>
+                    <p>7. 能够独立编制本职种或本专业、本岗位的管理制度、标准，并实施。</p>
+                    <p>8. 能够引进、消化、吸收国内外先进技术，解决重大生产、技术疑难问题。`;
+                break;
+            case "装备类":
+                content = `
+                    <p>1. 主持或作为技术骨干（排名1～3位，下同），完成装备或施工技术优化方案等。</p>
+                    <p>2. 能够制定检修施工方案，掌握关键控制环节。</p>
+                    <p>3. 能够组织工程项目交接验收。</p>
+                    <p>4. 能够独立进行技术交底、安全交底，并实现可控。</p>
+                    <p>5. 能够独立完成故障、事故、隐患分析，形成专项分析报告。</p>
+                    <p>6. 能够组织确定本职种或专业范围内的设备寿命周期。</p>
+                    <p>7. 能够独立制定设备操作规程、安全操作规程等。</p>
+                    <p>8. 能够制定事故预控预案、隐患排查方案等，掌握隐患或关键控制点。</p>
+                    <p>9. 能够独立编制本职种或本专业、本岗位的管理制度、标准，并实施。</p>
+                    <p>10. 能够引进、消化、吸收国内外先进技术、设备，解决重大设备、技术疑难问题。</p>
+                `;
+                break;
+            case "其他工程类":
+                content = `
+                    <p>1. 主持或作为技术骨干（排名1～3位），完成技术优化方案等。</p>
+                    <p>2. 能够制定项修、技术改造方案，掌握关键控制环节。</p>
+                    <p>3. 能够组织工程项目交接验收。</p>
+                    <p>4. 能够独立进行技术交底、安全交底，并实现可控。</p>
+                    <p>5. 能够独立完成故障、事故、隐患、质量检验、安全风险评估分析等，形成专项分析报告。</p>
+                    <p>6. 能够制定事故预控预案、隐患排查方案等，掌握隐患或关键控制点。</p>
+                    <p>7. 能够独立编制本职种或本专业、本岗位的管理制度、标准，并实施。</p>
+                    <p>8. 能够引进、消化、吸收国内外先进技术、设备，解决重大设备、技术疑难问题。</p>
+                `;
+                break;
+            default:
+                content = "<p>请选择一个项目类别以查看相关信息。</p>";
+        }
+
+        infoModalBody.innerHTML = content;
+    }
+
+</script>
+</body>
+</html>

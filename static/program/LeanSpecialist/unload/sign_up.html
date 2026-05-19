@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 每120秒刷新一次页面 -->
+    <meta http-equiv="refresh" content="120">
+    <title>精益认证节点</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../vendor/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="../bootstrap-icons-1.11.3/font/bootstrap-icons.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="util/util.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="css/sing_up.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="../util/sweetalert2.css?v=' + randomVersion + '">');
+
+    </script>
+</head>
+
+<body class="poppins-bold">
+
+<!-- 遮罩层 -->
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-content">
+
+        <div class="diamond-loader">
+            <!-- 静态阴影 -->
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+        </div>
+        <div class="shadow"></div>
+        <p class="mt-3">正在加载，请稍候...</p>
+    </div>
+</div>
+
+
+<header class="background-container text-center">
+    <img id="header-img" src="" alt="ST" style="height: 60px;">
+</header>
+<div class="user-name"><span id="userName"></span></div>
+
+<main class="container_main">
+    <div id="statusAlertBar" class="alert alert-dismissible fade show mb-4" style="display: none;">
+        <div class="d-flex align-items-center">
+            <i id="statusAlertIcon" class="bi me-3 fs-4"></i>
+            <div>
+                <h6 id="statusAlertTitle" class="alert-heading mb-1"></h6>
+                <div id="statusAlertContent" class="small"></div>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <ul class="nav nav-pills justify-content-center" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="lean-student-tab" data-bs-toggle="pill" data-bs-target="#lean-student"
+                    type="button" role="tab" aria-controls="lean-student" aria-selected="true" data-role="精益学员">
+                <i class="bi bi-person me-1"></i>精益学员
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link disabled" id="lean-backbone-tab" data-bs-toggle="pill"
+                    data-bs-target="#lean-backbone"
+                    type="button" role="tab" aria-controls="lean-backbone" aria-selected="false" data-role="精益骨干"
+                    disabled tabindex="-1">
+                <i class="bi bi-people me-1"></i>精益骨干
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link disabled" id="lean-coach-tab" data-bs-toggle="pill" data-bs-target="#lean-coach"
+                    type="button" role="tab" aria-controls="lean-coach" aria-selected="false" data-role="精益教练"
+                    disabled tabindex="-1">
+                <i class="bi bi-star me-1"></i>精益教练
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link disabled" id="senior-coach-tab" data-bs-toggle="pill" data-bs-target="#senior-coach"
+                    type="button" role="tab" aria-controls="senior-coach" aria-selected="false" data-role="资深教练"
+                    disabled tabindex="-1">
+                <i class="bi bi-award me-1"></i>资深教练
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content mt-2">
+        <div class="tab-pane fade show active" id="timeline" role="tabpanel" aria-labelledby="timeline-tab">
+            <div class="timeline-container" id="timeline-content"></div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <button id="signup-button" class="btn btn-primary btn-lg px-4" disabled>
+            <i class="bi bi-send-check me-2"></i><span class="btn-text">立即报名</span>
+        </button>
+    </div>
+
+    <!-- 项目经验模态框 -->
+<div class="modal fade" id="projectExperienceModal" tabindex="-1" aria-labelledby="projectExperienceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <!-- 模态框头部 - 渐变背景 -->
+            <div class="modal-header text-white">
+                <h5 class="modal-title" id="projectExperienceModalLabel">
+                    <i class="bi bi-file-earmark-medical me-2"></i>项目经验审核
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- 模态框主体 -->
+            <div class="modal-body">
+                <!-- 表单组 -->
+                <div class="mb-4">
+                    <label for="project-experience" class="form-label">
+                        <i class="bi bi-pencil-square me-2"></i>请输入您的项目经验：
+                    </label>
+
+                    <!-- 提示信息 -->
+                    <div class="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <span class="small">要求报名人员<span class="highlight-lean">参与单个精益项目</span>6个月以上</span>
+                        </div>
+                    </div>
+
+                    <!-- 文本区域 -->
+                    <textarea id="project-experience" class="form-control" rows="6"
+                              maxlength="50"></textarea>
+
+                    <!-- 字数统计和进度条 -->
+                    <div class="char-counter">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="text-muted small">
+                                <span id="char-count">0</span>/50 字
+                            </div>
+                            <div id="char-status" class="small text-success">
+                                <i class="bi bi-check-circle"></i> 正常
+                            </div>
+                        </div>
+                        <div class="progress">
+                            <div id="char-progress" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- 验证信息 -->
+                    <div id="char-validation" class="small mt-2"></div>
+                </div>
+            </div>
+
+            <!-- 模态框底部 -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>取消
+                </button>
+                <button type="button" class="btn btn-primary" id="submit-experience" disabled>
+                    <i class="bi bi-send-check me-1"></i>提交申请
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- 选项模态框 -->
+    <div class="modal fade options-modal" id="optionsModal" tabindex="-1" aria-labelledby="optionsModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-gradient-primary  text-white border-0">
+                    <h5 class="modal-title fs-5 fw-semibold" id="optionsModalLabel">
+                        <i class="bi bi-file-earmark-medical me-2"></i>请选择操作
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-primary" id="summaryButton">
+                            <i class="bi bi-file-earmark-text me-2"></i>个人工作总结与发展计划
+                        </button>
+                        <button type="button" class="btn btn-primary" id="selfAssessmentButton">
+                            <i class="bi bi-clipboard-check me-2"></i>个人自评表
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 实训课程模态框 -->
+    <div class="modal fade" id="trainingCoursesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0">
+                <!-- 头部 - 渐变背景 -->
+                <div class="modal-header">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-trophy-fill"></i>
+                        <h5 class="modal-title mb-0 ms-2">我的实训课程记录</h5>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- 主体 -->
+                <div class="modal-body p-0">
+                    <!-- 加载状态 -->
+                    <div id="loadingIndicator" class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                        <p class="mt-3 text-muted">正在加载课程数据...</p>
+                    </div>
+
+                    <!-- 数据表格容器 -->
+                    <div id="coursesTableContainer" class="d-none">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                <tr>
+                                    <th width="30" class="text-center">#</th>
+                                    <th>
+                                        <i class="bi bi-book me-1"></i>课程名称
+                                    </th>
+                                    <th width="150" class="text-end">
+                                        <i class="bi bi-calendar me-1"></i>完成日期
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody id="coursesTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 空状态 -->
+                    <div id="emptyState" class="text-center py-5 d-none">
+                        <i class="bi bi-inbox text-muted fs-1"></i>
+                        <p class="mt-3 text-muted">暂无实训课程记录</p>
+                    </div>
+                </div>
+
+                <!-- 底部 -->
+                <div class="modal-footer bg-light">
+                    <small class="text-muted me-auto">
+                        共 <span id="coursesCount" class="courses-count">0</span> 门课程
+                    </small>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i>关闭
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+</body>
+<script>
+
+    document.write('<script src="../util/confetti.browser.min.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="vendor/util/util_link.js"?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../util/sweetalert2@11.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script type="module" src=js/main.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script type="module" src=js/modules/timeline/timelineManager.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../js/popper.js?v=' + randomVersion + '"><\/script>');
+</script>
+</html>

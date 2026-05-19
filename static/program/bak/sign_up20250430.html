@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>精益认证节点</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../../logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../../bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="../bootstrap-icons-1.11.3/font/bootstrap-icons.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="util/util.css?v=' + randomVersion + '">');
+        document.write('<script src="../../easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../util/util_link.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script type="module" src=js/main.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../../bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../../elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../js/popper.js?v=' + randomVersion + '"><\/script>');
+    </script>
+    <style>
+
+        :root {
+            --primary-color: #4361ee;
+            --primary-light: #eef2ff;
+            --secondary-color: #3a0ca3;
+            --accent-color: #f72585;
+            --success-color: #4cc9f0;
+            --danger-color: #ef233c;
+            --warning-color: #ff9e00;
+            --light-bg: #f8f9fa;
+            --dark-bg: #212529;
+            --text-color: #2b2d42;
+            --text-light: #8d99ae;
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .timeline-container {
+            position: relative;
+        }
+
+        .exam_time {
+            font-size: 15px !important;
+            font-weight: bold;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+            margin: 10px;
+        }
+
+        .timeline-point {
+            position: absolute;
+            left: 8px;
+            top: 0;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #fff;
+            z-index: 1;
+        }
+
+        .timeline-point.completed {
+            background-image: url('png/completed.svg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .timeline-point.in-progress {
+            background-image: url('png/in-progress.svg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .timeline-point.pending {
+            background-image: url('png/pending.svg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .content-card {
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 1.25rem;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+        }
+
+        .detail-card {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .content-card h6 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .content-card p {
+            font-size: 13px;
+        }
+
+        .detail-card p {
+            margin: 5px 0;
+        }
+
+        .text-center {
+            margin-top: 10px;
+        }
+
+        .nav-item {
+            font-size: 16px;
+        }
+
+        .nav-pills {
+            justify-content: center;
+
+        }
+
+        .nav-pills .nav-link {
+            padding: 5px !important;
+        }
+
+        .nav-pills .nav-link.active {
+            background: #007bff;
+            color: #fff !important;
+        }
+
+        .custom-btn {
+            background: #007bff;
+            border: none;
+            transition: background 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .custom-btn:hover {
+            background: #007bff;
+        }
+
+        .badge-small {
+
+            font-size: 12px !important;
+            padding: 3px 6px !important;
+            border-radius: 8px !important;
+            height: 20px !important;
+        }
+
+        .mt-4 {
+            margin-top: 2px !important;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+
+            .content-card {
+                margin-left: 40px;
+            }
+
+            .user-name {
+                background-color: rgba(255, 255, 255, 0.5);
+                font-size: 18px;
+                border-radius: 10px;
+                z-index: 1001;
+            }
+        }
+
+        /* 自定义.user-name位置 */
+        .user-name {
+            position: absolute;
+            top: 200px;
+            right: 10px;
+            margin-bottom: 5px;
+        }
+
+        .custom-btn:disabled {
+            background-color: grey;
+            color: white;
+            cursor: not-allowed;
+            opacity: 0.6;
+            border-color: grey;
+        }
+
+        #userName {
+            padding: 5px;
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* 自定义查看证书按钮样式 */
+        .custom-certificate-btn {
+            background: #007bff;
+            border: none;
+            color: white;
+            padding: 0.375rem 0.75rem;
+            border-radius: 10px;
+            transition: all 0.2s ease; /* 添加过渡效果使变化更平滑 */
+        }
+
+        /* 鼠标悬停状态 */
+        .custom-certificate-btn:hover {
+            background: #0069d9;
+            color: white;
+        }
+
+        /* 点击状态 */
+        .custom-certificate-btn:active,
+        .custom-certificate-btn:focus {
+            background: #0069d9 !important;
+            color: white !important;
+            box-shadow: none !important; /* 移除点击时的阴影效果 */
+            outline: none !important; /* 移除点击时的轮廓线 */
+        }
+
+        .text-success {
+            color: #16c17a !important;
+        }
+
+        .text-danger {
+            color: #f93139 !important;
+        }
+
+    </style>
+</head>
+
+<body class="poppins-bold">
+<div class="user-name"><span id="userName"></span></div>
+
+<header class="background-container">
+    <img id="header-img" src="" alt="ST">
+</header>
+<main class="container mt-4" id="mainContent">
+    <ul class="nav nav-pills mt-4" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="lean-student-tab" data-bs-toggle="pill" data-bs-target="#lean-student"
+                    type="button" role="tab" aria-controls="lean-student" aria-selected="true" data-role="精益学员">
+                精益学员
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="lean-backbone-tab" data-bs-toggle="pill" data-bs-target="#lean-backbone"
+                    type="button" role="tab" aria-controls="lean-backbone" aria-selected="false" data-role="精益骨干">
+                精益骨干
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="lean-coach-tab" data-bs-toggle="pill" data-bs-target="#lean-coach"
+                    type="button" role="tab" aria-controls="lean-coach" aria-selected="false" data-role="精益教练">
+                精益教练
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="senior-coach-tab" data-bs-toggle="pill" data-bs-target="#senior-coach"
+                    type="button" role="tab" aria-controls="senior-coach" aria-selected="false" data-role="资深教练">
+                资深教练
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content mt-4">
+        <div class="tab-pane fade show active" id="timeline" role="tabpanel" aria-labelledby="timeline-tab">
+            <div class="timeline-container" id="timeline-content"></div>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <button id="signup-button" class="btn custom-btn btn-lg text-light">立即报名</button>
+    </div>
+
+    <!-- Modal HTML (Add this to your HTML body) -->
+    <div class="modal fade" id="projectExperienceModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">申请考试</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="project-experience">请输入您的项目经验：
+                        <br><span class="text-danger">要求报名人员参与单个精益项目6个月以上。</span>
+                    </label>
+                    <textarea id="project-experience" class="form-control" rows="4"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="submit-experience">提交经验</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal HTML (Add this to your HTML body) -->
+    <div class="modal fade" id="optionsModal" tabindex="-1" aria-labelledby="optionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="optionsModalLabel">请选择您要访问的页面</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>您已完成考试，请选择以下选项：</p>
+                    <button type="button" class="btn btn-primary" id="summaryButton">个人工作总结与发展计划</button>
+                    <button type="button" class="btn btn-primary" id="selfAssessmentButton">个人自评表
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公文文件检测</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="/logo.png?v=' + randomVersion + '"  type="image/png">');
+        document.write('<link rel="stylesheet" href="vendor/bootstrap5/css/bootstrap.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./css/util.css?v=' + randomVersion + '">');
+        document.write('<script src="vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../program/js/popper.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="js/util.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/bootstrap5/js/bootstrap.js?v=' + randomVersion + '"><\/script>');
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+<header class="background-container">
+    <a href="http://edi.sdstg.com/" target="_self" rel="noopener">
+        <img id="header-img" src="" alt="ST">
+    </a>
+    <h2 class="h2-container">石横特钢集团有限公司公文检测</h2>
+</header>
+<main>
+    <div class="container mt-5">
+        <div id="result" class="mt-4">
+            <p id="errorCount" class="error"></p> <!-- Error count display -->
+            <ul id="errorList" class="list-unstyled error"></ul>
+            <p id="successMessage" class="success"></p>
+        </div>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="file" class="form-label">选择文件 (仅支持.docx 格式)</label>
+                <input type="file" class="form-control" name="file" id="file" accept=".docx" required>
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" id="upload-button" class="btn btn-primary">上传并检测</button>
+            </div>
+        </form>
+    </div>
+</main>
+<script>
+    document.getElementById('uploadForm').onsubmit = function (event) {
+        event.preventDefault(); // 防止默认表单提交
+
+        var formData = new FormData();
+        var fileInput = document.getElementById('file');
+
+        // 检查是否选中文件
+        if (fileInput.files.length === 0) {
+            displayError("请选择一个文件");
+            return;
+        }
+
+        formData.append('file', fileInput.files[0]);
+
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+            try {
+                const base64String = btoa(String.fromCharCode(...new Uint8Array(event.target.result))); // 转换为 Base64
+
+                const dataObject = {
+                    base: base64String
+                };
+
+                // 添加请求参数
+                formData.append('req', '575');
+                formData.append('data', JSON.stringify(dataObject));
+
+                const uploadButton = document.getElementById('upload-button');
+
+                // 发送请求
+                axios.post('/imc/customOpt', formData, {})
+                    .then(response => {
+                        // 解析外层 JSON
+                        let innerData = response.data;
+
+                        // 提取错误信息
+                        const errors = innerData.data.data; // 在内层数据中提取 errors
+
+                        var errorList = document.getElementById('errorList');
+                        var errorCount = document.getElementById('errorCount');
+                        var successMessage = document.getElementById('successMessage');
+                        errorList.innerHTML = '';
+                        successMessage.innerHTML = '';
+
+                        // 检查并展示错误
+                        if (innerData.status === 0 && Array.isArray(errors) && errors.length > 0) {
+                            // 显示错误数量
+                            errorCount.innerText = `检查成功，一共发现 ${errors.length} 处错误:`;
+                            errors.forEach(function (errorInfo) {
+                                var li = document.createElement('li');
+                                li.textContent = errorInfo.error; // 取出错误的信息
+                                errorList.appendChild(li);
+                            });
+                        } else {
+                            displaySuccess('检查成功，未发现错误。');
+                        }
+                    })
+                    .catch(error => {
+                        displayError("上传文件时发生错误：" + error.message);
+                    })
+                    .finally(() => {
+                        uploadButton.disabled = false; // 上传结束后重新启用按钮
+                    });
+            } catch (error) {
+                displayError("转换为 Base64 时发生错误：" + error.message);
+            }
+        };
+
+        reader.onerror = function () {
+            displayError("读取文件时发生错误。");
+        };
+
+        reader.readAsArrayBuffer(fileInput.files[0]); // 读取文件内容
+    };
+
+    function displayError(message) {
+        const errorList = document.getElementById('errorList');
+        errorList.innerHTML = `<li>${message}</li>`;
+        document.getElementById('successMessage').innerText = ''; // 清空成功信息
+    }
+
+    function displaySuccess(message) {
+        const successMessage = document.getElementById('successMessage');
+        successMessage.innerText = message;
+        document.getElementById('errorList').innerHTML = ''; // 清空错误信息
+        document.getElementById('errorCount').innerText = ''; // 清空错误计数
+        // 3 秒后清除成功消息
+        setTimeout(() => {
+            successMessage.innerText = '';
+        }, 3000);
+    }
+</script>
+</body>
+</html>

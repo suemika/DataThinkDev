@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大学生职业生涯</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="vendor/bootstrap5/css/bootstrap.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./css/util.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./css/professional-development-query.css?v=' + randomVersion + '">');
+        document.write('<script src="vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="js/util.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="js/professional-development-query.js?v=' + randomVersion + '"><\/script>');
+    </script>
+
+</head>
+
+<body>
+<header class="background-container">
+    <a href="http://edi.sdstg.com/" target="_self" rel="noopener">
+        <img id="header-img" src="" alt="ST">
+    </a>
+    <h2 class="h2-container">石横特钢集团有限公司大学生职业生涯</h2>
+</header>
+<main>
+    <div id="search-container" class="mb-4">
+        <form id="search-form" onsubmit="return false;">
+            <div class="input-group mb-3">
+                <input type="text" id="search-box" class="form-control" placeholder="请输入工资编号\姓名进行查询..."
+                       oninput="updateResults()"/>
+                <button type="button" class="btn btn-primary" id="query-button" onclick="redirectToResults()">查询
+                </button>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-2">
+                    <select id="employee-type-select" class="form-select" onchange="updateResults()">
+                        <option value="">员工状态</option>
+                        <!-- Options for Employee Type -->
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select id="major-select" class="form-select" onchange="updateResults()">
+                        <option value="">专业</option>
+                        <!-- Options for Major -->
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select id="degree-select" class="form-select" onchange="updateResults()">
+                        <option value="">学历</option>
+                        <!-- Options for Degree -->
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select id="university-select" class="form-select" onchange="updateResults()">
+                        <option value="">毕业院校</option>
+                        <!-- Options for University -->
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select id="political-status-select" class="form-select" onchange="updateResults()">
+                        <option value="">政治面貌</option>
+                        <!-- Options for Political Status -->
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select id="marital-status-select" class="form-select" onchange="updateResults()">
+                        <option value="">婚恋状况</option>
+                        <!-- Options for marital Status -->
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select id="current-title-select" class="form-select" onchange="updateResults()">
+                        <option value="">现聘职称</option>
+                        <!-- Options for current title -->
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select id="MBTI-select" class="form-select" onchange="updateResults()">
+                        <option value="">MBTI性格测试类型</option>
+                        <!-- Options for MBTI  -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="result-data">
+                <div id="result-info" class="mt-2" style="display: none;">
+                    <!-- This div will display the count of filtered results -->
+                    <p id="result-count"></p>
+                </div>
+
+                <div id="result-container" class="mt-2" style="display: none;">
+                    <ul id="result-list-all" class="list-group"></ul>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</main>
+</body>
+</html>

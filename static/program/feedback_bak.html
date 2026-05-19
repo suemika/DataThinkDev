@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>石横特钢 | 员工反映问题问卷</title>
+    <!-- 引入必要的JS库 -->
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="logo/logo.png?v=' + randomVersion + '"  type="image/png">');
+        document.write('<link rel="stylesheet" href="vendor/bootstrap5/css/bootstrap.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="bootstrap-icons-1.11.3/font/bootstrap-icons.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./css/util.css?v=' + randomVersion + '">');
+        document.write('<script src="vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../program/js/popper.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="js/util.js?v=' + randomVersion + '"><\/script>');
+    </script>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #57cc99;
+            --accent-color: #ff9a3c;
+            --light-bg: #f8f9fa;
+            --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            margin-top: -20px;
+            position: relative;
+            z-index: 1;
+            padding: 2rem;
+            max-width: 900px;
+        }
+
+        .form-container {
+            padding: 1.5rem;
+        }
+
+        .form-section {
+            background: var(--light-bg);
+            border-radius: 15px;
+            padding: 1.8rem;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid var(--primary-color);
+            transition: var(--transition);
+        }
+
+        .form-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+            background: linear-gradient(to right, var(--primary-color), transparent);
+            color: white;
+            padding: 0.8rem 1.2rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .section-header i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-label i {
+            margin-right: 8px;
+            color: var(--primary-color);
+        }
+
+        .star {
+            color: #ff4757;
+            margin-right: 4px;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(26, 95, 122, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: #aaa;
+        }
+
+        .description-box {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #e0e0e0;
+        }
+
+        .description-box p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .info-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed #ddd;
+        }
+
+        .info-footer div {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .info-footer i {
+            margin-right: 8px;
+            color: var(--accent-color);
+        }
+
+        .form-check-inline {
+            margin-right: 1.5rem;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-submit {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.8rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-width: 150px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(26, 95, 122, 0.3);
+        }
+
+        .btn-submit:disabled {
+            background: #ccc;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-submit i {
+            font-size: 1.2rem;
+        }
+
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .qr-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .qr-trigger {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+        }
+
+        .qr-trigger:hover {
+            background: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        .qr-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qr-modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 300px;
+            position: relative;
+        }
+
+        .qr-modal img {
+            max-width: 200px;
+            height: auto;
+        }
+
+        .qr-modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .alert-custom {
+            border-radius: 10px;
+            border: none;
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background: linear-gradient(to right, #d4edda, #c3e6cb);
+            color: #155724;
+        }
+
+        .alert-error {
+            background: linear-gradient(to right, #f8d7da, #f5c6cb);
+            color: #721c24;
+        }
+
+        .file-upload {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background: var(--light-bg);
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .file-upload-label:hover {
+            background: #e9ecef;
+            border-color: var(--primary-color);
+        }
+
+        .file-list {
+            margin-top: 1rem;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-item i {
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+                margin-top: 0;
+                padding: 1rem;
+            }
+
+            .form-section {
+                padding: 1rem;
+            }
+
+            .section-header {
+                font-size: 1rem;
+                padding: 0.6rem 1rem;
+            }
+
+            .qr-trigger {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+
+            .info-footer {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .header-container h2 {
+                font-size: 1.4rem;
+            }
+
+            .logo-container {
+                position: relative;
+                left: 0;
+                margin-bottom: 1rem;
+            }
+
+            .logo {
+                height: 40px;
+            }
+        }
+
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #155f7a;
+        }
+    </style>
+</head>
+<body>
+<header class="background-container">
+     <img id="header-img" src="" alt="ST">
+    <h2 class="h2-container"></i>员工反映问题问卷</h2>
+    <p style="opacity: 0.9; font-size: 0.95rem;">畅所欲言，共同建设美好特钢</p>
+
+</header>
+
+<div class="container my-4">
+    <div class="description-box">
+        <p>
+            为畅通员工建言献策渠道，营造开放式的管理氛围，及时发现和解决问题，给员工积极正确的引导，
+            特建立员工反映问题的二维码渠道。员工可微信扫码反映问题，我们对您反映的问题将及时反馈、
+            解决，处理结果向公司领导汇报。
+        </p>
+        <div class="info-footer">
+            <div><i class="bi bi-building"></i> 工 会</div>
+            <div><i class="bi bi-calendar-check"></i> 2024年1月</div>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <form id="feedbackForm">
+            <!-- 基本信息 -->
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="bi bi-person-lines-fill"></i> 基本信息
+                </div>
+                
+                <div class="form-group">
+                    <label for="name" class="form-label">
+                        <span class="star">*</span> <i class="bi bi-person"></i> 姓名
+                    </label>
+                    <input type="text" class="form-control" id="name" name="name" 
+                           placeholder="请输入您的姓名" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="department" class="form-label">
+                        <i class="bi bi-building"></i> 部门
+                    </label>
+                    <input type="text" class="form-control" id="department" name="department"
+                           placeholder="请输入您的部门（选填）">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone" class="form-label">
+                        <span class="star">*</span> <i class="bi bi-telephone"></i> 联系电话
+                    </label>
+                    <input type="tel" class="form-control" maxlength="11" id="phone" name="phone"
+                           placeholder="请输入11位手机号或7位座机号" required>
+                </div>
+            </div>
+
+            <!-- 问题描述 -->
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="bi bi-question-circle-fill"></i> 问题描述
+                </div>
+                
+                <div class="form-group">
+                    <label for="description_issue" class="form-label">
+                        <span class="star">*</span> <i class="bi bi-chat-text"></i> 问题详情
+                    </label>
+                    <textarea class="form-control" id="description_issue" name="description_issue" 
+                              rows="4" placeholder="请详细描述您遇到的问题、建议或意见..." 
+                              style="resize: vertical;" required></textarea>
+                </div>
+            </div>
+
+            <!-- 文件上传 -->
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="bi bi-paperclip"></i> 附件上传
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-file-earmark"></i> 上传附件
+                    </label>
+                    <div class="file-upload">
+                        <input class="form-control" type="file" id="attachment" multiple>
+                        <label for="attachment" class="file-upload-label">
+                            <i class="bi bi-cloud-arrow-up"></i> 点击选择文件
+                        </label>
+                    </div>
+                    <small class="text-muted mt-2 d-block">支持上传图片、文档等文件（可选）</small>
+                    <div id="fileList" class="file-list"></div>
+                </div>
+            </div>
+
+            <!-- 反馈部门 -->
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="bi bi-send-check-fill"></i> 反馈部门
+                </div>
+                
+                <div class="form-group">
+                    <label for="feedback_department" class="form-label">
+                        <span class="star">*</span> <i class="bi bi-buildings"></i> 目标部门
+                    </label>
+                    <input type="text" class="form-control" id="feedback_department" 
+                           name="feedback_department" placeholder="请指定希望处理问题的部门" required>
+                </div>
+            </div>
+
+            <!-- 反馈方式 -->
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="bi bi-chat-left-text-fill"></i> 反馈方式
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <span class="star">*</span> <i class="bi bi-broadcast"></i> 选择反馈方式
+                    </label>
+                    <div class="mt-2">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" id="phone_feedback" 
+                                   name="feedback_choice" value="电话" required>
+                            <label class="form-check-label" for="phone_feedback">
+                                <i class="bi bi-telephone-outbound"></i> 电话反馈
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" id="wechat_feedback" 
+                                   name="feedback_choice" value="微信回访">
+                            <label class="form-check-label" for="wechat_feedback">
+                                <i class="bi bi-wechat"></i> 微信回访
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" id="meeting_feedback" 
+                                   name="feedback_choice" value="现场沟通">
+                            <label class="form-check-label" for="meeting_feedback">
+                                <i class="bi bi-people-fill"></i> 现场沟通
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="alertContainer"></div>
+
+            <!-- 提交按钮 -->
+            <div class="text-center mt-4 pt-3 border-top">
+                <button type="button" id="submitBtn" class="btn-submit" onclick="submitFeedback(this)">
+                    <i class="bi bi-send-check"></i> 提交反馈
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 二维码浮动按钮 -->
+<div class="qr-container">
+    <div class="qr-trigger" onclick="showQrModal()">
+        <i class="bi bi-qr-code"></i>
+    </div>
+</div>
+
+<!-- 二维码弹窗 -->
+<div class="qr-modal" id="qrModal" onclick="hideQrModal(event)">
+    <div class="qr-modal-content">
+        <img src="./logo/feedback_qr.png" alt="反馈二维码">
+        <h5 class="mt-3">石横特钢员工反馈</h5>
+        <p class="text-muted">微信扫码 随时反馈</p>
+    </div>
+</div>
+
+<script>
+    // 文件上传处理
+    document.getElementById('attachment').addEventListener('change', function(e) {
+        const fileList = document.getElementById('fileList');
+        fileList.innerHTML = '';
+        
+        Array.from(e.target.files).forEach((file, index) => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.innerHTML = `
+                <i class="bi bi-file-earmark"></i>
+                <span>${file.name}</span>
+                <small class="text-muted ms-auto">${formatFileSize(file.size)}</small>
+            `;
+            fileList.appendChild(fileItem);
+        });
+    });
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function submitFeedback(button) {
+        const form = document.getElementById('feedbackForm');
+        button.disabled = true;
+        
+        // 表单验证
+        if (!form.checkValidity()) {
+            showAlert('请填写所有必填项！', false);
+            button.disabled = false;
+            form.reportValidity();
+            return;
+        }
+
+        const phoneInput = document.getElementById('phone').value;
+        const phonePattern = /^(\d{11}|\d{7})$/;
+        if (!phonePattern.test(phoneInput)) {
+            showAlert('请输入11位手机号码或7位座机号码。', false);
+            button.disabled = false;
+            return;
+        }
+
+        const descriptionIssue = document.getElementById('description_issue').value.trim();
+        if (descriptionIssue.length < 6) {
+            showAlert('问题描述至少需要6个字符。', false);
+            button.disabled = false;
+            return;
+        }
+
+        const feedbackChoice = document.querySelector('input[name="feedback_choice"]:checked');
+        if (!feedbackChoice) {
+            showAlert('请选择反馈方式。', false);
+            button.disabled = false;
+            return;
+        }
+
+        // 准备表单数据
+        const formData = new FormData(form);
+        formData.append('feedbackChoice', feedbackChoice.value);
+        
+        // 显示提交状态
+        button.innerHTML = '<i class="bi bi-arrow-repeat spinner"></i> 提交中...';
+
+        // 发送数据
+        axios.post('/imc/customOpt', {
+            req: '494',
+            data: JSON.stringify(Object.fromEntries(formData))
+        })
+        .then(response => {
+            const data = response.data.data.msg;
+            uploadFiles(data);
+            form.reset();
+            document.getElementById('fileList').innerHTML = '';
+            showAlert('提交成功！感谢您的反馈。', true);
+        })
+        .catch(error => {
+            console.error('提交失败:', error);
+            showAlert('提交失败，请稍后重试。', false);
+        })
+        .finally(() => {
+            button.innerHTML = '<i class="bi bi-send-check"></i> 提交反馈';
+            button.disabled = false;
+        });
+    }
+
+    function uploadFiles(data) {
+        const fileInput = document.getElementById('attachment');
+        if (!fileInput.files.length) return;
+
+        const files = Array.from(fileInput.files);
+        const promises = files.map(file => {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('filterRules', JSON.stringify([
+                {field: "table_id", op: "equal", value: "647"},
+                {field: "row_id", op: "equal", value: data},
+                {field: "uploadType", op: "equal", value: ""}
+            ]));
+
+            return axios.post('/imc/uploadAttachments', formData);
+        });
+
+        Promise.all(promises)
+            .then(() => updateFileYesOrNo(data))
+            .catch(error => console.error('文件上传失败:', error));
+    }
+
+    function updateFileYesOrNo(data) {
+        axios.post('/imc/customOpt', {
+            req: '496',
+            data: JSON.stringify(data)
+        }).catch(error => console.error('更新文件状态失败:', error));
+    }
+
+    function showAlert(message, isSuccess) {
+        const alertContainer = document.getElementById('alertContainer');
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert-custom ${isSuccess ? 'alert-success' : 'alert-error'}`;
+        alertDiv.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="bi ${isSuccess ? 'bi-check-circle' : 'bi-exclamation-circle'} me-2"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        alertContainer.innerHTML = '';
+        alertContainer.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            alertDiv.style.opacity = '0';
+            setTimeout(() => alertDiv.remove(), 300);
+        }, 3000);
+    }
+
+    function showQrModal() {
+        document.getElementById('qrModal').style.display = 'flex';
+    }
+
+    function hideQrModal(event) {
+        if (event.target.id === 'qrModal') {
+            document.getElementById('qrModal').style.display = 'none';
+        }
+    }
+
+    // 防止手机端点击时出现蓝色高亮
+    document.addEventListener('touchstart', function() {}, {passive: true});
+</script>
+</body>
+</html>

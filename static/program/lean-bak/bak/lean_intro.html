@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>个人自评表评价标准</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../../logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../../bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="util/util.css?v=' + randomVersion + '">');
+        document.write('<script src="../../easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../util/util_link.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../../bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../../elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../js/popper.js?v=' + randomVersion + '"><\/script>');
+    </script>
+    <style>
+
+
+        #header-img {
+            max-width: 120px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+
+        /* 返回按钮样式 */
+        #backButton {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        #backButton i {
+            margin-right: 5px;
+        }
+
+        /* 列表块样式 */
+        .list-block {
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 30px;
+            box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .list-block:hover {
+            transform: translateY(-3px);
+        }
+
+        /* 箭头样式 */
+        .arrow {
+            color: #999;
+            font-weight: bold;
+            font-size: 20px;
+            float: right;
+            margin-left: 10px;
+            transition: color 0.3s ease;
+        }
+
+        /* 禁用样式 */
+        .disabled {
+            pointer-events: none;
+            color: #6c757d;
+            background-color: #f8f9fa;
+        }
+
+        /* 标题样式 */
+        .title {
+            display: block;
+            text-decoration: none;
+            color: #333;
+            font-size: 1.1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .title:hover {
+            background-color: #e0e9ff;
+        }
+
+        /* 未填写和已填写样式 */
+        .unfilled {
+            color: #ff5555;
+        }
+
+        .filled {
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        /* 错误提示样式 */
+        #errorAlert {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 20px;
+        }
+    </style>
+</head>
+
+<body>
+<header class="background-container">
+    <img id="header-img" src="" alt="ST">
+    <h2 class="poppins-bold-italic">精益认证平台</h2>
+</header>
+<nav aria-label="面包屑导航">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="lean_list.html">认证阶段</a></li>
+        <li class="breadcrumb-item active">自评表</li>
+    </ol>
+</nav>
+<main class="container mt-4" id="mainContent">
+    <button class="btn btn-primary rounded-start" onclick="location.reload()" style="margin-bottom: 10px;">刷新</button>
+    <div id="errorAlert" class="alert alert-danger d-none" role="alert"></div>
+    <div class="list-group" id="achievementLinks"></div>
+</main>
+<script>
+    const userName = getNameFromUrl("userName");
+
+    // 从后端 API 获取链接名称
+    async function loadList() {
+        const response = await fetchDataFromAPI('680', userName);
+        if (response.data.status === 0) {
+            return response.data.data;
+        }
+        return null;
+    }
+
+    // 动态生成链接
+    function renderData(data) {
+        const container = document.getElementById("achievementLinks");
+        data.forEach(item => {
+            const link = document.createElement("a");
+            link.href = `selfAssessment.html?p=${item.id}&userName=${userName}`; // 设置链接地址
+            link.className = "list-group-item list-group-item-action title"; // 添加新的类
+            // 用 item.into_status 替换未填写，并动态设置颜色
+            const statusClass = item.into_status === "未填写" ? "unfilled" : "filled";
+            // 添加内容，包含“未填写”和箭头
+            link.innerHTML = `${item.name} <font class="${statusClass}">${item.into}</font><span class="arrow">></span>`;
+            container.appendChild(link);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', async function () {
+        if (userName === null) {
+            window.location.href = "http://edi.sdstg.com/";
+        }
+        const data = await loadList(userName);
+        if (data) {
+            renderData(data); // 渲染生成链接
+        } else {
+            document.getElementById('errorAlert').textContent = '加载数据失败'; // 显示错误信息
+            document.getElementById('errorAlert').classList.remove('d-none');
+        }
+    });
+</script>
+</body>
+
+</html>

@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>合同文件回传</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../vendor/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="../bootstrap-icons-1.11.3/font/bootstrap-icons.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./util/util.css?v=' + randomVersion + '">');
+    </script>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-light: #e0e7ff;
+            --secondary-color: #3f37c9;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4cc9f0;
+            --danger-color: #f72585;
+            --warning-color: #f8961e;
+            --info-color: #4895ef;
+            --background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --border-radius: 12px;
+            --box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .form-container {
+            width: 90%;
+            margin: 0 auto;
+            padding: 2.5rem;
+            background: var(--background);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-container:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+        }
+
+        .form-container:hover {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .page-header p {
+            color: #64748b;
+            font-size: 0.95rem;
+            margin-top: 0.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+
+        .form-label .required {
+            color: var(--danger-color);
+            margin-left: 4px;
+        }
+
+        .form-label i {
+            margin-right: 8px;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+        }
+
+        .input-group {
+            margin-bottom: 1.75rem;
+            position: relative;
+        }
+
+        .input-group-text {
+            background-color: var(--primary-light);
+            border-color: rgba(67, 97, 238, 0.15);
+            color: var(--primary-color);
+            min-width: 45px;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .form-control, .form-select {
+            border-left: 0;
+            padding: 0.85rem 1rem;
+            height: auto;
+            border-color: rgba(67, 97, 238, 0.15);
+            transition: var(--transition);
+            font-size: 0.95rem;
+            background-color: #f8fafc;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.15);
+            background-color: white;
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .btn-upload {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            width: 100%;
+            padding: 1rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            transition: var(--transition);
+            border-radius: var(--border-radius);
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.2);
+            font-size: 1rem;
+            text-transform: uppercase;
+        }
+
+        .btn-upload:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-upload:active {
+            transform: translateY(1px);
+        }
+
+        .file-input-container {
+            margin-bottom: 1.75rem;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            border: 1px dashed rgba(67, 97, 238, 0.3);
+            border-radius: var(--border-radius);
+            background-color: rgba(67, 97, 238, 0.03);
+            cursor: pointer;
+            transition: var(--transition);
+            height: auto;
+            min-height: 60px;
+        }
+
+        .file-input-label:hover {
+            background-color: rgba(67, 97, 238, 0.08);
+            border-color: rgba(67, 97, 238, 0.5);
+        }
+
+        .file-input-label i {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-right: 12px;
+        }
+
+        .file-input-text {
+            flex-grow: 1;
+        }
+
+        .file-input-text span {
+            display: block;
+        }
+
+        .file-input-title {
+            font-weight: 500;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .file-name {
+            color: #64748b;
+            font-size: 0.85rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-hint {
+            color: #94a3b8;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .alert {
+            border-radius: var(--border-radius);
+            padding: 1rem 1.25rem;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .alert i {
+            margin-right: 8px;
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            font-size: 0.85rem;
+            margin-top: 6px;
+            display: none;
+            padding-left: 8px;
+        }
+
+        .is-invalid {
+            border-color: var(--danger-color) !important;
+        }
+
+        .is-invalid + .error-message {
+            display: block;
+        }
+
+        .back-btn {
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            color: var(--primary-color);
+            display: inline-flex;
+            align-items: center;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            background-color: rgba(67, 97, 238, 0.05);
+            border: 1px solid rgba(67, 97, 238, 0.1);
+        }
+
+        .back-btn:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+            transform: translateX(-3px);
+            text-decoration: none;
+        }
+
+        .back-btn i {
+            margin-right: 8px;
+            font-size: 1.1rem;
+        }
+
+        /* 加载动画 */
+        .loading-spinner {
+            display: inline-block;
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 3px solid rgba(67, 97, 238, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 1.5rem;
+                margin: 0 15px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+<!-- 遮罩层 -->
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-content">
+
+        <div class="diamond-loader">
+            <!-- 静态阴影 -->
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+        </div>
+        <div class="shadow"></div>
+        <p class="mt-3">正在加载，请稍候...</p>
+    </div>
+</div>
+<!-- 页眉 -->
+<header class="background-container">
+    <a href="http://edi.sdstg.com/" target="_self" rel="noopener">
+        <img id="header-img" src="" alt="ST">
+    </a>
+    <h2 class="h2-container">合同文件回传</h2>
+</header>
+<!-- 主内容区 -->
+<main id="main-content">
+    <div class="form-container">
+        <div class="back-btn" id="backToHome">
+            <i class="bi bi-arrow-left"></i>返回首页
+        </div>
+
+        <div class="page-header">
+            <h2>上传合同文件</h2>
+            <p>请上传已签署的合同文件，确保信息准确无误</p>
+        </div>
+
+        <div id="error-container" class="mb-3"></div>
+
+        <!-- 履约情况 -->
+        <div class="input-group">
+            <label for="description" class="form-label">
+                <i class="bi bi-chat-square-text"></i>履约情况
+            </label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-pencil-square"></i></span>
+                <textarea class="form-control" id="description" rows="3" placeholder="请输入履约情况（正常/不正常）"></textarea>
+            </div>
+        </div>
+
+        <!-- 文件上传 -->
+        <div class="file-input-container">
+            <label class="form-label">
+                <i class="bi bi-paperclip"></i>合同文件<span class="required">*</span>
+            </label>
+            <div class="file-input-label" id="file-input-label">
+                <i class="bi bi-cloud-arrow-up"></i>
+                <div class="file-input-text">
+                    <span class="file-input-title">点击选择文件或拖放文件到此处</span>
+                    <span id="file-name" class="file-name">未选择文件</span>
+                </div>
+            </div>
+            <input type="file" class="form-control d-none" id="docx_file" accept=".pdf" required>
+            <div class="error-message" id="docx_file_error">请选择合同文件</div>
+            <div class="file-hint">仅支持PDF格式，文件大小不超过10MB</div>
+        </div>
+
+        <!-- 上传按钮 -->
+        <button type="button" class="btn btn-primary btn-upload" id="upload-button">
+            <i class="bi bi-cloud-upload"></i> 上传合同文件
+        </button>
+
+        <!-- 状态提示 -->
+        <div id="uploading-container" style="display: none;" class="alert alert-info mt-4" role="alert">
+            <i class="bi bi-arrow-repeat me-2 fa-spin"></i>文件上传中，请稍候...
+        </div>
+        <div id="success-container" style="display: none;" class="alert alert-success mt-4" role="alert">
+            <i class="bi bi-check-circle me-2"></i>上传成功！系统正在处理您的文件
+        </div>
+        <div id="waiting-container" style="display: none;" class="alert alert-warning mt-4" role="alert">
+            <i class="bi bi-hourglass me-2"></i>数据量较多，请稍等片刻...
+        </div>
+    </div>
+</main>
+
+<script>
+    document.write('<script src="../vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="./util/util_link.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../js/popper.js?v=' + randomVersion + '"><\/script>');
+</script>
+<script>
+
+    const contractId = getNameFromUrl("contractId");
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        if (!contractId) {
+            // 弹出提示并重定向到另一个页面
+            window.location.href = 'home.html'; // 这里设置你的重定向URL
+            return; // 确保后续的代码不再执行
+        }
+
+        // 先显示加载层
+        util.loading.show();
+
+        // 缓存所有DOM元素
+        const dom = {
+            // 表单元素
+            description: document.getElementById('description'),
+            docxFile: document.getElementById('docx_file'),
+            fileName: document.getElementById('file-name'),
+            fileInputLabel: document.getElementById('file-input-label'),
+
+            // 按钮
+            uploadButton: document.getElementById('upload-button'),
+
+            // 消息容器
+            errorContainer: document.getElementById('error-container'),
+            uploadingContainer: document.getElementById('uploading-container'),
+            successContainer: document.getElementById('success-container'),
+            waitingContainer: document.getElementById('waiting-container'),
+
+            // 错误提示元素
+            contractNameError: document.getElementById('contract_name_error'),
+            departmentError: document.getElementById('department_error'),
+            contractTypeError: document.getElementById('contract_type_error'),
+            docxFileError: document.getElementById('docx_file_error')
+        };
+
+        // 返回首页按钮
+        document.getElementById('backToHome').addEventListener('click', function () {
+            window.location.href = 'home.html';
+        });
+
+        // 事件监听器
+        dom.uploadButton.addEventListener('click', uploadPDFFile);
+        dom.docxFile.addEventListener('change', updateFileName);
+        dom.fileInputLabel.addEventListener('click', () => dom.docxFile.click());
+
+        dom.docxFile.addEventListener('change', validateFile);
+
+        // 拖放文件功能
+        dom.fileInputLabel.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dom.fileInputLabel.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
+            dom.fileInputLabel.style.borderColor = 'var(--primary-color)';
+        });
+
+        dom.fileInputLabel.addEventListener('dragleave', () => {
+            dom.fileInputLabel.style.backgroundColor = 'rgba(67, 97, 238, 0.03)';
+            dom.fileInputLabel.style.borderColor = 'rgba(67, 97, 238, 0.3)';
+        });
+
+        dom.fileInputLabel.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dom.fileInputLabel.style.backgroundColor = 'rgba(67, 97, 238, 0.03)';
+            dom.fileInputLabel.style.borderColor = 'rgba(67, 97, 238, 0.3)';
+
+            if (e.dataTransfer.files.length) {
+                dom.docxFile.files = e.dataTransfer.files;
+                updateFileName();
+            }
+        });
+
+
+         util.loading.hide();
+
+        function validateFile() {
+            const file = dom.docxFile.files[0];
+            let isValid = false;
+
+            if (file) {
+                // 验证文件类型
+                if (!/\.pdf$/i.test(file.name)) {
+                    displayError("请上传有效的PDF文档（.pdf）");
+                }
+                // 验证文件大小
+                else if (file.size > 10 * 1024 * 1024) {
+                    displayError("文件大小不能超过10MB");
+                } else {
+                    isValid = true;
+                }
+            }
+
+            toggleErrorState(dom.docxFile, dom.docxFileError, isValid);
+            return isValid;
+        }
+
+        function toggleErrorState(field, errorElement, isValid) {
+            if (isValid) {
+                field.classList.remove('is-invalid');
+                errorElement.style.display = 'none';
+            } else {
+                field.classList.add('is-invalid');
+                errorElement.style.display = 'block';
+            }
+        }
+
+        function updateFileName() {
+            const file = dom.docxFile.files[0];
+            if (file) {
+                dom.fileName.textContent = file.name;
+                dom.fileName.style.color = '#334155';
+                dom.fileInputLabel.querySelector('.file-input-title').textContent = '已选择文件';
+            } else {
+                dom.fileName.textContent = '未选择文件';
+                dom.fileName.style.color = '#64748b';
+                dom.fileInputLabel.querySelector('.file-input-title').textContent = '点击选择文件或拖放文件到此处';
+            }
+            validateFile();
+        }
+
+        async function uploadPDFFile() {
+            clearMessages();
+            displayUploadingMessage();
+
+            // 验证所有必填字段
+            const isFormValid = [
+                validateFile()
+            ].every(Boolean);
+
+            if (!isFormValid) {
+                displayError("请填写所有必填字段");
+                clearUploadingMessage();
+                return;
+            }
+
+            const file = dom.docxFile.files[0];
+            const formData = {
+                description: dom.description.value,
+                contractId: contractId
+            };
+
+            const reader = new FileReader();
+
+            reader.onload = async function (event) {
+                try {
+                    // 转换为 Base64
+                    const dataUrl = event.target.result;
+                    const base64 = dataUrl.split(',')[1];  // 取逗号后面的纯 Base64 部分
+                    formData.base = base64;
+
+                    // 更新按钮状态
+                    dom.uploadButton.disabled = true;
+                    dom.uploadButton.innerHTML = '<span class="loading-spinner"></span>上传中...';
+
+                    // 模拟延迟
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+
+                    // 发送请求
+                    const response = await fetchDataFromAPI('754', formData);
+                    if (response.data.status === 0) {
+                        displaySuccess();
+                        setTimeout(() => {
+                            clearMessages();
+                            resetForm();
+                        }, 3000);
+                    } else {
+                        displayError(response.data.error || "上传失败，请重试");
+                    }
+                } catch (error) {
+                    console.error('上传时捕获到错误', error);
+                    displayError("上传文件时发生错误：" + (error.message || "网络错误"));
+                } finally {
+                    clearUploadingMessage();
+                    dom.uploadButton.disabled = false;
+                    dom.uploadButton.innerHTML = '<i class="bi bi-cloud-upload"></i> 上传合同文件';
+                }
+            };
+
+            reader.onerror = function () {
+                displayError("读取文件时发生错误。");
+                clearUploadingMessage();
+                dom.uploadButton.disabled = false;
+                dom.uploadButton.innerHTML = '<i class="bi bi-cloud-upload"></i> 上传合同文件';
+            };
+
+            // 使用 readAsArrayBuffer 方法
+            reader.readAsDataURL(file); // 以二进制 ArrayBuffer 的方式读取文件
+        }
+
+        function resetForm() {
+            // 重置表单值
+            dom.description.value = '';
+            dom.docxFile.value = '';
+            updateFileName();
+
+            // 清除验证状态
+            dom.docxFile.classList.remove('is-invalid');
+            dom.docxFileError.style.display = 'none';
+        }
+
+        function clearMessages() {
+            clearSuccessMessage();
+            clearUploadingMessage();
+            clearErrorMessage();
+        }
+
+        function clearUploadingMessage() {
+            dom.uploadingContainer.style.display = 'none';
+        }
+
+        function clearSuccessMessage() {
+            dom.successContainer.style.display = 'none';
+        }
+
+        function clearErrorMessage() {
+            dom.errorContainer.innerHTML = "";
+        }
+
+        function displayUploadingMessage() {
+            dom.uploadingContainer.style.display = 'block';
+            dom.successContainer.style.display = 'none';
+            dom.waitingContainer.style.display = 'none';
+        }
+
+        function displaySuccess() {
+            dom.successContainer.style.display = 'block';
+            dom.uploadingContainer.style.display = 'none';
+            dom.waitingContainer.style.display = 'none';
+        }
+
+        function displayError(errorMessage) {
+            dom.errorContainer.innerHTML = `
+                <div class="alert alert-danger d-flex align-items-center" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2"></i>
+                    <div>${errorMessage}</div>
+                </div>
+            `;
+        }
+    });
+</script>
+</body>
+</html>

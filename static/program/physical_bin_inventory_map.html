@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>动态货物图</title>
+    <link rel="stylesheet" href="vendor/bootstrap5/css/bootstrap.css">
+    <style>
+       .cargo-box {
+    border-radius: 10px; /* 圆角 */
+    padding: 15px;
+    margin: 15px;
+    text-align: center;
+    color: #fff; /* 字体颜色设为白色以提高可读性 */
+    cursor: pointer; /* 鼠标指针为手形 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 阴影效果 */
+    transition: transform 0.3s; /* 动画效果 */
+}
+
+.cargo-box.selected {
+    transition: transform 0.2s; /* 确保放大效果平滑 */
+}
+
+.cargo-box:hover {
+    transform: scale(1.2); /* 悬停时明显放大效果 */
+}
+
+.cargo-name {
+    font-size: 1.5rem; /* 大字体显示货物名称 */
+    font-weight: bold; /* 加粗 */
+}
+
+.cargo-low {
+    background: linear-gradient(135deg, #4CAF50, #C8E6C9); /* 低利用率，深绿色与浅绿渐变 */
+}
+
+.cargo-medium {
+    background: linear-gradient(135deg, #2196F3, #BBDEFB); /* 中等利用率，深蓝与淡蓝渐变 */
+}
+
+.cargo-high {
+    background: linear-gradient(135deg, #FF9800, #FFE0B2); /* 高利用率，深橙与浅橙渐变 */
+}
+
+.table-custom {
+    background-color: #f1f1f1; /* 表格背景色 */
+    border-radius: 10px; /* 圆角 */
+    overflow: hidden; /* 避免子元素超出边框 */
+}
+
+.button-container {
+    margin-top: 10px; /* 增加按钮上方的间距 */
+    position: relative; /* 保持相对位置 */
+    z-index: 10; /* 确保按钮在最上层 */
+}
+
+.button-container .button {
+    margin-top: 10px; /* 按钮的上间距 */
+    padding: 10px 15px; /* 内边距 */
+}
+
+.pagination-custom .page-link {
+    background-color: #007bff; /* 按钮背景色 */
+    color: white;
+    border-radius: 5px; /* 圆角 */
+    padding: 10px 15px;
+}
+
+.pagination-custom .page-link:hover {
+    background-color: #0056b3; /* 深蓝色 */
+}
+
+.pagination-custom .active .page-link {
+    background-color: #0056b3; /* 活动项背景色 */
+    color: white; /* 白色字体 */
+}
+
+.selected {
+    border: 2px solid #007bff; /* 蓝色边框 */
+    transform: scale(1.2); /* 选中后放大 */
+    z-index: 1; /* 使选中项在最上层 */
+}
+
+
+    </style>
+</head>
+<body>
+<main>
+    <div class="container mt-5">
+        <h1 class="text-center">动态货物图</h1>
+        <div class="row" id="cargo-container">
+            <!-- 动态生成的货物项 -->
+        </div>
+
+        <!-- 进出明细表格 -->
+        <div class="details-table">
+            <h5>进出明细</h5>
+            <div id="location-info"></div> <!-- 货位信息 -->
+            <div class="table-responsive mt-2">
+                <table class="table table-bordered table-custom">
+                    <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>入库量</th>
+                        <th>出库量</th>
+                        <th>批次</th>
+                    </tr>
+                    </thead>
+                    <tbody id="details-table-body">
+                    <!-- 进出明细内容 -->
+                    </tbody>
+                </table>
+            </div>
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-custom">
+                    <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</main>
+
+<script src="vendor/bootstrap5/js/bootstrap.bundle.min.js"></script>
+<script>
+    // 模拟动态货物数据，增加容量字段和明细数据
+    const cargoData = [
+        {
+            name: '货物 A',
+            quantity: 10,
+            capacity: 50,
+            location: '货位 A',
+            details: [
+                {date: '2023-09-20', inQuantity: 10, outQuantity: 5, batch: 'A001'},
+                {date: '2023-09-25', inQuantity: 0, outQuantity: 5, batch: 'A002'},
+                {date: '2023-09-26', inQuantity: 0, outQuantity: 5, batch: 'A003'}
+            ]
+        },
+        {
+            name: '货物 B',
+            quantity: 5,
+            capacity: 30,
+            location: '货位 B',
+            details: [
+                {date: '2023-09-22', inQuantity: 5, outQuantity: 0, batch: 'B001'}
+            ]
+        },
+        {
+            name: '货物 C',
+            quantity: 20,
+            capacity: 100,
+            location: '货位 C',
+            details: [
+                {date: '2023-09-23', inQuantity: 20, outQuantity: 0, batch: 'C001'}
+            ]
+        },
+        {
+            name: '货物 D',
+            quantity: 0,
+            capacity: 20,
+            location: '货位 D',
+            details: []
+        },
+        {
+            name: '货物 E',
+            quantity: 15,
+            capacity: 60,
+            location: '货位 E',
+            details: [
+                {date: '2023-09-24', inQuantity: 15, outQuantity: 5, batch: 'E001'},
+                {date: '2023-09-28', inQuantity: 0, outQuantity: 5, batch: 'E002'}
+            ]
+        },
+    ];
+    // 全局变量用于存储当前选中的货物
+
+    let selectedCargo = null;
+
+    function getBackgroundColor(ratio) {
+        if (ratio < 0.5) {
+            return 'cargo-low'; // 低利用率
+        } else if (ratio < 0.8) {
+            return 'cargo-medium'; // 中等利用率
+        } else {
+            return 'cargo-high'; // 高利用率
+        }
+    }
+
+
+    function renderCargo() {
+        const container = document.getElementById('cargo-container');
+        container.innerHTML = ''; // 清空容器
+
+        cargoData.forEach(cargo => {
+            const cargoDiv = document.createElement('div');
+            cargoDiv.className = 'col-lg-2 col-md-3 col-sm-4 text-center';
+
+            const cargoBox = document.createElement('div');
+            cargoBox.className = `cargo-box ${getBackgroundColor(cargo.quantity / cargo.capacity)}`; // 动态计算初始背景颜色
+            cargoBox.innerHTML = `
+            <div class="cargo-name">${cargo.name}</div>
+            <p>数量: ${cargo.quantity}</p>
+            <p>容量: ${cargo.capacity}</p>
+            <p>利用率: ${(cargo.quantity / cargo.capacity * 100).toFixed(2)}%</p>
+        `;
+
+            // 创建增加和减少按钮
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'button-container';
+            buttonContainer.innerHTML = `
+            <button class="btn btn-primary" onclick="updateSelectedQuantity('${cargo.name}', -5); event.stopPropagation();">减少</button>
+            <button class="btn btn-success" onclick="updateSelectedQuantity('${cargo.name}', 5); event.stopPropagation();">增加</button>
+        `;
+
+            // 点击事件来处理选中状态和按钮显示
+            cargoBox.onclick = () => {
+                // 先把以前选中的货物的按钮隐藏
+                if (selectedCargo) {
+                    const previousCargoBox = document.querySelector('.cargo-box.selected');
+                    const previousButtonContainer = previousCargoBox.nextElementSibling;
+                    previousButtonContainer.style.display = 'none'; // 隐藏以前的按钮
+                    previousCargoBox.classList.remove('selected'); // 取消选中状态
+                    previousCargoBox.style.transform = "scale(1)"; // 恢复原始尺寸
+                }
+
+                // 如果当前没有选中，则选中当前货物
+                if (selectedCargo !== cargo) {
+                    selectedCargo = cargo; // 选中当前货物
+                    cargoBox.classList.add('selected');
+                    cargoBox.style.transform = "scale(1.5)"; // 放大效果
+                    buttonContainer.style.display = 'block'; // 显示当前按钮
+
+                    // 显示货位信息和明细表
+                    showDetails(cargo, cargoBox, buttonContainer);
+                } else {
+                    // 如果再次点击则取消选择
+                    selectedCargo = null;
+                    cargoBox.classList.remove('selected');
+                    cargoBox.style.transform = "scale(1)"; // 恢复原始尺寸
+                    buttonContainer.style.display = 'none'; // 隐藏按钮
+                    clearDetailTable(); // 清空表格内容
+                }
+
+                renderCargo(); // 重新渲染以确保状态更新
+            };
+
+            cargoDiv.appendChild(cargoBox);
+            cargoDiv.appendChild(buttonContainer);
+            container.appendChild(cargoDiv);
+
+            // 如果该货物项是当前选中项，保持选中状态
+            if (selectedCargo === cargo) {
+                cargoBox.classList.add('selected');
+                buttonContainer.style.display = 'block'; // 显示按钮
+            } else {
+                buttonContainer.style.display = 'none'; // 初始状态，其他货物项的按钮隐藏
+            }
+        });
+    }
+
+
+    function showDetails(cargo, cargoBox, buttonContainer) {
+        const locationInfo = document.getElementById('location-info');
+        const detailsTableBody = document.getElementById('details-table-body');
+
+        // 显示货位信息
+        locationInfo.innerHTML = `<p><strong>货位：</strong>${cargo.location}</p>`;
+
+        detailsTableBody.innerHTML = ''; // 清空表格内容
+
+        if (cargo.details.length === 0) {
+            detailsTableBody.innerHTML = `<tr><td colspan="4" class="text-center">没有进出明细记录。</td></tr>`;
+        } else {
+            cargo.details.forEach(detail => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                <td>${detail.date}</td>
+                <td>${detail.inQuantity}</td>
+                <td>${detail.outQuantity}</td>
+                <td>${detail.batch}</td>
+            `;
+                detailsTableBody.appendChild(row);
+            });
+        }
+    }
+
+
+    function deselectCargo(cargoBox, buttonContainer) {
+        selectedCargo = null;
+        cargoBox.classList.remove('selected');
+        buttonContainer.style.display = 'none'; // 隐藏按钮
+        renderCargo(); // 重新渲染，
+    }
+
+
+    function updateSelectedQuantity(cargoName, change) {
+        const cargo = cargoData.find(item => item.name === cargoName);
+        if (cargo) {
+            cargo.quantity = Math.max(0, cargo.quantity + change); // 更新数量，确保不为负数
+            renderCargo(); // 重新渲染货物图，更新背景颜色
+
+            // 更新明细表格，保持选中状态
+            if (selectedCargo === cargo) {
+                const cargoBox = document.querySelector(`.cargo-box.selected`);
+                const buttonContainer = cargoBox.nextElementSibling; // 获取按钮容器
+                showDetails(selectedCargo, cargoBox, buttonContainer); // 更新明细表格
+            }
+        }
+    }
+
+
+    // 初始化渲染
+    renderCargo();
+</script>
+</body>
+</html>

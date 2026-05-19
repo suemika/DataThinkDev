@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>认证个人自评表</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../../logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../../bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="util/util.css?v=' + randomVersion + '">');
+        document.write('<script src="../../easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../util/util_link.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../../bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../../elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../js/popper.js?v=' + randomVersion + '"><\/script>');
+    </script>
+    <style>
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #212529;
+        }
+
+        .content-section {
+            margin-bottom: 25px;
+        }
+
+        .level {
+            font-weight: 600;
+            margin-top: 15px;
+            display: inline-block;
+            color: #007bff;
+            font-size: 1.1rem;
+        }
+
+        .level-description {
+            font-size: 0.9rem;
+            color: #777;
+            display: inline;
+            margin-left: 8px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 1.05rem;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            padding: 10px 15px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .btn-submit {
+            margin-top: 25px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+
+        .btn-submit:disabled {
+            background-color: grey;
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+<header class="background-container">
+    <img id="header-img" src="" alt="ST">
+    <h2 class="poppins-bold-italic">精益认证平台</h2>
+</header>
+<main class="container" id="mainContent">
+
+    <div id="evaluation-container"></div>
+</main>
+<script>
+    const userName = getNameFromUrl("userName");
+    const p = getNameFromUrl("p");
+
+    async function loadList() {
+        const response = await fetchDataFromAPI('679', p);
+        if (response.data.status === 0) {
+            return response.data.data;
+        }
+        return null;
+    }
+
+    function renderData(data) {
+        const container = document.getElementById("evaluation-container");
+        data.forEach((item, index) => {
+            const card = document.createElement("div");
+            card.classList.add("card", "mb-3");
+            card.innerHTML = `
+          <div class="card-body">
+            ${item.definitions
+                .map(def =>
+                    `<div class="content-section">
+                    <strong>${def.definition}</strong>
+                    ${def.levels
+                        .map(
+                            level =>
+                                `<div class="content-section">
+                                <div class="level">${level.level} <span class="level-description">${level.detail}</span></div>
+                                <div>${level.description}</div>
+                            </div>`
+                        )
+                        .join("")}
+                  <div class="content-section">
+                      <label class="form-label"><strong>个人自评得分：</strong></label>
+                      <select class="form-control score-select" data-definition-id="${def.id}">
+                          <option value="" disabled selected>请选择分数</option>
+                          <option value="1">1分</option>
+                          <option value="2">2分</option>
+                          <option value="3">3分</option>
+                          <option value="4">4分</option>
+                          <option value="5">5分</option>
+                      </select>
+                  </div>
+                  <div class="content-section">
+                      <label class="form-label"><strong>评分举例说明：</strong></label>
+                      <textarea class="form-control example-textarea" data-definition-id="${def.id}" rows="3" placeholder="请填写评分举例说明"></textarea>
+                  </div>
+                  <button class="btn-submit" onclick="submitRating(${def.id})">提交评分</button>
+                  </div>
+          <hr>`
+                )
+                .join("")}
+          </div>
+        `;
+            container.appendChild(card);
+        });
+    }
+
+
+    async function submitRating(modelId) {
+        const card = document.querySelector(`.card [data-definition-id="${modelId}"]`).closest('.card');
+        const scoreSelect = card.querySelector('.score-select[data-definition-id="' + modelId + '"]');
+        const exampleTextarea = card.querySelector('.example-textarea[data-definition-id="' + modelId + '"]');
+        const submitButton = card.querySelector('.btn-submit');
+        if (!scoreSelect || !exampleTextarea) {
+            console.error(`Elements not found for modelId: ${modelId}`);
+            return;
+        }
+
+        const score = scoreSelect.value;
+        const example = exampleTextarea.value;
+
+        if (!score) {
+            alert('请先选择分数！');
+            return;
+        }
+        // 禁用提交按钮
+        submitButton.disabled = true;
+        submitButton.innerHTML = '提交中...';
+        const submissionData = {
+            userName: userName,
+            modelId: modelId,
+            definitionId: p,
+            score: score,
+            example: example
+        };
+
+        try {
+            const response = await fetchDataFromAPI('681', submissionData);
+            if (response.data.status === 0) {
+                alert('评分提交成功！');
+                window.location.reload();
+            } else {
+                alert('提交失败：' + response.data.message);
+            }
+        } catch (error) {
+            console.error('提交过程中出错：', error);
+            alert('提交过程中出错，请稍后重试。');
+        } finally {
+            submitButton.disabled = false;
+            submitButton.innerHTML = '提交';
+        }
+    }
+
+    async function loadSelfEvaluationData() {
+        const data = {
+            userName: userName,
+            definitionId: p
+        };
+        const response = await fetchDataFromAPI('682', data);
+        if (response.data.status === 0) {
+            const evaluations = response.data.data;
+            evaluations.forEach(evaluation => {
+                const modelId = evaluation.modelId;
+                const score = evaluation.score;
+                const example = evaluation.example;
+
+                const scoreSelect = document.querySelector(`.score-select[data-definition-id="${modelId}"]`);
+                const exampleTextarea = document.querySelector(`.example-textarea[data-definition-id="${modelId}"]`);
+
+                if (scoreSelect) {
+                    scoreSelect.value = score;
+                }
+                if (exampleTextarea) {
+                    exampleTextarea.value = example;
+                }
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async function () {
+        if (userName === null) {
+            window.location.href = "http://edi.sdstg.com/";
+        }
+        const data = await loadList();
+        if (data) {
+            renderData(data);
+            await loadSelfEvaluationData();
+        } else {
+            console.error('数据加载失败');
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'Poppins-BoldItalic';
+    src: url('fonts/Poppins-BoldItalic.ttf') format('truetype'); /* 确保路径正确 */
+}
+
+h1 {
+    font-family: 'Poppins-BoldItalic', Heiti, serif; /* 使用定义的字体 */
+    font-weight: bold;
+}

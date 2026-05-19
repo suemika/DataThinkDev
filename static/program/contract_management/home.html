@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>合同管理系统</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../vendor/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="../bootstrap-icons-1.11.3/font/bootstrap-icons.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./util/util.css?v=' + randomVersion + '">');
+    </script>
+    <style>
+        :root {
+            --hover-color: #f0f3ff;
+            --primary-color: #4361ee;
+            --primary-light: #e0e7ff;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4cc9f0;
+            --warning-color: #f8961e;
+            --danger-color: #f72585;
+            --card-hover-shadow: 0 10px 20px rgba(67, 97, 238, 0.15);
+            --border-radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .welcome-container {
+            width: 90%;
+            margin: 2rem auto;
+            padding: 2.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+
+        .welcome-header {
+            margin-bottom: 2.5rem;
+            text-align: center;
+            position: relative;
+            padding-bottom: 1.5rem;
+        }
+
+        .welcome-header::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: 2px;
+        }
+
+        .welcome-header h1 {
+            color: var(--dark-color);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            font-size: 2.2rem;
+        }
+
+        .welcome-header p {
+            color: #64748b;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .option-cards {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .option-card {
+            width: 320px;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .option-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--card-hover-shadow);
+            border-color: rgba(67, 97, 238, 0.2);
+        }
+
+        .option-card:hover::before {
+            opacity: 1;
+        }
+
+        .option-card i {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: var(--transition);
+        }
+
+        .option-card:hover i {
+            transform: scale(1.1);
+        }
+
+        .option-card h3 {
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+
+        .option-card p {
+            color: #64748b;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        /* 我的合同表格样式 */
+        .contracts-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 3px solid var(--primary-light);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .section-title {
+            color: var(--dark-color);
+            font-weight: 600;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 0.75rem;
+            color: var(--primary-color);
+        }
+
+        .refresh-btn {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .refresh-btn:hover {
+            background-color: rgba(67, 97, 238, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .refresh-btn:active {
+            transform: translateY(0);
+        }
+
+        .refresh-btn i {
+            margin-right: 0.5rem;
+            transition: transform 0.3s;
+        }
+
+        .refresh-btn:hover i {
+            transform: rotate(180deg);
+        }
+
+        .contracts-table-container {
+            width: 100%;
+            overflow: hidden;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            background-color: #fff;
+        }
+
+        .contracts-table-container:hover {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .contracts-table {
+            width: 100%;
+
+            font-size: 0.95rem;
+            table-layout: fixed; /* 固定布局 */
+            border-collapse: collapse;
+        }
+
+        .contracts-table th,
+        .contracts-table td {
+            padding: 0.75rem 0.5rem !important; /* 减小单元格内边距 */
+            vertical-align: middle;
+            line-height: 1.5;
+            word-break: break-word; /* 允许长单词换行 */
+        }
+
+        .contracts-table td {
+            padding: 1rem 0.75rem !important; /* 增加垂直内边距 */
+            border-bottom: 1px solid #f1f5f9;
+            text-align: center;
+        }
+
+        .contracts-table th {
+            padding: 1rem 0.75rem !important;
+            border-bottom: 2px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .contracts-table tr:nth-child(even) td {
+            background-color: #f8fafc; /* 浅色背景交替行 */
+        }
+
+        .contracts-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .contracts-table tr:hover td {
+            background-color: var(--hover-color);
+            transform: scale(1.05);
+            box-shadow: inset 0 -1px 0 #e2e8f0; /* 保持悬浮时的分隔线 */
+        }
+
+        .contracts-table tr td[colspan="6"] {
+            width: 100%;
+            padding: 0; /* 移除默认 padding */
+            text-align: center; /* 内容居中 */
+        }
+
+
+        .contracts-table tr {
+            border-bottom: 1px solid #e2e8f0; /* 增加行间分隔线 */
+        }
+
+        .contract-name-cell {
+            text-align: left;
+            padding-left: 1.5rem;
+        }
+
+        .emoji-icon {
+            font-size: 1.2em;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .action-cell {
+            white-space: nowrap;
+            padding: 0.5rem !important; /* 减少内边距 */
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem !important; /* 减小按钮内边距 */
+            font-size: 0.85rem !important; /* 减小字体大小 */
+            margin: 0.1rem; /* 添加微小外边距 */
+
+            display: inline-flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: var(--transition);
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            color: white;
+        }
+
+        .action-btn i {
+            margin-right: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .download-btn {
+            background-color: var(--success-color);
+        }
+
+        .download-btn:hover {
+            background-color: #3ab7dc;
+        }
+
+        .upload-btn {
+            background-color: var(--accent-color);
+        }
+
+        .upload-btn:hover {
+            background-color: #3a7bef;
+        }
+
+        .start-flow-btn {
+            background-color: var(--primary-color);
+        }
+
+        .start-flow-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .view-detail-btn {
+            background-color: #6c757d;
+        }
+
+        .view-detail-btn:hover {
+            background-color: #5a6268;
+        }
+
+        /* 状态徽章优化 */
+        .status-badge {
+            display: inline-block;
+            padding: 0.35rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            min-width: 70px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .status-pending {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .status-completed {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .status-uploaded {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .status-not-started {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .success-modal .modal-dialog {
+            max-width: 600px;
+        }
+
+        .success-modal .modal-content {
+            border-radius: var(--border-radius);
+            border: none;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .success-modal .modal-header {
+            border-bottom: none;
+            padding: 1.5rem 1.5rem 0.5rem;
+        }
+
+        .success-modal .modal-body {
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        .success-modal .modal-footer {
+            border-top: none;
+            padding: 1rem 1.5rem 1.5rem;
+            justify-content: center;
+        }
+
+        .success-modal .alert {
+            border-left: 4px solid var(--success-color);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .workflow-status {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+        }
+
+
+        .workflow-status {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin-top: 1rem;
+        }
+
+        .progress {
+            height: 10px;
+            border-radius: 5px;
+            background-color: #e9ecef;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            border-radius: 5px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+        }
+
+        .status-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .status-text {
+            color: var(--primary-color);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem; /* 减少按钮间距 */
+            justify-content: center;
+            flex-wrap: wrap; /* 允许按钮换行 */
+            padding: 0.25rem 0;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 992px) {
+            .welcome-container {
+                width: 95%;
+                padding: 2rem;
+            }
+
+            .option-card {
+                width: 100%;
+                max-width: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .welcome-container {
+                padding: 1.5rem;
+                margin: 1rem auto;
+                width: 98%;
+            }
+
+            .welcome-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .contracts-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .action-buttons {
+                flex-direction: row; /* 保持水平排列 */
+                justify-content: flex-start; /* 左对齐 */
+                overflow-x: auto; /* 允许水平滚动 */
+                padding-bottom: 0.5rem; /* 为滚动条留空间 */
+            }
+
+            .action-btn {
+                flex-shrink: 0; /* 防止按钮缩小 */
+            }
+
+            .action-buttons .btn {
+                width: 100%;
+            }
+        }
+
+
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin3 0.8s ease-in-out infinite;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+
+        @keyframes spin3 {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        main {
+            max-width: 1500px;
+            margin: 0 auto; /* 水平居中 */
+            width: 100%; /* 确保宽度占满父容器 */
+            padding: 0 15px; /* 可选：添加内边距避免内容贴边 */
+            box-sizing: border-box; /* 确保内边距不影响总宽度 */
+        }
+
+        .delete-btn {
+            background-color: var(--danger-color);
+        }
+
+        .delete-btn:hover {
+            background-color: #e5176b;
+        }
+
+
+        /* 在现有的CSS中添加以下样式 */
+        .empty-table-message {
+            padding: 2rem 2rem;
+        }
+
+        .empty-table-message i {
+            font-size: 3.5rem;
+            display: block;
+            margin-bottom: 1.5rem;
+            color: #e2e8f0;
+            background: linear-gradient(135deg, var(--primary-light), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .empty-table-message p {
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        .empty-action-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            text-decoration: none;
+            transition: var(--transition);
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(67, 97, 238, 0.1);
+        }
+
+        .empty-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(67, 97, 238, 0.15);
+            color: white;
+        }
+
+        .empty-action-btn i {
+            margin-right: 0.75rem;
+            font-size: 1rem;
+        }
+
+    </style>
+</head>
+<body class="poppins-bold">
+
+<!-- 遮罩层 -->
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-content">
+
+        <div class="diamond-loader">
+            <!-- 静态阴影 -->
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+        </div>
+        <div class="shadow"></div>
+        <p class="mt-3">正在加载，请稍候...</p>
+    </div>
+</div>
+
+<header class="background-container">
+    <a href="http://edi.sdstg.com/" target="_self" rel="noopener">
+        <img id="header-img" src="" alt="ST">
+    </a>
+    <h2 class="h2-container">合同管理系统</h2>
+</header>
+<main id="main-content">
+
+    <!-- 欢迎容器 - 现在是主要内容 -->
+    <div class="welcome-container">
+        <div class="user-name"><span id="userName"></span></div>
+
+        <div class="welcome-header">
+            <h1>欢迎使用合同管理系统</h1>
+            <p>高效创建、管理和跟踪您的业务合同，简化合同生命周期管理流程</p>
+        </div>
+
+        <div class="option-cards">
+            <div class="option-card" id="newContractOption">
+                <i class="bi bi-file-earmark-plus"></i>
+                <h3>合同起草与审核</h3>
+                <p>使用智能模板快速创建专业合同文档，支持多种合同类型和自定义条款</p>
+            </div>
+        </div>
+
+
+        <!-- 我的合同表格 -->
+        <div class="contracts-section">
+
+            <div class="section-header">
+                <h3 class="section-title">
+                    <i class="bi bi-files"></i>
+                    我的合同
+                </h3>
+                <button class="refresh-btn" id="refreshContracts">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    刷新列表
+                </button>
+            </div>
+
+            <div class="contracts-table-container">
+                <table class="contracts-table">
+                    <thead>
+                    <tr>
+                        <th style="width: 20%;">合同名称</th>
+                        <th style="width: 15%;">部门</th>
+                        <th style="width: 15%;">类型</th>
+                        <th style="width: 10%;">状态</th>
+                        <th style="width: 15%;">创建时间</th>
+                        <th style="width: 25%;" class="text-center">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="contractsTableBody">
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 0;">
+                            <div class="empty-table-message">
+                                <i class="bi bi-file-earmark-text"></i>
+                                <p>暂无合同数据</p>
+                                <button onclick="window.location.href='index.html'" class="empty-action-btn">
+                                    <i class="bi bi-plus-lg"></i> 创建新合同
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成功信息模态框 -->
+    <div class="modal fade success-modal" id="successModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-success d-flex align-items-center mb-4">
+                        <i class="bi bi-check-circle-fill me-2 fs-4"></i>
+                        <div>
+                            <h5 class="mb-1">合同流程已成功发起！</h5>
+                        </div>
+                    </div>
+
+                    <div class="workflow-status">
+                        <div class="status-info">
+                            <span>当前状态:</span>
+                            <span class="status-text">审批中</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                 style="width: 30%"></div>
+                        </div>
+                        <p class="text-muted mt-2 small">流程已提交至相关部门审批，请耐心等待</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" id="viewWorkflowDetail">
+                        <i class="bi bi-eye me-2"></i>查看流程详情
+                    </button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        <i class="bi bi-plus-circle me-2"></i>新建合同
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    document.write('<script src="../vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="./util/util_link.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+</script>
+<script>
+
+    // 全局函数，用于发起工作流
+    async function startWorkflowForContract(contractId, filePath) {
+        try {
+            // 显示加载状态
+            const buttons = document.querySelectorAll(`.start-flow-btn[data-contract-id="${contractId}"]`);
+            buttons.forEach(btn => {
+                btn.innerHTML = '<span class="loading-spinner"></span> 发起中...';
+                btn.disabled = true;
+            });
+
+            const formData = {
+                action: 'start_workflow',
+                filePath: filePath,
+                templateId: contractId,
+                historyId: contractId
+            };
+
+            const response = await fetchDataFromAPI('719', formData);
+
+            if (response.data.status === 0) {
+                showSuccessModal(response.data.workflowId);
+
+                // 刷新列表
+                await loadMyContracts();
+            } else {
+
+                const msg = response.data.msg;
+                await fetchDataFromAPI('755', {
+                    workId: userName,
+                    sourceAddress: window.location.pathname + ' contract_management -> home.html-> api : 719 -> line : 779',
+                    error: msg,
+                    reqData: JSON.stringify(formData)
+                });
+
+                showMsg(msg || '发起流程失败');
+
+                throw new Error(msg || '发起流程失败');
+            }
+        } catch (error) {
+            showMsg(error.message || '发起流程时发生错误');
+            console.error('发起流程错误:', error);
+
+            // 错误处理
+            const buttons = document.querySelectorAll(`.start-flow-btn[data-contract-id="${contractId}"]`);
+            buttons.forEach(btn => {
+                btn.innerHTML = '<i class="bi bi-send-check"></i>发起流程';
+                btn.disabled = false;
+            });
+        }
+    }
+
+    // 全局函数，用于显示成功模态框
+    function showSuccessModal(workflowId) {
+
+        const modalEl = document.getElementById('successModal');
+
+        // 显示模态框
+        const successModal = new bootstrap.Modal(modalEl);
+        successModal.show();
+
+        // 移除 aria-hidden，避免辅助设备误判
+        fixModalAriaHidden('successModal');
+    }
+
+    // 全局函数，用于加载合同数据
+    // 在loadMyContracts函数中，修改初始加载状态
+    async function loadMyContracts() {
+        try {
+            const refreshBtn = document.getElementById('refreshContracts');
+            refreshBtn.innerHTML = '<span class="loading-spinner"></span> 加载中...';
+            refreshBtn.disabled = true;
+
+            // 显示加载中的空状态
+            renderLoadingState();
+
+            // 调用API获取合同数据
+            const response = await fetchDataFromAPI('753', {});
+
+            if (response.data.status === 0 && response.data.data) {
+
+                userName = response.data.userName
+                document.getElementById('userName').textContent = response.data.userName
+
+                renderContractsTable(response.data.data);
+            } else {
+                console.error('获取合同数据失败:', response.data.msg);
+                renderEmptyTable('获取合同数据失败，请重试', true);
+            }
+        } catch (error) {
+            console.error('加载合同数据出错:', error);
+            renderEmptyTable('加载合同数据出错，请刷新重试', true);
+        } finally {
+            const refreshBtn = document.getElementById('refreshContracts');
+            refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> 刷新列表';
+            refreshBtn.disabled = false;
+        }
+    }
+
+    // 添加加载中的状态显示
+    function renderLoadingState() {
+        const tableBody = document.getElementById('contractsTableBody');
+
+        tableBody.innerHTML = `
+        <tr>
+            <td colspan="6">
+                <div class="empty-table-message">
+                    <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                    <p>正在加载合同数据，请稍候...</p>
+                </div>
+            </td>
+        </tr>
+    `;
+    }
+
+    // 渲染合同表格
+    function renderContractsTable(contracts) {
+        const tableBody = document.getElementById('contractsTableBody');
+        tableBody.innerHTML = '';
+
+        if (!contracts || contracts.length === 0) {
+            renderEmptyTable('暂无合同数据', false);
+            return;
+        }
+
+        contracts.forEach(contract => {
+            const row = document.createElement('tr');
+            row.dataset.contractId = contract.id;
+            let workflowPath = 'http://edi.sdstg.com';
+
+            // 仅在 workflowId 不为空时生成 workflowPath
+            if (contract.workflowId) {
+                workflowPath = 'http://edi.sdstg.com/km/review/km_review_main/kmReviewMain.do?method=view&fdId=' + contract.workflowId;
+            }
+
+            // 状态徽章
+            let statusBadge = '';
+            if (contract.status === 0) {
+                statusBadge = '<span class="status-badge status-not-started">未发起流程</span>';
+            } else if (contract.status === 1) {
+                statusBadge = '<span class="status-badge status-pending">流程审核中</span>';
+            } else if (contract.status === 2) {
+                statusBadge = '<span class="status-badge status-uploaded">流程结束</span>';
+            } else if (contract.status === 3) {
+                statusBadge = '<span class="status-badge status-completed">已完成</span>';
+            }
+
+            // 操作按钮
+            let actionButtons = '';
+
+            // 文件下载按钮（如果有文件路径）
+            if (contract.filePath) {
+                const correctedPath = contract.filePath.replace(/\\/g, '/');
+                const safeUrl = encodeURI(`http://ems.sdstg.com/program/contract_management/${correctedPath}`);
+
+                actionButtons += `
+                <button onclick="window.open('${safeUrl}', '_blank')" class="action-btn download-btn">
+                    <i class="bi bi-download"></i> 下载
+                </button>
+            `;
+            }
+
+            // 根据不同状态显示不同操作
+            if (contract.status === 0) {
+                // 未发起流程：显示删除 + 发起流程
+                actionButtons += `
+                <button data-contract-id="${contract.id}"
+                        class="action-btn delete-btn"
+                        onclick="deleteContract('${contract.id}')">
+                    <i class="bi bi-trash"></i> 删除
+                </button>
+                <button data-contract-id="${contract.id}"
+                        data-file-path="${contract.filePath}"
+                        class="action-btn start-flow-btn">
+                    <i class="bi bi-send-check"></i> 发起流程
+                </button>
+            `;
+            } else if (contract.status === 1) {
+                // 流程审核中：显示回传 + 查看流程（仅当 workflowId 存在）+ 重新发起流程
+                actionButtons += `
+
+                ${contract.workflowId ? `
+                <a href="${workflowPath}" target="_blank" class="action-btn view-detail-btn">
+                    <i class="bi bi-eye"></i> 查看流程
+                </a>
+
+                ` : ''}
+                <button data-contract-id="${contract.id}"
+                        data-file-path="${contract.filePath}"
+                        class="action-btn start-flow-btn">
+                    <i class="bi bi-send-check"></i> 重新发起流程
+                </button>
+            `;
+            } else if (contract.status === 2) {
+                // 流程结束：显示重新回传 + 查看流程（仅当 workflowId 存在）
+                actionButtons += `
+                <a href="contract-upload.html?contractId=${contract.id}" class="action-btn upload-btn">
+                    <i class="bi bi-arrow-repeat"></i> 回传
+                </a>
+                ${contract.workflowId ? `
+                <a href="${workflowPath}" target="_blank" class="action-btn view-detail-btn">
+                    <i class="bi bi-eye"></i> 查看流程
+                </a>
+                ` : ''}
+            `;
+            } else if (contract.status === 3) {
+                // 状态3：仅显示下载 + 查看流程（仅当 workflowId 存在）
+                actionButtons += `
+            <a href="contract-upload.html?contractId=${contract.id}" class="action-btn upload-btn">
+                    <i class="bi bi-arrow-repeat"></i> 重新回传
+                </a>
+                ${contract.workflowId ? `
+                <a href="${workflowPath}" target="_blank" class="action-btn view-detail-btn">
+                    <i class="bi bi-eye"></i> 查看流程
+                </a>
+                ` : ''}
+            `;
+            }
+
+            row.innerHTML = `
+            <td class="contract-name-cell">
+                ${contract.name || '未命名合同'}
+            </td>
+            <td>${contract.department || '-'}</td>
+            <td>${contract.type || '-'}</td>
+            <td>${statusBadge}</td>
+            <td>${contract.createdAt || '-'}</td>
+            <td class="action-cell">
+                <div class="action-buttons">${actionButtons || '-'}</div>
+            </td>
+        `;
+
+            tableBody.appendChild(row);
+        });
+    }
+
+    // 全局函数，用于删除合同
+    async function deleteContract(contractId) {
+        if (!confirm('确定要删除此合同吗？此操作不可撤销。')) {
+            return;
+        }
+
+        try {
+            // 显示加载状态
+            const buttons = document.querySelectorAll(`.delete-btn[data-contract-id="${contractId}"]`);
+            buttons.forEach(btn => {
+                btn.innerHTML = '<span class="loading-spinner"></span> 删除中...';
+                btn.disabled = true;
+            });
+
+            // 调用API删除合同
+            const response = await fetchDataFromAPI('760', {contractId: contractId});
+
+            if (response.data.status === 0) {
+                showMsg('合同删除成功', true);
+                // 刷新列表
+                await loadMyContracts();
+            } else {
+                const msg = response.data.msg;
+                await fetchDataFromAPI('755', {
+                    workId: 760,
+                    sourceAddress: window.location.pathname + ' contract_management -> home.html -> 890',
+                    error: msg
+                });
+                showMsg(msg || '删除合同失败');
+                throw new Error(msg || '删除合同失败');
+            }
+        } catch (error) {
+
+            showMsg(error.message || '删除合同时发生错误');
+            console.error('删除合同错误:', error);
+
+            // 错误处理
+            const buttons = document.querySelectorAll(`.delete-btn[data-contract-id="${contractId}"]`);
+            buttons.forEach(btn => {
+                btn.innerHTML = '<i class="bi bi-trash"></i> 删除';
+                btn.disabled = false;
+            });
+        }
+    }
+
+    // 渲染空表格
+    function renderEmptyTable(message = '暂无合同数据', isError = false) {
+        const tableBody = document.getElementById('contractsTableBody');
+
+        tableBody.innerHTML = `
+        <tr>
+            <td colspan="6">
+                <div class="empty-table-message">
+                    <i class="bi ${isError ? 'bi-exclamation-octagon' : 'bi-file-earmark-text'}"></i>
+                    <p>${message}</p>
+                    ${isError ?
+            `<button onclick="loadMyContracts()" class="empty-action-btn">
+                            <i class="bi bi-arrow-repeat"></i> 重新加载
+                        </button>` :
+            `<button onclick="window.location.href='index.html'" class="empty-action-btn">
+                            <i class="bi bi-plus-lg"></i> 创建新合同
+                        </button>`
+        }
+                </div>
+            </td>
+        </tr>
+    `;
+    }
+
+    function fixModalAriaHidden(modalId) {
+        const el = document.getElementById(modalId);
+        el.addEventListener('show.bs.modal', () => {
+            setTimeout(() => el.removeAttribute('aria-hidden'), 0);
+        });
+        el.addEventListener('hide.bs.modal', () => {
+            el.setAttribute('aria-hidden', 'true');
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // 生成新合同选项
+        document.getElementById('newContractOption').addEventListener('click', function () {
+            window.location.href = 'index.html';
+        });
+
+        // 刷新合同列表
+        document.getElementById('refreshContracts').addEventListener('click', function () {
+            loadMyContracts();
+        });
+
+        // 查看工作流详情
+        document.getElementById('viewWorkflowDetail').addEventListener('click', function (e) {
+            window.location.href = `http://edi.sdstg.com/sys/portal/page.jsp`;
+        });
+        document.addEventListener('click', function (e) {
+            const startFlowBtn = e.target.closest('.start-flow-btn');
+            if (startFlowBtn) {
+                e.preventDefault();
+                const contractId = startFlowBtn.dataset.contractId;
+                const filePath = startFlowBtn.dataset.filePath;
+                startWorkflowForContract(contractId, filePath);
+            }
+        });
+
+        // 先显示加载层
+        util.loading.show();
+
+        // 然后初始化应用
+        loadMyContracts().finally(() => {
+            // 无论成功失败都隐藏加载层
+            util.loading.hide();
+        });
+
+    });
+</script>
+</body>
+</html>

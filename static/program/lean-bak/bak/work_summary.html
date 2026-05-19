@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>个人精益工作总结及发展计划</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../../logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../../bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="util/util.css?v=' + randomVersion + '">');
+        document.write('<script src="../../easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../util/util_link.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../../bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../../elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../js/popper.js?v=' + randomVersion + '"><\/script>');
+    </script>
+    <style>
+
+        h2 {
+            color: #007bff;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .container {
+            box-shadow: none;
+        }
+
+        .form-control {
+            padding: 10px 15px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .submit-btn-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn-primary {
+            padding: 12px 30px;
+            border-radius: 15px;
+            font-size: 20px;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .question-group {
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="background-container">
+    <img id="header-img" src="" alt="ST">
+    <h2 class="poppins-bold-italic">精益认证平台</h2>
+</header>
+<main class="container mt-4" id="mainContent">
+    <div>
+        <!-- 个人信息 -->
+        <section id="personal-info">
+            <h2>个人信息</h2>
+            <form id="personal-info-form">
+                <div class="mb-3">
+                    <label for="lean-domain" class="form-label">精益业务域</label>
+                    <input type="text" class="form-control" id="lean-domain" required>
+                </div>
+                <div class="mb-3">
+                    <label for="supervisor" class="form-label">直接上级</label>
+                    <input type="text" class="form-control" id="supervisor" required>
+                </div>
+                <div class="mb-3">
+                    <label for="department" class="form-label">所属厂部</label>
+                    <input type="text" class="form-control" id="department" required>
+                </div>
+            </form>
+        </section>
+
+        <!-- 个人精益工作总结 -->
+        <section id="work-summary" class="mt-5">
+            <h2>个人精益工作总结</h2>
+            <div id="summary-questions">
+
+            </div>
+        </section>
+
+        <!-- 个人发展目标 -->
+        <section id="development-goals" class="mt-5">
+            <h2>个人发展目标</h2>
+            <div id="goal-questions">
+                <!-- 填充发展目标问题 -->
+            </div>
+        </section>
+
+        <!-- 提交按钮 -->
+        <div class="submit-btn-container">
+            <button class="btn btn-primary" id="submit-btn">提交</button>
+        </div>
+    </div>
+</main>
+<script>
+    const userName = getNameFromUrl("userName");
+
+    // 从后端 API 获取链接名称
+    async function loadList() {
+        const response = await fetchDataFromAPI('683', userName);
+        if (response.data.status === 0) {
+            return response.data.data;
+        }
+        return null;
+    }
+
+    // 分别加载不同类型的问题
+    function loadQuestions(data) {
+        const summaryContainer = document.getElementById('summary-questions');
+        const goalsContainer = document.getElementById('goal-questions');
+
+        // 加载工作总结问题
+        data.work_summary.forEach((item, index) => {
+            const questionGroup = document.createElement('div');
+            questionGroup.classList.add('question-group');
+            questionGroup.innerHTML = `
+            <label for="work-summary-${index + 1}" class="form-label">${item.问题}</label>
+            <textarea class="form-control" id="work-summary-${index + 1}" rows="3" required></textarea>
+        `;
+            summaryContainer.appendChild(questionGroup);
+        });
+
+        // 加载发展目标问题
+        data.development_goals.forEach((item, index) => {
+            const goalGroup = document.createElement('div');
+            goalGroup.classList.add('question-group');
+            goalGroup.innerHTML = `
+            <label for="development-goal-${index + 1}" class="form-label">${item.计划}</label>
+            <textarea class="form-control" id="development-goal-${index + 1}" rows="3" required></textarea>
+        `;
+            goalsContainer.appendChild(goalGroup);
+        });
+    }
+
+
+    document.addEventListener('DOMContentLoaded', async function () {
+
+        if (userName === null) {
+            window.location.href = "http://edi.sdstg.com/";
+        }
+
+        const list = await loadList();
+        console.log(list)
+        if (list) {
+            loadQuestions(list);
+        }
+        if (list.personal_info[0]) {
+
+            // 填充个人信息
+            const personalInfo = list.personal_info[0]; // 取第一个数据项
+            if (personalInfo) {
+                document.getElementById('lean-domain').value = personalInfo['精益业务域'] || '';
+                document.getElementById('supervisor').value = personalInfo['直接上级'] || '';
+                document.getElementById('department').value = personalInfo['所属厂部'] || '';
+            }
+
+            // 填充工作总结问题的回答
+            document.getElementById('work-summary-1').value = personalInfo['问题1'] || '';
+            document.getElementById('work-summary-2').value = personalInfo['问题2'] || '';
+            document.getElementById('work-summary-3').value = personalInfo['问题3'] || '';
+            document.getElementById('work-summary-4').value = personalInfo['问题4'] || '';
+
+            // 填充发展目标计划的回答
+            document.getElementById('development-goal-1').value = personalInfo['计划1'] || '';
+            document.getElementById('development-goal-2').value = personalInfo['计划2'] || '';
+        }
+
+        // 提交按钮事件
+        document.getElementById('submit-btn').addEventListener('click', async function () {
+            const submitButton = this;
+            const personalInfoForm = document.getElementById('personal-info-form');
+
+            if (personalInfoForm.checkValidity()) {
+                // 禁用提交按钮
+                submitButton.disabled = true;
+                submitButton.innerHTML = '提交中...';
+
+                // 获取表单数据
+                const leanDomain = document.getElementById('lean-domain').value;
+                const supervisor = document.getElementById('supervisor').value;
+                const department = document.getElementById('department').value;
+
+                const summaryQuestions = document.querySelectorAll('#summary-questions textarea');
+                const goalQuestions = document.querySelectorAll('#goal-questions textarea');
+
+                const summaryAnswers = [];
+                const goalAnswers = [];
+
+                summaryQuestions.forEach(question => {
+                    summaryAnswers.push(question.value);
+                });
+
+                goalQuestions.forEach(question => {
+                    goalAnswers.push(question.value);
+                });
+
+                const submissionData = {
+                    userName: userName,
+                    leanDomain: leanDomain,
+                    supervisor: supervisor,
+                    department: department,
+                    summaryAnswers: summaryAnswers,
+                    goalAnswers: goalAnswers
+                };
+
+                try {
+                    const response = await fetchDataFromAPI('684', submissionData);
+                    if (response.data.status === 0) {
+                        alert('表单提交成功！');
+                        window.location.reload();
+                    } else {
+                        alert('表单提交失败，请重试。');
+                    }
+                } catch (error) {
+                    console.error('提交数据时出错:', error);
+                    alert('提交数据时出错，请检查网络或稍后重试。');
+                }
+
+                // 提交完成后重新启用提交按钮
+                submitButton.disabled = false;
+                submitButton.innerHTML = '提交';
+            }
+        });
+
+    });
+
+</script>
+</body>
+</html>

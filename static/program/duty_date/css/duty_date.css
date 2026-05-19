@@ -1,0 +1,322 @@
+/* =====================================================
+   duty_date.css — 值班日历专属样式
+   合并自 HTML 内联样式 + program/css/duty_date.css
+   注意: header 样式由 css/util.css 统一管理，此处不覆盖
+   ===================================================== */
+
+/* ---- CSS 变量 (duty_date 专属) ---- */
+:root {
+    --dt-primary: #4a6cf7;
+    --dt-secondary: #6a82fb;
+    --dt-accent: #fc5c7d;
+    --dt-light: #f8fafc;
+    --dt-dark: #2d3748;
+    --dt-success: #10b981;
+    --dt-warning: #f59e0b;
+    --dt-danger: #ef4444;
+    --dt-info: #3b82f6;
+    --dt-radius: 12px;
+    --dt-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    --dt-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --dt-gradient-primary: linear-gradient(135deg, var(--dt-primary), var(--dt-secondary));
+    --dt-gradient-accent: linear-gradient(135deg, var(--dt-accent), #ff8a5c);
+    --dt-gradient-success: linear-gradient(135deg, var(--dt-success), #34d399);
+}
+
+/* ---- 自定义滚动条 ---- */
+.search-results-body::-webkit-scrollbar {
+    width: 6px;
+}
+.search-results-body::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+.search-results-body::-webkit-scrollbar-thumb {
+    background: var(--dt-primary);
+    border-radius: 3px;
+}
+.search-results-body::-webkit-scrollbar-thumb:hover {
+    background: var(--dt-secondary);
+}
+
+/* ---- 加载动画 ---- */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, .3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: dt-spin 1s ease-in-out infinite;
+    margin-right: 10px;
+}
+
+/* ---- 日历事件样式 ---- */
+.fc-daygrid-day-frame {
+    min-height: 80px;
+}
+.fc-day-today {
+    background-color: rgba(0, 123, 255, 0.61) !important;
+}
+
+.duty-event {
+    background: linear-gradient(135deg, #4a6cf7, #6a82fb) !important;
+    border-radius: 6px !important;
+    padding: 4px 8px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+}
+.holiday-event {
+    background: linear-gradient(135deg, #fc5c7d, #ff8a5c) !important;
+    border-radius: 6px !important;
+    padding: 4px 8px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+}
+.work-event {
+    background: linear-gradient(135deg, #10b981, #34d399) !important;
+    border-radius: 6px !important;
+    padding: 4px 8px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+}
+/* JS 引用了 holiday-only-event 但没有样式 — 补充 */
+.holiday-only-event {
+    background: var(--dt-warning) !important;
+    border-radius: 6px !important;
+    padding: 4px 8px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+}
+
+/* ---- 高亮样式 ---- */
+.highlight-zhang {
+    animation: dt-pulse 2s infinite !important;
+}
+.search-highlight {
+    animation: dt-bounce 0.5s ease !important;
+}
+
+/* ---- 搜索结果表格行 ---- */
+.search-result-row {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.search-result-row:hover {
+    background-color: rgba(74, 108, 247, 0.05) !important;
+    transform: translateX(5px);
+}
+
+/* ---- 主布局 (Grid: 1.8fr 日历 + 1fr 结果) ---- */
+.main-container {
+    display: grid;
+    grid-template-columns: 1fr 1.8fr;
+    gap: 20px;
+    height: calc(100vh - 120px);
+    margin-bottom: 1rem;
+}
+
+.results-section {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.search-results {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-radius: var(--dt-radius);
+    box-shadow: var(--dt-shadow);
+    overflow: hidden;
+}
+
+.search-results-header {
+    background: var(--dt-gradient-primary);
+    color: white;
+    padding: 12px 20px;
+    font-weight: 600;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.search-results-body {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+/* ---- 表格 ---- */
+.table {
+    font-size: 0.85rem;
+    margin: 0;
+}
+.table th {
+    background-color: #f8fafc;
+    color: var(--dt-dark);
+    font-weight: 600;
+    padding: 10px 12px;
+    border-bottom: 2px solid #e2e8f0;
+    font-size: 0.8rem;
+}
+.table td {
+    padding: 8px 12px;
+    border-color: #f1f5f9;
+}
+
+/* ---- 日历区域 ---- */
+.calendar-section {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.calendar-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-radius: var(--dt-radius);
+    box-shadow: var(--dt-shadow);
+    overflow: hidden;
+    padding: 15px;
+}
+
+#calendar {
+    flex: 1;
+    min-height: 0;
+}
+
+/* 压缩日历事件 */
+.fc-event {
+    font-size: 12px !important;
+    padding: 2px 6px !important;
+    margin: 1px 0 !important;
+}
+
+/* 日历头部 */
+.fc .fc-toolbar {
+    padding: 8px 0;
+}
+.fc .fc-toolbar-title {
+    font-size: 1.3rem;
+}
+
+/* ---- 搜索框 ---- */
+.search-container {
+    background: white;
+    padding: 15px;
+    border-radius: var(--dt-radius);
+    box-shadow: var(--dt-shadow);
+    margin-bottom: 15px;
+}
+.search-container .row {
+    margin: 0;
+}
+.search-container .col-md-8,
+.search-container .col-md-4 {
+    padding: 0 5px;
+}
+.form-control {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+}
+.btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+}
+
+/* ---- 响应式 ---- */
+@media (max-width: 1200px) {
+    .main-container {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+    .results-section {
+        height: 300px;
+    }
+    .calendar-section {
+        height: 500px;
+    }
+}
+@media (max-width: 768px) {
+    body {
+        padding: 8px;
+    }
+    .main-container {
+        gap: 15px;
+    }
+    .search-container {
+        padding: 12px;
+    }
+    .search-container .row > div {
+        margin-bottom: 10px;
+    }
+    .fc .fc-toolbar {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .fc .fc-toolbar-title {
+        font-size: 1.1rem;
+    }
+}
+
+/* ---- Tooltip ---- */
+#tooltip {
+    position: fixed !important;
+    z-index: 9999 !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+    padding: 15px !important;
+    max-width: 300px !important;
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+    border-left: 4px solid #4a6cf7 !important;
+    pointer-events: none !important;
+    transition: opacity 0.2s ease !important;
+    display: none;
+}
+
+#tooltip::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: 50%;
+    transform: translateY(-50%) rotate(45deg);
+    width: 10px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.98);
+    border-left: 1px solid #e2e8f0;
+    border-top: 1px solid #e2e8f0;
+    z-index: -1;
+}
+
+#tooltip.right-arrow::before {
+    left: auto;
+    right: -6px;
+    transform: translateY(-50%) rotate(225deg);
+}
+
+/* ---- 动画 ---- */
+@keyframes dt-spin {
+    to { transform: rotate(360deg); }
+}
+@keyframes dt-pulse {
+    0%   { box-shadow: 0 0 0 2px #ef4444; }
+    50%  { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.3); }
+    100% { box-shadow: 0 0 0 2px #ef4444; }
+}
+@keyframes dt-bounce {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.05); }
+}
+@keyframes star-twinkle {
+    0%   { opacity: 0.7; transform: scale(0.9) rotate(0deg); filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.6)); }
+    100% { opacity: 1;   transform: scale(1.1) rotate(5deg); filter: drop-shadow(0 0 4px rgba(255, 215, 0, 1)); }
+}

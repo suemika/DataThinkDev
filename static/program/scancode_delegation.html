@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>石横特钢 | 质检委托</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="scancodeDelegation/logo/logo.png?v=' + randomVersion + '"  type="image/png">');
+        document.write('<link rel="stylesheet" href="scancodeDelegation/css/bootstrap.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="scancodeDelegation/css/scancode_delegation.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="scancodeDelegation/css/scancode_util.css?v=' + randomVersion + '">');
+        document.write('<script src="scancodeDelegation/js/bootstrap.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="scancodeDelegation/js/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="scancodeDelegation/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="scancodeDelegation/js/scancode_util.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="scancodeDelegation/js/scancode_delegation.js?v=' + randomVersion + '"><\/script>');
+    </script>
+  <style>
+    </style>
+</head>
+<body>
+<header class="background-container">
+    <img id="header-img" src="" alt="ST">
+    <h2 class="h2-container">质检委托</h2>
+</header>
+<div id="errorAlert" class="alert alert-danger d-none" role="alert"></div>
+
+<main>
+    <div class="container" id="mainContent">
+        <div class="card">
+            <div class="card-body">
+                <form id="myForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="sampleName" class="form-label">试样名称</label>
+                            <select class="form-select" id="sampleName" name="试样名称" required>
+                                <option value="">请选择试样名称</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="samplingLocation" class="form-label">取样地点</label>
+                            <select class="form-select" id="samplingLocation" name="取样地点" required>
+                                <option value="">请选择取样地点</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="actualSampleNumber" class="form-label">实际样号</label>
+                            <input type="text" class="form-control" id="actualSampleNumber" name="实际样号" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="carNumber" class="form-label">车号</label>
+                            <input type="text" class="form-control" id="carNumber" name="车号">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="processingCenter" class="form-label">加工中心名称</label>
+                            <select class="form-select" id="processingCenter" name="加工中心名称" required>
+                                <option value="">请选择加工中心</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="destination" class="form-label">发往单位</label>
+                            <input type="text" class="form-control" id="destination" name="发往单位">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="materialName" class="form-label">物料名称</label>
+                            <select class="form-select" id="materialName" name="物料名称" disabled required>
+                                <option value="">请选择物料名称</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="schemeName" class="form-label">方案名称</label>
+                            <select class="form-select" id="schemeName" name="方案名称" disabled required>
+                                <option value="">请选择方案名称</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="remarks" class="form-label">备注</label>
+                            <textarea class="form-control" id="remarks" name="备注" rows="3"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="salaryNumber" class="form-label">工资编号</label>
+                            <input type="text" class="form-control" id="salaryNumber" name="工资编号" required>
+                        </div>
+                    </div>
+
+
+                    <div class="d-grid gap-2">
+                        <button type="button" id="submitBtn" class="btn btn-primary btn-lg">
+                            <i class="bi bi-send-fill me-2"></i>提交
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

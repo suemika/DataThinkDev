@@ -1,0 +1,90 @@
+.main{
+	margin:0 auto;
+	background-color: white;
+	width:96%;
+	margin:2%;
+	border :1px solid black;
+	
+	padding:0px;
+	/*height:600px;*/
+}
+.main h2{
+	text-align: center;
+}
+.dataTable2{
+	
+	background-color: white;
+	position: relative;
+	width:96%;
+	margin:2%;
+	
+}
+
+
+.dataTable2 tr td{
+	text-align:left;
+	
+	border :1px solid #DDDDDD;
+	
+	
+}
+.main_row1{
+
+	position: relative;
+	width:96%;
+	margin:2%;
+	height:30px;
+}
+
+.main_row2{
+	
+	position: relative;
+	width:30%;
+	
+	float:left;
+	margin-left:2%;
+	
+	
+}
+.main_row3{
+	
+	position: relative;
+	width:23%;
+	
+	float:left;
+	margin-left:2%;
+	
+	
+}
+.main_row4{
+	
+	position: relative;
+	width:48%;
+	
+	float:left;
+	margin-left:2%;
+	
+	
+}
+.info_list{
+	margin-left:2px;
+	
+}
+.info_list li{
+	font-weight:bolder;
+	font-size:18px;
+	margin-left:2px;
+	
+}
+.btn_sumbit{
+	
+	width:94%;
+	margin:0% 2% 2% 2%;
+	border-radius: 18px;
+	background-color:#66B1FF;
+	color:white;
+	height:25px;
+	border:0px;
+}
+
+

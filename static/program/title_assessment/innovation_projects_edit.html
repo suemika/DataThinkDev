@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>近2年公司内创新项目填报</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <script>
+        // 获取当前时间戳作为版本号
+        const version = Date.now();
+    </script>
+
+    <link rel="icon" href="../vendor/logo.png?v=1" type="image/png">
+    <link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.css?v=${version}">
+    <link rel="stylesheet" href="vendor/css/util.css"?v=${version}">
+    <script src="../vendor/easyui/js-easyui/axios.min.js?v=${version}"></script>
+    <script src="../vendor/bootstrap5/js/bootstrap.js?v=${version}"></script>
+    <script src="vendor/util/util_link.js"?v=${version}"></script>
+    <script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=${version}"></script>
+    <style>
+        body {
+            background-color: #f8f9fa; /* 设置背景颜色 */
+        }
+
+        header {
+            background-color: #007bff; /* 头部背景色 */
+            color: #fff; /* 文字颜色 */
+            padding: 20px; /* 内边距 */
+            text-align: center; /* 文字居中 */
+            border-radius: 5px 5px 0 0; /* 圆角边框 */
+            margin-bottom: 20px; /* 下边距 */
+        }
+
+        .module {
+            padding: 20px; /* 内边距 */
+            border-radius: 5px; /* 圆角 */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 投影效果 */
+            background-color: #ffffff; /* 背景颜色 */
+        }
+
+        button {
+            margin-top: 10px; /* 按钮上边距 */
+        }
+    </style>
+</head>
+<body>
+<header class="background-container">
+    <a href="http://edi.sdstg.com/" target="_self" rel="noopener">
+        <img id="header-img" src="" alt="ST">
+    </a>
+    <h2 class="h2-container">近2年公司内创新项目填报</h2>
+</header>
+<main class="container mt-4">
+    <div class="d-flex justify-content-between mb-3">
+        <button onclick="goBack()" class="btn btn-info">返回</button>
+        <button type="button" id="submitBtn" class="btn btn-success" onclick="submitFeedback(this)">
+            提交
+        </button>
+    </div>
+
+    <div id="errorAlert" class="alert alert-danger d-none position-relative" role="alert">
+        <span id="errorMessage"></span>
+        <button type="button" class="btn-close position-absolute top-0 end-0 m-1" aria-label="Close"
+                onclick="closeError()"></button>
+    </div>
+
+    <div class="module">
+        <h2>近2年公司内创新项目</h2>
+        <form id="feedbackForm">
+            <div class="form-group mb-3">
+                <label for="level">级别</label>
+                <select class="form-select" id="level" name="level" required>
+                    <option value="">-- 选择级别 --</option>
+                    <option value="公司级">公司级</option>
+                    <option value="二级">二级</option>
+                </select>
+            </div>
+            <div class="form-group mb-3">
+                <label for="innovationProjectName">项目名称</label>
+                <input type="text" class="form-control" id="innovationProjectName" name="innovationProjectName"
+                       required>
+            </div>
+            <div class="form-group mb-3">
+                <label for="innovationMeasures">主要采取的措施及效果</label>
+                <textarea class="form-control" id="innovationMeasures" name="innovationMeasures" rows="3"
+                          maxlength="300" required></textarea>
+            </div>
+            <div class="form-group mb-3">
+                <label for="innovationRank">位次 (填写规则（*/*），如2/3)</label>
+                <input type="text" class="form-control" id="innovationRank" name="innovationRank" required
+                       pattern="\d+/\d+" value="1/1">
+            </div>
+            <div class="form-group mb-3">
+                <label for="responsibility">承担职责</label>
+                <select class="form-select" id="responsibility" name="responsibility" required>
+                    <option value="">-- 选择职责 --</option>
+                    <option value="主持">主持</option>
+                    <option value="参与">参与</option>
+                </select>
+            </div>
+        </form>
+    </div>
+</main>
+<script>
+    const uuid = getNameFromUrl('uuid');
+    const workID = getNameFromUrl('workID');
+    const itemId = getNameFromUrl('itemId');
+    const edit_name = 'innovation_projects';
+
+    $(document).ready(function () {
+
+        if (workID === "null") {
+            window.location.href = 'main.html?uuid=' + uuid; // 替换为实际 URL
+        } else if (itemId) {
+            loadProjectData(itemId); // 如果有 itemId，加载数据
+        }
+    });
+
+    function goBack() {
+        window.location.href = `${edit_name}.html?uuid=${encodeURIComponent(uuid)}&workID=${encodeURIComponent(workID)}&refresh=true`;
+    }
+
+    async function loadProjectData(id) {
+        try {
+            // 使用 FormData 取得表单数据
+            const formData = new FormData();
+            formData.append('name', edit_name);
+            formData.append('workID', workID);
+            formData.append('pid', uuid);
+            formData.append('itemId', itemId); // 添加 itemId 用于修改数据
+
+            const response = await fetchDataFromAPI('638', Object.fromEntries(formData)); // 根据实际 API 进行更改
+            if (response.data.data.item) {
+                const project = response.data.data.item[0];
+                // 填充表单数据
+                document.getElementById('level').value = project[0];
+                document.getElementById('innovationProjectName').value = project[1];
+                document.getElementById('innovationMeasures').value = project[2];
+                document.getElementById('innovationRank').value = project[3];
+                document.getElementById('responsibility').value = project[4];
+            } else {
+                showMsg('未找到项目数据！');
+            }
+        } catch (error) {
+            showMsg('加载项目数据时发生错误。');
+        }
+    }
+
+    async function submitFeedback(button) {
+        const form = document.getElementById('feedbackForm');
+        const roleInput = document.getElementById('innovationRank').value;
+        const rolePattern = /^\d+\/\d+$/;
+
+        if (!rolePattern.test(roleInput)) {
+            showMsg('格式不正确，请按照规则填写，如2/3。');
+            return;
+        }
+
+        // 检查表单有效性
+        if (!form.checkValidity()) {
+            showMsg('请填写所有必填项！');
+            return;
+        }
+
+        // 使用 FormData 取得表单数据
+        const formData = new FormData(form);
+        formData.append('name', edit_name);
+        formData.append('workID', workID);
+        formData.append('pid', uuid);
+        formData.append('itemId', itemId); // 添加 itemId 用于修改数据
+
+        button.disabled = true; // 禁用按钮，防止重复提交
+
+        try {
+            const apiAction = itemId ? '637' : '630'; // 修改和新增 API 接口的示例
+            const response = await fetchDataFromAPI(apiAction, Object.fromEntries(formData));
+            if (response.data && response.data.msg !== 0) {
+                goBack(); // 提交成功后返回
+            } else {
+                showMsg('提交失败！');
+            }
+        } catch (error) {
+            showMsg('发生错误，请稍后重试。');
+        } finally {
+            button.disabled = false; // 向用户恢复按钮状态
+        }
+    }
+
+
+</script>
+</body>
+</html>

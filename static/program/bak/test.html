@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>获取IP地址</title>
+</head>
+<body>
+    <h1>你的IP地址是：</h1>
+    <p id="ip-address">正在获取...</p>
+
+   <script>
+    async function getIP() {
+        const apiEndpoints = [
+            'https://api.ipify.org?format=json',
+            'https://ipapi.co/json',
+            'https://ipinfo.io/json'
+        ];
+
+        for (const endpoint of apiEndpoints) {
+            try {
+                const response = await fetch(endpoint);
+                const data = await response.json();
+                return data.ip || data.ip_address || data.query;
+            } catch (error) {
+                console.log(`尝试 ${endpoint} 失败:`, error);
+            }
+        }
+        return '无法获取IP地址';
+    }
+
+    getIP().then(ip => {
+        document.getElementById('ip-address').textContent = ip;
+    });
+</script>
+</body>
+</html>

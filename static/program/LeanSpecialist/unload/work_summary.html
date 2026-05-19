@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人精益工作总结及发展计划</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../vendor/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="../bootstrap-icons-1.11.3/font/bootstrap-icons.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="util/util.css?v=' + randomVersion + '">');
+        document.write('<script src="../vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/util/util_link.js"?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../js/popper.js?v=' + randomVersion + '"><\/script>');
+    </script>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --border-radius: 10px;
+            --primary-light: #eef2ff;
+            --secondary-color: #007bff;
+            --accent-color: #4895ef;
+            --light-bg: #f8f9fa;
+            --dark-bg: #212529;
+            --text-color: #2b2d42;
+            --text-light: #8d99ae;
+            --success-color: #4cc9f0;
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --background: linear-gradient(135deg, #f4f9ff 0%, #e0e9ff 100%);
+        }
+
+        .nav-style {
+            background-color: var(--background);
+            width: calc(100% - 20px);
+            margin: 1px auto 3rem auto;
+            max-width: 800px;
+        }
+
+        /* 面包屑导航 */
+        .breadcrumb {
+            background: var(--background);
+            padding: 0.95rem 0.3rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            margin-bottom: 1.5rem;
+        }
+
+        .breadcrumb-item a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+
+        .breadcrumb-item a:hover {
+            color: var(--accent-color);
+            text-decoration: underline;
+        }
+
+        .breadcrumb-item.active {
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .form-control {
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);;
+            border: 1px solid #e0e0e0;
+            transition: var(--transition);
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.15);
+            background-color: white;
+        }
+
+        .btn-submit {
+            margin-top: 1.5rem;
+            background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn-submit:hover {
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(67, 97, 238, 0.3);
+            background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
+        }
+
+        .btn-submit:disabled {
+            background: #cccccc;
+            color: #fff;
+            transform: none;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(20, 20);
+                opacity: 0;
+            }
+        }
+
+        .question-group {
+            margin-bottom: 1.75rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        }
+
+        .question-group:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .question-group label {
+            font-weight: 600;
+            color: var(--dark-bg);
+            margin-bottom: 0.75rem;
+            display: block;
+            font-size: 1.1rem;
+        }
+
+        textarea.form-control {
+            min-height: 220px;
+            resize: vertical;
+        }
+
+        section {
+            margin-bottom: 3rem;
+        }
+
+        .bi {
+            font-size: 1.25rem;
+            vertical-align: middle;
+            margin-right: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            section {
+                margin-bottom: 2rem;
+            }
+
+            .question-group {
+                padding: 1.25rem;
+            }
+        }
+
+        /* 加载动画 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        section {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        #work-summary {
+            animation-delay: 0.1s;
+        }
+
+        #development-goals {
+            animation-delay: 0.2s;
+        }
+
+        /* 添加按钮状态样式 */
+        .btn-submit.btn-loading {
+            background: linear-gradient(to right, #6c757d, #adb5bd);
+        }
+
+        .btn-submit.btn-success {
+            background: linear-gradient(to right, #0092ff, #20c997);
+        }
+
+        .btn-submit:disabled {
+            opacity: 1;
+        }
+
+        /* 添加按钮动画 */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .btn-submit.btn-loading {
+            animation: pulse 1.5s infinite;
+        }
+
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(67, 97, 238, 0.3);
+            background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
+        }
+
+
+        .submit-btn-container {
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+        i {
+            margin-right: 8px;
+        }
+
+        .char-count.normal {
+            color: #6c757d !important;
+        }
+
+        .char-count.warning {
+            color: #ffc107 !important;
+            font-weight: 600;
+        }
+
+        .char-count.danger {
+            color: #dc3545 !important;
+            font-weight: 700;
+        }
+
+        /* 文本区域样式调整 */
+        .form-control {
+            resize: vertical;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.15);
+        }
+
+    </style>
+</head>
+
+<body class="poppins-bold">
+
+<!-- 遮罩层 -->
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-content">
+
+        <div class="diamond-loader">
+            <!-- 静态阴影 -->
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+        </div>
+        <div class="shadow"></div>
+        <p class="mt-3">正在加载，请稍候...</p>
+    </div>
+</div>
+
+<header class="background-container text-center">
+    <img id="header-img" src="" alt="ST" style="height: 60px;">
+</header>
+<div class="user-name"><span id="userName"></span></div>
+
+<nav aria-label="面包屑导航" class="nav-style">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="lean_intro.html"><i class="bi bi-house-door"></i>认证阶段</a></li>
+        <li class="breadcrumb-item active"><i class="bi bi-file-earmark-text"></i>详情</li>
+    </ol>
+</nav>
+
+<main class="container_main" id="mainContent">
+    <div>
+        <!-- 个人信息 -->
+        <section id="personal-info">
+            <h2><i class="bi bi-person-badge"></i>个人信息</h2>
+            <form id="personal-info-form">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="lean-domain" class="form-label">精益业务域</label>
+                        <input type="text" class="form-control" id="lean-domain" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="supervisor" class="form-label">直接上级</label>
+                        <input type="text" class="form-control" id="supervisor" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="department" class="form-label">所属厂部</label>
+                        <input type="text" class="form-control" id="department" required>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <!-- 个人精益工作总结 -->
+        <section id="work-summary">
+            <h2><i class="bi bi-clipboard2-data"></i>个人精益工作总结</h2>
+            <div id="summary-questions" class="row g-3">
+                <!-- 动态加载的问题将在这里显示 -->
+            </div>
+        </section>
+
+        <!-- 个人发展目标 -->
+        <section id="development-goals">
+            <h2><i class="bi bi-graph-up-arrow"></i>个人发展目标</h2>
+            <div id="goal-questions" class="row g-3">
+                <!-- 动态加载的目标将在这里显示 -->
+            </div>
+        </section>
+
+        <!-- 提交按钮 -->
+        <div class="submit-btn-container">
+            <button class="btn btn-submit" id="submit-btn">
+                <i class="bi bi-send-check"></i>提交申请
+            </button>
+        </div>
+    </div>
+</main>
+
+<script>
+    const userFID = getNameFromUrl("userName");
+    const role = getNameFromUrl("role");
+    const redirectURL = `sign_up.html?userName=${encodeURIComponent(userFID)}`;
+    let isSubmitted = false;
+
+    let status = null;
+    let userName = null;
+
+    window.onscroll = function () {
+        toggleBackToTopButton();
+    };
+
+    // 从后端 API 获取链接名称
+    async function loadList() {
+
+        await getUserInfo(userFID);
+
+        const feedbackData = {
+            workId: userName,
+            role: role
+        };
+
+        const response = await fetchDataFromAPI('683', feedbackData);
+        if (response.data.status === 0) {
+            return response.data.data;
+        }
+        return null;
+    }
+
+
+    async function getUserInfo(userFID) {
+
+        const feedbackData = {
+            userName: userFID,
+            role: role,
+            type: 1
+        };
+
+        const response = await fetchDataFromAPI('759', feedbackData);
+
+
+        if (response.data.status === 0) {
+            status = response.data.user_status;
+            userName = response.data.userNumber;
+            document.getElementById('userName').textContent = response.data.user_name
+        }
+    }
+
+    // 分别加载不同类型的问题
+    function loadQuestions(data) {
+        const summaryContainer = document.getElementById('summary-questions');
+        const goalsContainer = document.getElementById('goal-questions');
+
+        // 加载工作总结问题
+        data.work_summary.forEach((item, index) => {
+            const questionGroup = document.createElement('div');
+            questionGroup.classList.add('col-md-12');
+            questionGroup.innerHTML = `
+            <div class="question-group h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label for="work-summary-${index + 1}">
+                        <i class="bi bi-calendar2-week"></i>${item.问题}
+                    </label>
+                    <small class="text-muted char-count" id="summary-count-${index + 1}">0/2000</small>
+                </div>
+                <textarea class="form-control"
+                          id="work-summary-${index + 1}"
+                          rows="4"
+                          maxlength="2000"
+                          placeholder="请输入您的回答..."
+                          required></textarea>
+                <div class="form-text text-end mt-1">
+                    <small>最多可输入2000个字符</small>
+                </div>
+            </div>
+        `;
+            summaryContainer.appendChild(questionGroup);
+        });
+
+        // 加载发展目标问题
+        data.development_goals.forEach((item, index) => {
+            const goalGroup = document.createElement('div');
+            goalGroup.classList.add('col-md-12');
+            goalGroup.innerHTML = `
+            <div class="question-group h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label for="development-goal-${index + 1}">
+                        <i class="bi bi-check2-circle"></i>${item.计划}
+                    </label>
+                    <small class="text-muted char-count" id="goal-count-${index + 1}">0/2000</small>
+                </div>
+                <textarea class="form-control"
+                          id="development-goal-${index + 1}"
+                          rows="4"
+                          maxlength="2000"
+                          placeholder="请输入您的计划..."
+                          required></textarea>
+                <div class="form-text text-end mt-1">
+                    <small>最多可输入2000个字符</small>
+                </div>
+            </div>
+        `;
+            goalsContainer.appendChild(goalGroup);
+        });
+
+        // 初始化字数统计
+        initCharCounters();
+
+        // 添加输入变化监听器
+        setupInputChangeListeners();
+    }
+
+    function initCharCounters() {
+        // 工作总结字数统计
+        document.querySelectorAll('#summary-questions textarea').forEach((textarea, index) => {
+            const counterId = `summary-count-${index + 1}`;
+            const charCount = document.getElementById(counterId);
+
+            if (charCount) {
+                updateCharCount(textarea, charCount);
+
+                textarea.addEventListener('input', function () {
+                    updateCharCount(this, charCount);
+                });
+
+                // 防止粘贴超过限制
+                textarea.addEventListener('paste', function (e) {
+                    handlePasteEvent(this, e, 2000, charCount);
+                });
+            }
+        });
+
+        // 发展目标字数统计
+        document.querySelectorAll('#goal-questions textarea').forEach((textarea, index) => {
+            const counterId = `goal-count-${index + 1}`;
+            const charCount = document.getElementById(counterId);
+
+            if (charCount) {
+                updateCharCount(textarea, charCount);
+
+                textarea.addEventListener('input', function () {
+                    updateCharCount(this, charCount);
+                });
+
+                // 防止粘贴超过限制
+                textarea.addEventListener('paste', function (e) {
+                    handlePasteEvent(this, e, 2000, charCount);
+                });
+            }
+        });
+    }
+
+    function updateCharCount(textarea, counterElement) {
+        const length = textarea.value.length;
+        counterElement.textContent = `${length}/2000`;
+
+        // 清除所有样式类
+        counterElement.classList.remove('normal', 'warning', 'danger');
+
+        // 根据字符数添加不同的样式类
+        if (length >= 1900) {
+            counterElement.classList.add('danger');
+        } else if (length >= 1700) {
+            counterElement.classList.add('warning');
+        } else {
+            counterElement.classList.add('normal');
+        }
+
+        // 检查是否超过限制
+        if (length > 2000) {
+            textarea.value = textarea.value.substring(0, 2000);
+            counterElement.textContent = '2000/2000';
+            counterElement.classList.add('danger');
+        }
+    }
+
+    async function submitData() {
+        const submitButton = document.getElementById('submit-btn');
+        const personalInfoForm = document.getElementById('personal-info-form');
+
+        try {
+            if (personalInfoForm.checkValidity()) {
+                // 保存原始按钮状态
+                const originalButtonState = {
+                    innerHTML: submitButton.innerHTML,
+                    disabled: submitButton.disabled
+                };
+
+                // 更新按钮为提交中状态
+                submitButton.disabled = true;
+                submitButton.className = 'btn btn-submit btn-loading';
+                submitButton.innerHTML = '<i class="bi bi-hourglass-split me-2"></i> 提交中...';
+
+                // 获取表单数据
+                const submissionData = {
+                    userName: userName,
+                    leanDomain: document.getElementById('lean-domain').value,
+                    supervisor: document.getElementById('supervisor').value,
+                    department: document.getElementById('department').value,
+                    summaryAnswers: Array.from(document.querySelectorAll('#summary-questions textarea')).map(t => t.value),
+                    goalAnswers: Array.from(document.querySelectorAll('#goal-questions textarea')).map(t => t.value),
+                    role: role
+                };
+
+                const response = await fetchDataFromAPI('684', submissionData);
+                if (response.data.status === 0) {
+                    // 更新按钮为成功状态，但不禁用
+                    submitButton.disabled = false;  // 不禁用按钮
+                    submitButton.className = 'btn btn-submit btn-success';
+                    submitButton.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i> 提交成功，可继续编辑';
+
+                    // 记录提交状态
+                    isSubmitted = true;
+
+                    // 创建成功提示
+                    const successAlert = document.createElement('div');
+                    successAlert.className = 'alert alert-success alert-dismissible fade show';
+                    successAlert.style.position = 'fixed';
+                    successAlert.style.top = '20px';
+                    successAlert.style.right = '20px';
+                    successAlert.style.zIndex = '1000';
+                    successAlert.style.maxWidth = '350px';
+                    successAlert.innerHTML = `
+                <i class="bi bi-check-circle-fill"></i> <strong>表单已成功提交!</strong><br>
+                <small>您可以继续编辑并重新提交</small>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+                    document.body.appendChild(successAlert);
+
+                    // 5秒后自动关闭提示
+                    setTimeout(() => {
+                        successAlert.classList.remove('show');
+                        setTimeout(() => successAlert.remove(), 150);
+                    }, 5000);
+
+                } else {
+                    // 提交失败，显示错误提示
+                    const errorAlert = document.createElement('div');
+                    errorAlert.className = 'alert alert-danger alert-dismissible fade show';
+                    errorAlert.style.position = 'fixed';
+                    errorAlert.style.top = '20px';
+                    errorAlert.style.right = '20px';
+                    errorAlert.style.zIndex = '1001';
+                    errorAlert.style.maxWidth = '350px';
+                    errorAlert.innerHTML = `
+                <i class="bi bi-exclamation-triangle-fill"></i> <strong>提交失败!</strong> ${response.data.msg || '请稍后重试'}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+                    document.body.appendChild(errorAlert);
+
+                    // 3秒后自动关闭错误提示
+                    setTimeout(() => {
+                        errorAlert.classList.remove('show');
+                        setTimeout(() => errorAlert.remove(), 150);
+                    }, 3000);
+
+                    // 恢复按钮到原始的正常状态
+                    submitButton.disabled = false;
+                    submitButton.className = 'btn btn-submit';
+                    submitButton.innerHTML = '<i class="bi bi-send-check"></i>重新提交';
+
+                    // 记录错误日志
+                    await saveDataToAPI({
+                        workId: userName,
+                        sourceAddress: window.location.pathname + '  lineNumber-> 567',
+                        error: response.data.msg,
+                        reqData: submissionData
+                    });
+                }
+            } else {
+                // 表单验证失败，显示错误提示
+                const errorAlert = document.createElement('div');
+                errorAlert.className = 'alert alert-warning alert-dismissible fade show';
+                errorAlert.style.position = 'fixed';
+                errorAlert.style.top = '20px';
+                errorAlert.style.right = '20px';
+                errorAlert.style.zIndex = '1000';
+                errorAlert.style.maxWidth = '350px';
+                errorAlert.innerHTML = `
+            <i class="bi bi-exclamation-triangle-fill"></i> <strong>请填写所有必填字段！</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+                document.body.appendChild(errorAlert);
+
+                // 3秒后自动关闭提示
+                setTimeout(() => {
+                    errorAlert.classList.remove('show');
+                    setTimeout(() => errorAlert.remove(), 150);
+                }, 3000);
+            }
+        } catch (error) {
+            console.error('提交数据时出错:', error);
+
+            // 网络错误提示
+            const networkAlert = document.createElement('div');
+            networkAlert.className = 'alert alert-danger alert-dismissible fade show';
+            networkAlert.style.position = 'fixed';
+            networkAlert.style.top = '20px';
+            networkAlert.style.right = '20px';
+            networkAlert.style.zIndex = '1001';
+            networkAlert.style.maxWidth = '350px';
+            networkAlert.innerHTML = `
+        <i class="bi bi-exclamation-triangle-fill"></i> <strong>网络错误!</strong> 请检查网络连接后重试
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+            document.body.appendChild(networkAlert);
+
+            // 3秒后自动关闭提示
+            setTimeout(() => {
+                networkAlert.classList.remove('show');
+                setTimeout(() => networkAlert.remove(), 150);
+            }, 3000);
+
+            // 恢复按钮状态
+            submitButton.disabled = false;
+            submitButton.className = 'btn btn-submit';
+            submitButton.innerHTML = '<i class="bi bi-send-check"></i>重新提交';
+        }
+    }
+
+    // 处理粘贴事件
+    function handlePasteEvent(textarea, event, maxLength, counterElement) {
+        event.preventDefault();
+        const pastedText = (event.clipboardData || window.clipboardData).getData('text');
+        const currentText = textarea.value;
+        const selectionStart = textarea.selectionStart;
+        const selectionEnd = textarea.selectionEnd;
+
+        const newText = currentText.substring(0, selectionStart) +
+            pastedText +
+            currentText.substring(selectionEnd);
+
+        if (newText.length > maxLength) {
+            // 如果粘贴后会超过限制，截取合适长度
+            const allowedLength = maxLength - (currentText.length - (selectionEnd - selectionStart));
+            const truncatedText = pastedText.substring(0, allowedLength);
+
+            textarea.value = currentText.substring(0, selectionStart) +
+                truncatedText +
+                currentText.substring(selectionEnd);
+
+            // 更新光标位置
+            textarea.selectionStart = textarea.selectionEnd = selectionStart + truncatedText.length;
+        } else {
+            textarea.value = newText;
+        }
+
+        // 触发input事件更新字数
+        textarea.dispatchEvent(new Event('input'));
+    }
+
+    // 设置输入变化监听器
+    function setupInputChangeListeners() {
+        const allInputs = document.querySelectorAll('input, textarea');
+        const submitBtn = document.getElementById('submit-btn');
+
+        allInputs.forEach(input => {
+            input.addEventListener('input', () => {
+                if (isSubmitted) {
+                    // 如果已提交但有内容变化，重置按钮状态
+                    submitBtn.disabled = false;
+                    submitBtn.className = 'btn-submit';
+                    submitBtn.innerHTML = '<i class="bi bi-send-check"></i>提交申请';
+                    isSubmitted = false;
+                }
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', async function () {
+
+        // 先显示加载层
+        util.loading.show();
+        if (userFID === null) {
+            window.location.href = "http://edi.sdstg.com/";
+        }
+
+
+        const homeLink = document.querySelector('.breadcrumb-item a');
+        homeLink.href = redirectURL;
+
+        const list = await loadList().finally(() => {
+            // 无论成功失败都隐藏加载层
+            util.loading.hide();
+        });
+
+
+        if (list) {
+            loadQuestions(list);
+        }
+
+        if (list.personal_info[0]) {
+            // 填充个人信息
+            const personalInfo = list.personal_info[0];
+            if (personalInfo) {
+                document.getElementById('lean-domain').value = personalInfo['精益业务域'] || '';
+                document.getElementById('supervisor').value = personalInfo['直接上级'] || '';
+                document.getElementById('department').value = personalInfo['所属厂部'] || '';
+            }
+
+            // 填充工作总结问题的回答
+            const workSummary1 = document.getElementById('work-summary-1');
+            const workSummary2 = document.getElementById('work-summary-2');
+            const workSummary3 = document.getElementById('work-summary-3');
+            const workSummary4 = document.getElementById('work-summary-4');
+
+            if (workSummary1) workSummary1.value = personalInfo['问题1'] || '';
+            if (workSummary2) workSummary2.value = personalInfo['问题2'] || '';
+            if (workSummary3) workSummary3.value = personalInfo['问题3'] || '';
+            if (workSummary4) workSummary4.value = personalInfo['问题4'] || '';
+
+            // 填充发展目标计划的回答
+            const developmentGoal1 = document.getElementById('development-goal-1');
+            const developmentGoal2 = document.getElementById('development-goal-2');
+
+            if (developmentGoal1) developmentGoal1.value = personalInfo['计划1'] || '';
+            if (developmentGoal2) developmentGoal2.value = personalInfo['计划2'] || '';
+
+            // 在填充数据后，手动更新所有字数统计
+            setTimeout(() => {
+                // 更新工作总结的字数统计
+                document.querySelectorAll('#summary-questions textarea').forEach((textarea, index) => {
+                    const counterId = `summary-count-${index + 1}`;
+                    const charCount = document.getElementById(counterId);
+                    if (charCount && textarea) {
+                        updateCharCount(textarea, charCount);
+                    }
+                });
+
+                // 更新发展目标的字数统计
+                document.querySelectorAll('#goal-questions textarea').forEach((textarea, index) => {
+                    const counterId = `goal-count-${index + 1}`;
+                    const charCount = document.getElementById(counterId);
+                    if (charCount && textarea) {
+                        updateCharCount(textarea, charCount);
+                    }
+                });
+            }, 100);
+        }
+
+        if (status === "已通过") {
+            // 禁用所有表单元素
+            const formElements = document.querySelectorAll('input, textarea, button:not(.back-to-top button)');
+            formElements.forEach(element => {
+                element.disabled = true;
+            });
+
+            // 添加禁用状态的视觉提示
+            document.querySelectorAll('.question-group').forEach(group => {
+                group.style.opacity = '0.8';
+                group.style.boxShadow = 'none';
+                group.style.transform = 'none';
+                group.style.cursor = 'not-allowed';
+            });
+
+            // 修改提交按钮样式
+            const submitBtn = document.getElementById('submit-btn');
+            // 更新按钮为成功状态
+            submitBtn.className = 'btn-submit btn-success';
+            submitBtn.innerHTML = '<i class="bi bi-lock"></i> 已提交';
+            submitBtn.classList.remove('btn-primary');
+            submitBtn.classList.add('btn-secondary');
+
+            return;
+        }
+
+        document.getElementById('submit-btn').addEventListener('click', submitData);
+    });
+</script>
+</body>
+</html>

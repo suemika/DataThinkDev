@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>精益认证信息填报</title>
+    <script>
+        // 随机生成版本号以缓存更新
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../vendor/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="../bootstrap-icons-1.11.3/font/bootstrap-icons.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="util/util.css?v=' + randomVersion + '">');
+        document.write('<script src="../vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/util/util_link.js"?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+    </script>
+
+    <style>
+        /* 样式调整 */
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            margin: 5px;
+            background-color: #ffffff;
+        }
+
+        .readonly-input {
+            background-color: #f8f9fa; /* 浅灰背景以示区分只读和可编辑 */
+            color: #495057; /* 深色文字以增强可读性 */
+        }
+
+        .section-title {
+            font-weight: bold;
+            color: #007bff;
+            font-size: 18px;
+            text-align: center;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-submit {
+            width: 100%;
+            border-radius: 10px;
+            background: #007bff;
+            color: white;
+            font-size: 16px;
+            padding: 10px;
+            transition: background 0.4s;
+            border: none;
+            margin-top: 20px;
+        }
+
+        .btn-submit:hover {
+            background: #0069d9;
+        }
+
+        /* 样式设置 */
+        .required {
+            color: red;
+            font-size: 12px;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-group label i {
+            margin-right: 8px;
+            color: #6c757d;
+        }
+
+        .breadcrumb {
+            background-color: transparent;
+            padding: 0.75rem 1rem;
+        }
+
+        .breadcrumb-item a {
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .alert {
+            margin: 15px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body class="poppins-bold">
+<header class="background-container">
+    <img id="header-img" src="" alt="ST">
+    <h2 class="poppins-bold-italic">精益认证平台</h2>
+</header>
+<nav aria-label="面包屑导航">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="lean_list.html"><i class="bi bi-house-door"></i> 首页</a></li>
+        <li class="breadcrumb-item active"><i class="bi bi-pencil-square"></i> 信息填报</li>
+    </ol>
+</nav>
+<div id="errorAlert" class="alert alert-danger d-none" role="alert">
+    <i class="bi bi-exclamation-triangle-fill"></i> <span id="errorMsg"></span>
+</div>
+<main>
+    <div class="container">
+        <div class="card">
+            <h1 class="section-title"><i class="bi bi-person-badge"></i> 报名信息</h1>
+            <section class="row">
+                <div class="col-6">
+                    <div class="form-group">
+                        <label><i class="bi bi-person-vcard"></i> 工资编号</label>
+                        <input type="text" class="form-control readonly-input" id="salaryNumber" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="bi bi-person"></i> 姓名</label>
+                        <input type="text" class="form-control readonly-input" id="name" readonly>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="form-group">
+                        <label><i class="bi bi-calendar"></i> 年龄</label>
+                        <input type="text" class="form-control readonly-input" id="age" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="bi bi-gender-ambiguous"></i> 性别</label>
+                        <input type="text" class="form-control readonly-input" id="gender" readonly>
+                    </div>
+                </div>
+            </section>
+
+            <h1 class="section-title"><i class="bi bi-briefcase"></i> 职务信息</h1>
+            <section class="row">
+                <div class="col-12">
+                    <div class="form-group">
+                        <label><i class="bi bi-building"></i> 单位</label>
+                        <input type="text" class="form-control readonly-input" id="unit" readonly>
+                    </div>
+                </div>
+            </section>
+            <section class="row">
+                <div class="col-6">
+                    <div class="form-group">
+                        <label><i class="bi bi-person-workspace"></i> 职务</label>
+                        <input type="text" class="form-control readonly-input" id="post" readonly>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="form-group">
+                        <label><i class="bi bi-person-gear"></i> 职位</label>
+                        <input type="text" class="form-control readonly-input" id="position" readonly>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="form-group">
+                        <label><i class="bi bi-award"></i> 技术等级</label>
+                        <input type="text" class="form-control readonly-input" id="technicalLevel" readonly>
+                    </div>
+                </div>
+
+                <div class="col-6">
+                    <div class="form-group">
+                        <label><i class="bi bi-mortarboard"></i> 聘任职称</label>
+                        <input type="text" class="form-control readonly-input" id="jobTitle" readonly>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="form-group">
+                        <label><i class="bi bi-file-earmark-medical"></i> 社会资格</label>
+                        <input type="text" class="form-control readonly-input" id="socialQualification" readonly>
+                    </div>
+                </div>
+            </section>
+
+            <h1 class="section-title"><i class="bi bi-chat-left-text"></i> 问题反馈</h1>
+            <div class="form-group">
+                <label><i class="bi bi-question-circle"></i> 反馈内容(有疑问请反馈，可不填。)</label>
+                <textarea class="form-control" id="feedback" rows="3" placeholder="请输入您的反馈内容..."></textarea>
+            </div>
+
+            <button type="button" class="btn btn-submit" id="submitButton" onclick="submitFeedback()">
+                <i class="bi bi-send-check"></i> 立即提交
+            </button>
+        </div>
+    </div>
+</main>
+
+<script>
+    // 从 URL 获取参数
+    const userName = getNameFromUrl('userName');
+    const cardId = getNameFromUrl('cardId');
+    const redirectURL = `sign_up.html?userName=${userName}`;
+
+    let hasData = false; // 默认没有数据
+
+    async function fetchData() {
+        if (!userName) {
+            window.location.href = "http://edi.sdstg.com/";
+        }
+        const homeLink = document.querySelector('.breadcrumb-item a');
+        homeLink.href = `lean_list.html?gzbh=${userName}`;
+
+        const headerImg = document.getElementById('header-img');
+        headerImg.src = '../logo/font_logo2.png';
+
+        try {
+            const response = await fetchDataFromAPI('656', userName);
+            if (response.data.status === 0) {
+                const data = response.data.data[0];
+                document.getElementById('salaryNumber').value = data['工资编号'];
+                document.getElementById('name').value = data['姓名'];
+                document.getElementById('age').value = data['年龄'];
+                document.getElementById('gender').value = data['性别'];
+                document.getElementById('unit').value = data['单位'];
+                document.getElementById('position').value = data['职位'];
+                document.getElementById('post').value = data['职务'];
+                document.getElementById('technicalLevel').value = data['技术等级'];
+                document.getElementById('jobTitle').value = data['聘任职称'];
+
+                hasData = true; // 标记数据已加载
+            } else {
+                console.error('未找到数据');
+                showMsg('未找到数据，请联系管理员！');
+                disableSubmitButton(); // 禁用提交按钮
+            }
+
+            const response2 = await fetchDataFromAPI('669', userName);
+            if (response2.data.status === 0) {
+                document.getElementById('socialQualification').value = response2.data.role ? response2.data.role : "无";
+            }
+        } catch (error) {
+            console.error('获取数据失败:', error);
+            showMsg('获取数据失败，请刷新页面重试');
+            disableSubmitButton(); // 禁用提交按钮
+        }
+    }
+
+    function disableSubmitButton() {
+        const submitButton = document.getElementById('submitButton');
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="bi bi-lock"></i> 数据未加载，禁止提交';
+        submitButton.style.background = '#6c757d'; // 灰色表示禁用
+    }
+
+    async function submitFeedback() {
+        if (!hasData) {
+            alert('数据未加载，无法提交！');
+            return;
+        }
+
+        const jobTitle = document.getElementById('jobTitle').value.trim();
+        let socialQualification = document.getElementById('socialQualification').value.trim();
+        const feedback = document.getElementById('feedback').value.trim();
+
+        if (!socialQualification) {
+            socialQualification = '无';
+        }
+
+        const submitButton = document.getElementById('submitButton');
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="bi bi-hourglass"></i> 提交中...';
+
+        const feedbackData = {
+            workID: userName,
+            cardId: cardId,
+            socialQualification: socialQualification,
+            feedback: feedback
+        };
+
+        try {
+            const response = await fetchDataFromAPI('657', feedbackData);
+            if (response.data.status === 0) {
+                alert('提交成功！');
+                window.location.href = redirectURL;
+            } else {
+                showMsg(response.data.msg);
+            }
+        } catch (error) {
+            console.error('提交请求失败:', error);
+            showMsg('提交失败，请重试！');
+        } finally {
+            submitButton.disabled = false;
+            submitButton.innerHTML = '<i class="bi bi-send-check"></i> 立即提交';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchData);
+</script>
+</body>
+
+</html>

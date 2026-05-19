@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>合同管理系统 - 合同起草与审核</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../vendor/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="../bootstrap-icons-1.11.3/font/bootstrap-icons.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./util/util.css?v=' + randomVersion + '">');
+    </script>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-light: #e0e7ff;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-600: #6c757d;
+            --gray-400: #ced4da;
+            --gray-300: #dee2e6;
+            --success-color: #4cc9f0;
+            --warning-color: #f8961e;
+            --danger-color: #f72585;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --card-hover-shadow: 0 10px 20px rgba(67, 97, 238, 0.15);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --border-radius: 12px;
+        }
+
+        /* 主容器 */
+        .form-container {
+            width: 90%;
+            margin: 0 auto 3rem;
+            padding: 2.5rem;
+            border-radius: var(--border-radius);
+            background-color: white;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+        }
+
+        .form-container:hover {
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        /* 页面标题 */
+        .page-header {
+            position: relative;
+            padding-bottom: 1.5rem;
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+
+        .page-header::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: 2px;
+            transition: var(--transition);
+        }
+
+        .page-header:hover::after {
+            width: 120px;
+        }
+
+        .page-header p {
+            font-size: 1.1rem;
+            color: var(--gray-600);
+            margin-bottom: 0;
+        }
+
+        /* 表单元素 */
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-label i {
+            margin-right: 8px;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .form-control, .form-select {
+            padding: 0.85rem 1.25rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--gray-300);
+            transition: var(--transition);
+            font-size: 1rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.15);
+        }
+
+        .form-control::placeholder {
+            color: var(--gray-400);
+            font-size: 0.95rem;
+            opacity: 1;
+        }
+
+        /* 按钮样式 */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px);
+        }
+
+        /* 返回按钮 */
+        .back-btn {
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            color: var(--primary-color);
+            display: inline-flex;
+            align-items: center;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            background-color: var(--primary-light);
+            border: 1px solid rgba(67, 97, 238, 0.1);
+        }
+
+        .back-btn:hover {
+            background-color: rgba(67, 97, 238, 0.2);
+            transform: translateX(-5px);
+            text-decoration: none;
+        }
+
+        .back-btn i {
+            margin-right: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        /* 动态字段容器 */
+        .dynamic-fields-container {
+            margin-bottom: 2rem;
+        }
+
+        /* 加载指示器 */
+        .loading-indicator {
+            display: none;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .spinner-border {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-width: 0.25em;
+            color: var(--primary-color);
+        }
+
+        /* 成功消息 */
+        .success-message {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+            margin-top: 2rem;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 工作流状态 */
+        .workflow-status {
+            display: none;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background-color: rgba(248, 249, 250, 0.8);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .workflow-status.active {
+            display: block;
+        }
+
+        .progress {
+            height: 8px;
+            border-radius: 4px;
+        }
+
+        .progress-bar {
+            border-radius: 4px;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 992px) {
+            .form-container {
+                padding: 2rem;
+                margin: 0 1.5rem 3rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .form-container {
+                padding: 1.5rem;
+                border-radius: 0;
+                margin: 0 0 3rem;
+            }
+
+            .page-header p {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .form-container {
+                padding: 1.25rem;
+            }
+
+            .form-control, .form-select {
+                padding: 0.75rem 1rem;
+            }
+        }
+
+        main {
+            max-width: 1500px;
+            margin: 0 auto; /* 水平居中 */
+            width: 100%; /* 确保宽度占满父容器 */
+            padding: 0 15px; /* 可选：添加内边距避免内容贴边 */
+            box-sizing: border-box; /* 确保内边距不影响总宽度 */
+        }
+
+    </style>
+</head>
+<body>
+<!-- 页眉 -->
+<header class="background-container">
+    <a href="http://edi.sdstg.com/" target="_self" rel="noopener">
+        <img id="header-img" src="" alt="ST">
+    </a>
+    <h2 class="h2-container">合同起草与审核</h2>
+</header>
+
+<!-- 主内容区 -->
+<main id="main-content">
+    <div class="form-container">
+        <!-- 返回按钮 -->
+        <div class="back-btn" id="backToFlowType">
+            <i class="bi bi-arrow-left"></i>返回流程主页面
+        </div>
+
+        <!-- 合同生成表单 -->
+        <form id="contractForm" novalidate>
+            <!-- 页面标题 -->
+            <div class="page-header">
+                <h2 id="templateName">请填写以下信息生成合同</h2>
+                <p>请填写以下信息生成合同</p>
+            </div>
+
+            <!-- 动态字段容器 -->
+            <div id="dynamicFieldsContainer" class="dynamic-fields-container row g-3">
+                <!-- 这里会根据选择的模板动态加载字段 -->
+            </div>
+
+            <!-- 生成按钮 -->
+            <button type="submit" class="btn btn-primary w-100 mb-4">
+                <i class="bi bi-magic me-2"></i>生成合同
+            </button>
+
+            <!-- 加载指示器 -->
+            <div id="loadingIndicator" class="loading-indicator">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">加载中...</span>
+                </div>
+                <p class="text-muted mt-3">正在处理，请稍候...</p>
+            </div>
+        </form>
+
+        <!-- 成功消息区域 -->
+        <div id="successMessage" class="success-message">
+            <div class="alert alert-success d-flex align-items-center">
+                <i class="bi bi-check-circle-fill me-2 fs-4"></i>
+                <div class="fs-5">
+                    合同生成成功！请点击下方按钮下载
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="#" class="btn btn-success btn-lg" id="downloadBtn">
+                    <i class="bi bi-download me-2"></i>下载合同文件
+                </a>
+            </div>
+
+            <!-- 发起流程部分 -->
+            <div class="mt-5 pt-4 border-top text-center">
+                <button type="button" class="btn btn-primary btn-lg" id="startWorkflowBtn">
+                    <i class="bi bi-send-check me-2"></i>发起合同流程
+                </button>
+                <p class="text-muted mt-3">下载确认无误后，点击发起正式审批流程</p>
+            </div>
+
+            <!-- 新增的返回首页按钮 -->
+            <div class="mt-3 text-center">
+                <a href="#" class="btn btn-outline-primary" id="backToHomeBtn">
+                    <i class="bi bi-house me-2"></i>返回首页
+                </a>
+            </div>
+
+        </div>
+
+        <!-- 工作流成功区域 -->
+        <div id="workflowSuccessArea" class="success-message">
+            <div class="alert alert-success d-flex align-items-center">
+                <i class="bi bi-check-circle-fill me-2 fs-4"></i>
+                <div>
+                    <h5 class="mb-1">合同流程已成功发起！</h5>
+                    <!--                    <p class="mb-0" id="workflowIdDisplay">流程编号: <span class="fw-bold"></span></p>-->
+                </div>
+            </div>
+
+            <div class="workflow-status mt-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>当前状态:</span>
+                    <span class="badge bg-primary">审批中</span>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 30%"></div>
+                </div>
+                <p class="text-muted mt-2 small">流程已提交至相关部门审批,有延迟时请耐心等待</p>
+            </div>
+
+            <div class="mt-4 d-flex justify-content-center gap-3">
+                <a href="home.html" class="btn btn-primary">
+                    <i class="bi bi-eye me-2"></i>查看详情
+                </a>
+                <a href="index.html" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>新建合同
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    document.write('<script src="../vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="./util/util_link.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+</script>
+
+<script>
+    // 获取模板ID
+    const templateId = getNameFromUrl("templateId");
+    let generatedContract = null;
+    let historyId = null;
+
+    // 页面加载完成后执行
+    document.addEventListener('DOMContentLoaded', function () {
+        // 显示全局加载层
+        util.loading.show('正在初始化...');
+
+        if (!templateId) {
+            window.location.href = "index.html";
+            return;
+        }
+// 检查sessionStorage中是否有已生成的合同
+        const savedContract = sessionStorage.getItem(`generatedContract_${templateId}`);
+        if (savedContract) {
+            generatedContract = JSON.parse(savedContract);
+            // 恢复按钮的禁用状态
+           // disableGenerateButton();
+        }
+        // 初始化合同生成器
+        initContractGenerator()
+            .catch(error => {
+                console.error("初始化失败:", error);
+                showMsg('页面初始化失败，请刷新重试');
+            })
+            .finally(() => {
+                util.loading.hide();
+            });
+    });
+
+    window.onscroll = function () {
+        toggleBackToTopButton();
+    };
+
+
+    /**
+     * 初始化合同生成器
+     */
+    async function initContractGenerator() {
+        // 加载模板字段
+        await loadTemplateFields(templateId);
+
+        // 设置表单验证
+        setupFormValidation();
+
+        // 返回按钮事件
+        document.getElementById('backToFlowType').addEventListener('click', function (e) {
+            e.preventDefault();
+            handleBackNavigation('index.html');
+        });
+        // 返回首页按钮事件
+        document.getElementById('backToHomeBtn').addEventListener('click', function (e) {
+            e.preventDefault(); // 阻止默认跳转
+            handleBackNavigation('home.html');
+        });
+
+        // 检查URL参数，如果是从流程跳转回来的，显示成功状态
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('workflowId')) {
+            showWorkflowSuccess(urlParams.get('workflowId'));
+        }
+    }
+
+    /**
+     * 处理返回导航事件
+     */
+    function handleBackNavigation(targetUrl) {
+        // 检查是否存在已生成但未提交的合同
+        if (generatedContract) {
+            // 弹出确认对话框（中文提示）
+            const userConfirmed = confirm('当前有未提交的合同，确定要离开吗？\n\n点击"确定"返回，点击"取消"继续编辑合同。');
+
+            // 如果用户点击"取消"，则中止导航
+            if (!userConfirmed) {
+                return false;
+            } else {
+                // 用户确认离开，清理sessionStorage
+                sessionStorage.removeItem(`generatedContract_${templateId}`);
+                generatedContract = null;
+            }
+        }
+
+        // 用户确认后或没有未提交合同时，跳转到目标页面
+        window.location.href = targetUrl;
+    }
+
+    /**
+     * 加载模板详情（包含占位符）
+     */
+    async function loadTemplateFields(templateId) {
+        try {
+            util.loading.show('正在加载模板字段...');
+
+            // 调用API获取模板详情
+            const response = await fetchDataFromAPI('744', {templateId});
+
+            if (response.data.status === 0 && response.data.data?.length > 0) {
+
+                document.getElementById('templateName').textContent = response.data.templateName
+
+                // 处理所有返回的模板数据
+                const templates = response.data.data;
+                const placeholders = extractAllPlaceholders(templates);
+
+                if (placeholders.length === 0) {
+                    renderNoFieldsMessage();
+                } else {
+                    renderDynamicFields(placeholders);
+                }
+            } else {
+                const errorMsg = response.data.msg || '未获取到模板数据';
+                throw new Error(errorMsg);
+            }
+        } catch (error) {
+            console.error("加载模板详情错误:", error);
+            renderErrorMessage(error.message || '加载模板详情失败，请刷新重试');
+            throw error;
+        } finally {
+            util.loading.hide();
+        }
+    }
+
+    /**
+     * 从所有模板中提取占位符
+     */
+    function extractAllPlaceholders(templates) {
+        const allPlaceholders = new Set();
+
+        templates.forEach(template => {
+            const templatePlaceholders = extractPlaceholders(template.name);
+            templatePlaceholders.forEach(placeholder => allPlaceholders.add(placeholder));
+        });
+
+        return Array.from(allPlaceholders);
+    }
+
+    /**
+     * 从模板内容中提取占位符
+     */
+    function extractPlaceholders(templateContent) {
+        const placeholderRegex = /\$([^$]+)\$/g;
+        const placeholders = [];
+        let match;
+
+        while ((match = placeholderRegex.exec(templateContent))) {
+            placeholders.push(match[1]);
+        }
+
+        return placeholders;
+    }
+
+    /**
+     * 渲染无字段消息
+     */
+    function renderNoFieldsMessage() {
+        document.getElementById('dynamicFieldsContainer').innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-info">此模板无需填写额外信息</div>
+            </div>
+        `;
+    }
+
+    /**
+     * 渲染错误消息
+     */
+    function renderErrorMessage(message) {
+        document.getElementById('dynamicFieldsContainer').innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-danger">${message}</div>
+            </div>
+        `;
+    }
+
+    /**
+     * 根据占位符渲染动态字段
+     */
+    function renderDynamicFields(placeholders) {
+        const container = document.getElementById('dynamicFieldsContainer');
+        container.innerHTML = '';
+
+        placeholders.forEach(placeholder => {
+            const fieldHtml = createPlaceholderField(placeholder);
+            container.appendChild(fieldHtml);
+        });
+    }
+
+    /**
+     * 为占位符创建表单字段
+     */
+    function createPlaceholderField(placeholder) {
+        const colDiv = document.createElement('div');
+        colDiv.className = 'col-md-6 mb-3';
+
+        const label = document.createElement('label');
+        label.className = 'form-label';
+        label.htmlFor = `field_${placeholder}`;
+        label.innerHTML = `<i class="bi bi-input-cursor-text"></i>${placeholder}`;
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'form-control';
+        input.id = `field_${placeholder}`;
+        input.name = placeholder;
+        input.required = true;
+        input.placeholder = `请输入${placeholder}`;
+
+        const feedbackDiv = document.createElement('div');
+        feedbackDiv.className = 'invalid-feedback';
+        feedbackDiv.textContent = `请输入${placeholder}`;
+
+        colDiv.appendChild(label);
+        colDiv.appendChild(input);
+        colDiv.appendChild(feedbackDiv);
+
+        return colDiv;
+    }
+
+    /**
+     * 设置表单验证
+     */
+    function setupFormValidation() {
+        const form = document.getElementById('contractForm');
+
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // 验证表单
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+
+            try {
+                await handleFormSubmit();
+            } catch (error) {
+                console.error('表单提交错误:', error);
+                showMsg(error.message || '处理请求时发生错误，请稍后重试');
+            }
+        });
+    }
+
+    /**
+     * 处理表单提交
+     */
+    async function handleFormSubmit() {
+        const form = document.getElementById('contractForm');
+
+        try {
+            showLoading(true);
+            setSubmitButtonState(true);
+
+            // 准备提交数据
+            const formData = {
+                action: 'generate',
+                templateId: templateId,
+                fieldValues: collectFormValues()
+            };
+
+            // 调用API生成合同
+            const response = await fetchDataFromAPI('719', formData);
+
+            if (response.data.status === 0) {
+                handleSuccessResponse(response.data);
+                // 成功时不重置按钮状态，保持禁用状态
+                return; // 直接返回，不执行finally中的重置代码
+            } else {
+                const msg = response.data.msg;
+                await fetchDataFromAPI('755', {
+                    workId: templateId,
+                    sourceAddress: window.location.pathname + ' contract_management -> contract-generator.html -> api : 719 -> line : 655',
+                    error: msg,
+                    reqData: JSON.stringify(formData)
+                });
+
+                throw new Error(response.data.msg || '生成合同失败');
+            }
+        } catch (error) {
+            console.error('生成合同错误:', error);
+            throw error;
+        } finally {
+            showLoading(false);
+            // 只有在出错时才重置按钮状态
+            if (!generatedContract) {
+                setSubmitButtonState(false);
+            }
+        }
+    }
+
+    /**
+     * 收集表单值
+     */
+    function collectFormValues() {
+        const values = {};
+        const inputs = document.querySelectorAll('#dynamicFieldsContainer [name]');
+
+        inputs.forEach(input => {
+            if (input.value.trim() === '' && input.required) {
+                throw new Error(`请填写${input.previousElementSibling.textContent}`);
+            }
+            values[input.name] = input.value;
+        });
+
+        return values;
+    }
+
+    /**
+     * 处理成功响应
+     */
+    function handleSuccessResponse(data) {
+        // 存储生成的文件信息
+        generatedContract = {
+            filePath: data.filePath,
+            templateId: templateId,
+            generateTime: new Date().toISOString(),
+            historyId: data.historyId
+        };
+
+        // 保存到sessionStorage，以便页面刷新后保持状态
+        sessionStorage.setItem(`generatedContract_${templateId}`, JSON.stringify(generatedContract));
+// 禁用生成按钮并显示已生成状态
+       disableGenerateButton();
+        // 显示下载区域
+        const successMessage = document.getElementById('successMessage');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        downloadBtn.href = data.filePath;
+        successMessage.style.display = 'block';
+        successMessage.scrollIntoView({behavior: 'smooth'});
+
+        // 添加下载后的事件跟踪
+        downloadBtn.addEventListener('click', function () {
+            console.log('合同下载:', data.fileName);
+        });
+
+        // 添加发起流程按钮事件
+        document.getElementById('startWorkflowBtn').addEventListener('click', startWorkflowProcess);
+    }
+
+    /**
+     * 发起工作流流程
+     */
+    async function startWorkflowProcess() {
+        if (!generatedContract) {
+            showMsg('请先生成合同文件');
+            return;
+        }
+
+        try {
+            const submitBtn = document.getElementById('startWorkflowBtn');
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 正在发起流程...';
+            submitBtn.disabled = true;
+
+            const response = await fetchDataFromAPI('719', {
+                action: 'start_workflow',
+                ...generatedContract
+            });
+
+            if (response.data.status === 0) {
+                showWorkflowSuccess(response.data.workflowId);
+            } else {
+                const msg = response.data.msg;
+                await fetchDataFromAPI('755', {
+                    workId: 719,
+                    sourceAddress: window.location.pathname + ' contract_management -> home.html-> api : 719 -> line : 749',
+                    error: msg,
+                    reqData: JSON.stringify(generatedContract)
+                });
+
+                showMsg(response.data.msg || '发起流程失败');
+                submitBtn.innerHTML = '<i class="bi bi-send-check me-2"></i>发起合同流程';
+                submitBtn.disabled = false;
+            }
+        } catch (error) {
+            console.error('发起流程错误:', error);
+            showMsg(error.message || '发起流程时发生错误');
+
+            const submitBtn = document.getElementById('startWorkflowBtn');
+            submitBtn.innerHTML = '<i class="bi bi-send-check me-2"></i>发起合同流程';
+            submitBtn.disabled = false;
+        }
+    }
+
+    /**
+     * 显示工作流成功状态
+     */
+    function showWorkflowSuccess(workflowId) {
+        // 清理sessionStorage
+        sessionStorage.removeItem(`generatedContract_${templateId}`);
+        generatedContract = null;
+        // 隐藏表单和下载区域
+        document.getElementById('contractForm').style.display = 'none';
+        document.getElementById('successMessage').style.display = 'none';
+
+        // 显示流程成功区域
+        //document.getElementById('workflowIdDisplay').querySelector('span').textContent = workflowId;
+        document.getElementById('workflowSuccessArea').style.display = 'block';
+
+        // 设置查看详情链接
+        //document.getElementById('viewWorkflowDetail').href = `http://edi.sdstg.com/sys/portal/page.jsp`;
+    }
+
+    /**
+     * 显示/隐藏加载状态
+     */
+    function showLoading(show) {
+        document.getElementById('loadingIndicator').style.display = show ? 'block' : 'none';
+    }
+
+    /**
+     * 设置提交按钮状态
+     */
+    function setSubmitButtonState(isLoading) {
+        const submitBtn = document.querySelector('#contractForm button[type="submit"]');
+
+        if (isLoading) {
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 正在生成...';
+            submitBtn.disabled = true;
+        } else {
+            // 只有当合同未生成时才恢复为可点击状态
+            if (!generatedContract) {
+                submitBtn.innerHTML = '<i class="bi bi-magic me-2"></i>生成合同';
+                submitBtn.disabled = false;
+            }
+        }
+    }
+
+    /**
+     * 禁用生成按钮并显示已生成状态
+     */
+    function disableGenerateButton() {
+        const submitBtn = document.querySelector('#contractForm button[type="submit"]');
+
+        submitBtn.disabled = false;
+        //
+        // // 更新按钮文本和样式
+        submitBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>合同已生成';
+        //submitBtn.classList.remove('btn-primary');
+        //submitBtn.classList.add('btn-success');
+
+        // 添加提示信息
+        const buttonContainer = submitBtn.parentElement;
+        // 先检查是否已存在提示信息，避免重复添加
+        let statusInfo = buttonContainer.querySelector('.alert-info');
+        if (!statusInfo) {
+            statusInfo = document.createElement('div');
+            statusInfo.className = 'alert alert-info mt-2';
+            statusInfo.innerHTML = `
+            <i class="bi bi-info-circle me-2"></i>
+            合同已生成，请下载文件或直接发起审批流程
+        `;
+            buttonContainer.appendChild(statusInfo);
+        }
+    }
+
+</script>
+</body>
+</html>

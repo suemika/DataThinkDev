@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>奶量记录系统</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../vendor/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="../bootstrap-icons-1.11.3/font/bootstrap-icons.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="util/util.css?v=' + randomVersion + '">');
+    </script>
+    <style>
+        .form-container {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            height: 100%;
+        }
+
+        .chart-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .record-item {
+            border-left: 4px solid #0d6efd;
+            padding-left: 10px;
+            margin-bottom: 10px;
+            background-color: #fff;
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-record {
+            background-color: #0d6efd;
+            color: white;
+            width: 100%;
+            padding: 10px;
+        }
+
+        .btn-record:hover {
+            background-color: #0b5ed7;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .form-select {
+            width: auto;
+            display: inline-block;
+        }
+
+        #milkChart {
+            width: 100%;
+            height: 400px;
+            min-height: 300px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .date-selector-group {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .date-selector {
+            display: flex;
+            align-items: center;
+            background: #f1f1f1;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .date-selector input {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+        }
+
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .recent-records-container {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* 周对比开关样式 */
+        .form-switch .form-check-input {
+            width: 3em;
+            height: 1.5em;
+            margin-left: 0.5em;
+        }
+
+        .form-switch .form-check-label {
+            margin-left: 0.5em;
+            font-weight: 500;
+        }
+
+        /* 或者使用margin */
+        .row.mb-4 > [class^="col-"] {
+            margin-bottom: 20px;
+        }
+
+        /* 删除按钮样式 */
+        .delete-btn {
+            padding: 0.25rem 0.5rem;
+            opacity: 0.7;
+            transition: all 0.2s;
+        }
+
+        .delete-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .record-item {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .record-item:hover {
+            background-color: #f8f9fa;
+            transform: translateX(3px);
+        }
+
+
+        /* 在现有样式中添加 */
+        .record-item .badge {
+            font-size: 0.75rem;
+            font-weight: normal;
+            vertical-align: middle;
+        }
+
+        .record-item .notes {
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        #typeChart {
+            width: 100%;
+            height: 400px;
+            min-height: 300px;
+        }
+
+
+        /* 新增样式 - 确保电脑端两栏布局 */
+        .main-content-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .form-column {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .stats-column {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        /* 在现有样式中添加 */
+        #recordsDateDisplay {
+            display: block;
+            margin-top: 2px;
+            font-size: 0.8rem;
+        }
+
+        /* 在现有样式中添加 */
+        #feedingType {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1em;
+            padding-right: 2.5rem;
+        }
+
+        /* 在现有样式中添加 */
+        #typeStats {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+            border-top: 1px dashed rgba(255, 255, 255, 0.3);
+            padding-top: 0.5rem;
+        }
+
+        #typeStats div {
+            line-height: 1.4;
+        }
+
+
+        /* 喂养类型统计卡片样式 */
+        #typeStatsChart {
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .type-stat-detail-item {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+        }
+
+        .type-stat-detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .type-stat-detail-name {
+            display: flex;
+            align-items: center;
+        }
+
+        .type-stat-detail-bullet {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .type-stat-detail-value {
+            font-weight: 500;
+        }
+
+        /* 高对比度 badge 颜色方案 */
+        .badge-type-1 {
+            background-color: #36b9cc !important; /* 亮青色 */
+        }
+
+        .badge-type-2 {
+            background-color: #706fff !important; /* 亮绿色 */
+        }
+
+        .badge-type-3 {
+            background-color: #f6c23e !important; /* 黄色 */
+            color: #000 !important; /* 深色文字提高可读性 */
+        }
+
+        .badge-type-4 {
+            background-color: #e74a3b !important; /* 红色 */
+        }
+
+        .badge-type-5 {
+            background-color: #4e73df !important; /* 蓝色 */
+        }
+
+        .badge-type-6 {
+            background-color: #a64ac9 !important; /* 紫色 */
+        }
+
+        .badge-type-7 {
+            background-color: #f17a54 !important; /* 橙色 */
+        }
+
+        .badge-type-8 {
+            background-color: #2ecc71 !important; /* 翠绿色 */
+        }
+
+        .badge-type-9 {
+            background-color: #ff6b6b !important; /* 亮粉红色 */
+        }
+
+        .badge-type-10 {
+            background-color: #34495e !important; /* 深蓝灰色（比纯黑柔和） */
+            color: #fff !important; /* 白色文字提高可读性 */
+        }
+
+        /* 饼图容器背景 */
+        #typeStatsChart {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 5px;
+        }
+
+        /* 悬停效果 */
+        .record-item:hover .badge {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        /* 图例样式 */
+        .legend-container {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .legend-container .badge {
+            font-size: 0.65rem;
+            padding: 0.25em 0.4em;
+            font-weight: normal;
+        }
+
+        /* 更新圆点样式 */
+        .type-stat-detail-bullet {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            position: relative;
+        }
+
+        /* 添加发光效果增强对比 */
+        .stat-card.bg-info {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 调整文字颜色增强可读性 */
+        .stat-card.bg-info .type-stat-detail-value {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .stat-card.bg-info .type-stat-detail-name {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* 加载指示器样式 */
+        .loading-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 9999;
+        }
+
+        .loading-text {
+            color: white;
+            margin-top: 10px;
+            font-size: 1.2rem;
+        }
+
+
+        /* 表单错误状态 */
+        .is-invalid {
+            border-color: #dc3545 !important;
+        }
+
+        .invalid-feedback {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .record-item {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* 新增的响应式样式 */
+        @media (max-width: 768px) {
+
+            .stat-card {
+                width: 100%;
+            }
+
+            #typeStatsChart {
+                height: 180px !important;
+            }
+
+            #typeStatsDetails {
+                max-height: 120px !important;
+            }
+
+            /* 移动端调整 */
+            #milkChart {
+                height: 300px !important;
+                background: #f9f9f9;
+            }
+
+            .echarts-tooltip {
+                transform: scale(0.9);
+                transform-origin: center top;
+            }
+
+            .nav-tabs .nav-link {
+                padding: 0.5rem 0.75rem;
+                font-size: 1rem;
+            }
+
+            .tab-pane .chart-container {
+                padding: 10px;
+            }
+
+            #typeChart, #timeHeatmap {
+                height: 300px !important;
+            }
+
+            /* 调整类型统计图表容器 */
+            #typeChart {
+                height: 280px !important;
+            }
+
+            /* 优化统计详情项显示 */
+            .type-stat-detail-item {
+                padding: 4px 4px;
+                font-size: 0.8rem;
+            }
+
+            .type-stat-detail-bullet {
+                width: 10px;
+                height: 10px;
+            }
+
+            .main-content-row {
+                flex-direction: column;
+            }
+
+            .form-column, .stats-column {
+                min-width: 100%;
+            }
+
+            /* 调整主容器间距 */
+            .container.py-4 {
+                padding-top: 1rem !important;
+                padding-bottom: 1rem !important;
+            }
+
+            /* 调整标题大小 */
+            h1.text-center {
+                font-size: 1.8rem;
+                margin-bottom: 1rem !important;
+            }
+
+            /* 表单容器调整 */
+            .form-container {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            /* 图表容器调整 */
+            #milkChart {
+                height: 300px !important;
+            }
+
+            /* 最近记录容器高度调整 */
+            .recent-records-container {
+                max-height: 250px;
+            }
+
+            /* 表单元素调整 */
+            .form-control, .form-select {
+                font-size: 0.9rem;
+            }
+
+            /* 按钮调整 */
+            .btn-record {
+                padding: 8px;
+                font-size: 0.9rem;
+            }
+
+            #typeChart {
+                height: 300px !important;
+            }
+
+            .chart-container {
+                margin-bottom: 20px;
+            }
+        }
+
+        .stats-list {
+            margin-top: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .stats-list .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .stats-list .stat-item:hover {
+            background: #e9ecef;
+        }
+
+        .stats-list .stat-item.active {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .text-center.p-3.bg-success.text-white.rounded.stat-card.mb-2 {
+            min-height: 260px; /* 从220px增加到260px */
+        }
+
+
+        #typeStatsDetails {
+            padding: 4px 4px;
+            overflow-y: auto;
+        }
+
+        /* 页签样式 */
+        .nav-tabs {
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .nav-tabs .nav-link {
+            color: #495057;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            font-weight: 500;
+            border-radius: 0;
+        }
+
+        .nav-tabs .nav-link:hover {
+            border-color: transparent;
+            color: #0d6efd;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: #0d6efd;
+            background-color: transparent;
+            border-bottom: 3px solid #0d6efd;
+        }
+
+        .tab-content {
+            padding: 20px 0;
+        }
+
+        /* 调整图表容器在页签中的样式 */
+        .tab-pane .chart-container {
+            box-shadow: none;
+            border-radius: 0 0 8px 8px;
+            border: 1px solid #dee2e6;
+            border-top: none;
+            padding: 15px;
+        }
+
+        /* 统计卡片行样式 */
+        .stat-cards-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .stat-card h5 {
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-card h2 {
+            font-size: 1.8rem;
+            margin: 5px 0;
+        }
+
+        .stat-card small {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        /* 统计页签样式 */
+        #statsTabs {
+            margin-top: 15px;
+        }
+
+        #statsTabs .nav-link {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+        }
+
+        /* 调整类型统计图表高度 */
+        #typeStatsChart {
+            height: 200px !important;
+        }
+
+        /* 确保图表容器有固定高度 */
+        #type-stats-tab-pane {
+            min-height: 300px;
+        }
+
+        /* 防止图表闪烁 */
+        .tab-pane {
+            position: relative;
+        }
+
+        /* 图表容器样式 */
+        #typeStatsChart {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            transition: height 0.3s ease;
+        }
+
+        /* 图表容器样式 */
+        #milkChart {
+            background: linear-gradient(135deg, #f9f9f9 0%, #f0f4f8 100%);
+            border-radius: 8px;
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        /* 悬停效果 */
+        #milkChart:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+
+        #timeHeatmap {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        /* 热力图单元格悬停效果 */
+        .echarts-heatmap-cell:hover {
+            stroke: #333;
+            stroke-width: 1px;
+        }
+
+        .feeding-info {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 15px; /* 整体调小字号 */
+            line-height: 1.4;
+        }
+
+        .feeding-section, .other-section {
+            margin-bottom: 12px;
+        }
+
+        .feeding-info h4 {
+            color: #6c757d;
+            margin: 0 0 8px 0; /* 减少标题间距 */
+            font-weight: 500;
+        }
+
+        .highlight {
+            color: #0d6efd;
+            background-color: #f0f7ff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .text-muted {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        /* 紧凑型列表样式 */
+        .feeding-info p {
+            margin: 4px 0; /* 减少段落间距 */
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* 类型名称和时间的分布 */
+        .feeding-info p span:first-child {
+            margin-right: 10px;
+        }
+
+        /* 容器样式 */
+        .typeStatsListContainer {
+            width: 100%;
+            font-family: Arial, sans-serif;
+        }
+
+        /* 每一项的布局 */
+        .stat-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* 类型标识小圆点 */
+        .type-badge {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        /* 类型名称（左对齐，固定宽度） */
+        .type-name {
+            flex: 1;
+            min-width: 100px;
+            font-weight: 500;
+        }
+
+        /* 奶量（右对齐，固定宽度） */
+        .type-amount {
+            width: 80px;
+            text-align: right;
+            margin: 0 10px;
+            color: #555;
+        }
+
+        /* 百分比（右对齐，固定宽度） */
+        .type-percent {
+            width: 50px;
+            text-align: right;
+            color: #888;
+        }
+
+    </style>
+</head>
+<body class="poppins-bold">
+<main class="container_main">
+    <div class="container py-4">
+        <h1 class="text-center mb-4">
+            <i class="bi bi-cup-hot"></i> 奶量记录系统
+        </h1>
+
+        <!-- 使用更灵活的布局方式 -->
+        <div class="main-content-row mb-4">
+            <!-- 新增记录表单 -->
+            <div class="form-column">
+                <div class="form-container">
+                    <h3><i class="bi bi-plus-circle"></i> 新增记录</h3>
+                    <form id="recordForm">
+                        <div class="mb-3">
+                            <label for="feedingType" class="form-label">喂养类型</label>
+                            <select class="form-control" id="feedingType" required>
+                                <option value="">请选择喂养类型...</option>
+                                <!-- 选项将通过JavaScript动态加载 -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">奶量 (ml)</label>
+                            <input type="number" class="form-control" id="amount" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="time" class="form-label">时间</label>
+                            <input type="datetime-local" class="form-control" id="time" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">备注</label>
+                            <textarea class="form-control" id="notes" rows="2"
+                                      placeholder="可记录喂养情况或其他注意事项"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-record">
+                            <i class="bi bi-save"></i> 保存记录
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 统计信息和最近记录 -->
+            <div class="stats-column">
+                <div class="form-container">
+                    <h3> 📊 统计</h3>
+
+                    <!-- 统计卡片行 -->
+                    <div class="d-flex justify-content-between flex-wrap stat-cards-container mb-3">
+                        <div class="text-center p-3 bg-primary text-white rounded stat-card"
+                             style="flex: 1; margin: 0 5px;">
+                            <h5>🥛 总奶量</h5>
+                            <h2 id="totalAmount">0</h2>
+                            <small>ml</small>
+                        </div>
+                        <div class="text-center p-3 bg-info text-white rounded stat-card"
+                             style="flex: 1; margin: 0 5px;">
+                            <h5>⏱️ 喂养次数</h5>
+                            <h2 id="feedCount">0</h2>
+                            <small>次</small>
+                        </div>
+                        <div class="text-center p-3 bg-warning text-dark rounded stat-card"
+                             style="flex: 1; margin: 0 5px;">
+                            <h2 id="avgInterval">--</h2>
+                        </div>
+                    </div>
+
+                    <!-- 统计页签部分 -->
+                    <ul class="nav nav-tabs" id="statsTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="type-stats-tab" data-bs-toggle="tab"
+                                    data-bs-target="#type-stats-tab-pane" type="button" role="tab">
+                                🥧 类型统计
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="records-tab" data-bs-toggle="tab"
+                                    data-bs-target="#records-tab-pane" type="button" role="tab">
+                                ⏳ 最近记录
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="statsTabsContent">
+                        <!-- 喂养类型统计 -->
+                        <div class="tab-pane fade show active" id="type-stats-tab-pane" role="tabpanel"
+                             aria-labelledby="type-stats-tab">
+                            <div class="mt-3" style="height: 300px;">
+                                <div id="typeStatsChart" style="width: 100%; height: 100%;"></div>
+                                <div id="typeStatsDetails" class="small mt-2"></div>
+                            </div>
+                        </div>
+
+                        <!-- 最近记录 -->
+                        <div class="tab-pane fade" id="records-tab-pane" role="tabpanel"
+                             aria-labelledby="records-tab">
+                            <div class="mt-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div>
+                                        <small id="recordsDateDisplay" class="text-muted">今天</small>
+                                    </div>
+                                    <div>
+                                        <button id="prevDayBtn" class="btn btn-sm btn-outline-secondary me-1">
+                                            ⏮️ 昨天
+                                        </button>
+                                        <button id="todayBtn" class="btn btn-sm btn-outline-secondary">
+                                            🏠 今天
+                                        </button>
+                                        <button id="refreshRecords" class="btn btn-sm btn-outline-secondary ms-1">
+                                            🔄 刷新
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="recent-records-container" id="recentRecords">
+                                    <div class="alert alert-info">正在加载记录...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 图表页签部分 -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <ul class="nav nav-tabs" id="chartTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="daily-tab" data-bs-toggle="tab"
+                                data-bs-target="#daily-tab-pane" type="button" role="tab">📅 每日奶量
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="type-tab" data-bs-toggle="tab" data-bs-target="#type-tab-pane"
+                                type="button" role="tab">🍼 喂养类型
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="heatmap-tab" data-bs-toggle="tab"
+                                data-bs-target="#heatmap-tab-pane" type="button" role="tab">⏰ 时间分布
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="chartTabsContent">
+                    <!-- 每日奶量统计 -->
+                    <div class="tab-pane fade show active" id="daily-tab-pane" role="tabpanel"
+                         aria-labelledby="daily-tab">
+                        <div class="chart-container mt-0">
+                            <div class="chart-header">
+                                <h3><i class="bi bi-bar-chart-line"></i> 每日奶量统计</h3>
+                                <div class="chart-controls">
+                                    <select id="dayRange" class="form-select form-select-sm">
+                                        <option value="30">最近30天</option>
+                                        <option value="7">最近7天</option>
+                                        <option value="14">最近14天</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="milkChart" style="width: 100%; height: 400px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 喂养类型统计 -->
+                    <div class="tab-pane fade" id="type-tab-pane" role="tabpanel" aria-labelledby="type-tab">
+                        <div class="chart-container mt-0">
+                            <div class="chart-header">
+                                <h3>🥧 喂养类型总统计</h3>
+                                <div class="chart-controls">
+                                    <select id="typeStatsRange" class="form-select form-select-sm">
+                                        <option value="7">最近7天</option>
+                                        <option value="14">最近14天</option>
+                                        <option value="30">最近30天</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="typeChart" style="width: 100%; height: 400px;"></div>
+                            <div id="typeStatsList" class="stats-list">
+                                <!-- 列表由 JS 动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 时间分布热力图 -->
+                    <div class="tab-pane fade" id="heatmap-tab-pane" role="tabpanel" aria-labelledby="heatmap-tab">
+                        <div class="chart-container mt-0">
+                            <h3> 🕒 喂养时间分布</h3>
+                            <div id="timeHeatmap" style="width: 100%; height: 400px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+</body>
+<script>
+    document.write('<script src="../vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="vendor/util/util_link.js"?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../js/popper.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../vendor/echarts/echarts.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="js/app.js?v=' + randomVersion + '"><\/script>');
+</script>
+</html>

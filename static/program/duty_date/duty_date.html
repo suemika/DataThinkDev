@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>值班日历</title>
+    <script>
+        // 缓存破坏版本号 — 统一入口
+        var _v = Date.now();
+        // CSS 必须在 body 渲染前加载，此处 document.write 是合理用法
+        document.write('<link rel="icon" href="../vendor/logo.png?v=' + _v + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.css?v=' + _v + '">');
+        document.write('<link rel="stylesheet" href="../bootstrap-icons-1.11.3/font/bootstrap-icons.css?v=' + _v + '">');
+        document.write('<link rel="stylesheet" href="css/util.css?v=' + _v + '">');
+        document.write('<link rel="stylesheet" href="css/duty_date.css?v=' + _v + '">');
+    </script>
+</head>
+<body>
+<header class="background-container" style="padding: 10px 0;">
+    <a href="http://edi.sdstg.com/" target="_self" rel="noopener">
+        <img id="header-img" src="" alt="ST" style="height: 32px;">
+    </a>
+    <h2 class="h2-container" style="font-size: 1.5rem; margin: 0;">值班日历</h2>
+</header>
+
+<main id="main-content">
+    <div class="container">
+        <!-- 搜索栏 -->
+        <div class="search-container">
+            <div class="row g-2">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <input type="text" id="searchInput" class="form-control"
+                               placeholder="输入姓名搜索值班记录..."/>
+                        <button id="searchButton" class="btn btn-primary">
+                            <i class="bi bi-search"></i> 查询
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <button id="exportBtn" class="btn btn-primary w-100">
+                        <i class="bi bi-download"></i> 导出Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主区域: 搜索结果 + 日历 -->
+        <div class="main-container">
+            <div class="results-section">
+                <div class="search-results">
+                    <div class="search-results-header">
+                        <i class="bi bi-calendar-check me-2"></i> 值班查询结果
+                    </div>
+                    <div class="search-results-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th>日期</th>
+                                    <th>假期</th>
+                                    <th>值班人员</th>
+                                    <th>领导</th>
+                                </tr>
+                                </thead>
+                                <tbody id="resultBody">
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">
+                                        <i class="bi bi-search" style="font-size: 1.5rem;"></i>
+                                        <div>输入姓名查询值班记录</div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="calendar-section">
+                <div class="calendar-wrapper">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tooltip -->
+    <div id="tooltip"></div>
+
+    <!-- 值班详情 Modal（静态模板，JS 只更新内容） -->
+    <div class="modal fade" id="eventModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-calendar-check me-2"></i>值班详情
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">日期</label>
+                                <div class="form-control bg-light" id="modal-date"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">星期</label>
+                                <div class="form-control bg-light" id="modal-weekday"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">节假日</label>
+                        <div class="form-control bg-light" id="modal-holiday"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">值班人员</label>
+                        <div class="form-control bg-light" id="modal-persons"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">值班领导</label>
+                        <div class="form-control bg-light" id="modal-leader"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- 脚本: 使用普通标签(按依赖顺序)，不再用 document.write -->
+<script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js"></script>
+<script src="../vendor/easyui/js-easyui/axios.min.js"></script>
+<script src="../vendor/elementui/js/jquery-3.7.0.min.js"></script>
+<script src="js/util.js"></script>
+<script src="fullcalendar-6.1.19/dist/index.global.min.js"></script>
+<script src="../xlsx/xlsx.full.min.js"></script>
+<script src="js/duty_date.js"></script>
+</body>
+</html>

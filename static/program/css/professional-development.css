@@ -1,0 +1,147 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7fa; /* 背景色 */
+    color: #333; /* 字体颜色 */
+    margin: 0;
+    padding: 20px;
+}
+
+.profile-photo {
+    width: 400px;
+    max-width: 100%; /* 确保自适应屏幕大小 */
+    height: auto;
+    border-radius: 50%;
+    border: 2px solid #ddd;
+    object-fit: cover;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* 阴影 */
+    margin-bottom: 20px;
+}
+
+.list-group-item-all {
+    cursor: pointer; /* 鼠标悬停时显示为可点击 */
+    padding: 10px 15px; /* 增加内边距 */
+    margin: 5px 0; /* 增加外边距 */
+    border-radius: 5px; /* 圆角边框 */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease; /* 过渡效果 */
+    background-color: #f8f9fa; /* 默认背景色 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+    border: none;
+}
+
+.list-group-item-all:hover {
+    background-color: #e9ecef; /* 悬停时背景颜色变化 */
+    color: #007bff; /* 悬停时文字颜色变化 */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* 悬停时更明显的阴影 */
+}
+
+#result-list-all {
+    max-height: 200px; /* 设置最大高度 */
+    overflow-y: auto; /* 允许纵向滚动 */
+    overflow-x: hidden; /* 禁止横向滚动 */
+}
+
+.list-group-item {
+    border: none;
+    padding: 10px;
+}
+
+.label-value {
+    font-weight: bold;
+}
+
+.container-fluid {
+    max-width: 1800px;
+    margin: 0 auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    background-color: #ffffff; /* 容器背景 */
+}
+
+.card {
+    border: 1px solid #e0e0e0; /* 边框色 */
+    border-radius: 8px; /* 圆角 */
+    margin-bottom: 20px; /* 卡片底部间距 */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* 阴影 */
+}
+
+.card-header {
+    color: white;
+    text-align: center;
+    padding: 15px;
+    border-top-left-radius: 8px; /* 与卡片圆角一致 */
+    border-top-right-radius: 8px; /* 与卡片圆角一致 */
+}
+
+.label-value {
+    font-weight: bold;
+}
+
+/* 设置container-fluid宽度 */
+.container-fluid {
+    max-width: 1800px; /* 设置最大宽度 */
+    margin: 0 auto; /* 水平居中 */
+}
+
+/* 设置flex-container宽度 */
+.flex-container {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    width: 100%; /* 使用100%填满父元素 */
+    margin-left: auto; /* 中央对齐 */
+    margin-right: auto; /* 中央对齐 */
+}
+
+.card-header.bg-custom {
+    background-color: #007BFF;
+    color: white;
+}
+
+/* 每个卡片对应的颜色 */
+.card-header.bg-warning {
+    background-color: #ffc107; /* 原来的黄色 */
+}
+
+.card-header.bg-custom {
+    background-color: #007BFF; /* 原来的蓝色 */
+}
+
+.card-header.bg-info {
+    background-color: #17a2b8; /* 原来的青色 */
+}
+
+.card-header.bg-danger {
+    background-color: #dc3545; /* 原来的红色 */
+}
+
+.card-header.bg-light {
+    background-color: #f8f9fa; /* 原来的灰色 */
+    color: #000; /* 灰色背景下的文字颜色 */
+}
+
+#loading {
+    display: none; /* 初始隐藏 */
+    padding: 6px 8px; /* 内边距 */
+    background-color: rgb(84, 214, 109); /* 半透明绿色背景 */
+    color: white; /* 字体颜色 */
+    border-radius: 5px; /* 圆角 */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); /* 阴影效果 */
+}
+
+#no-data-message {
+    display: none; /* 初始隐藏 */
+    padding: 6px 8px; /* 内边距 */
+    background-color: rgb(214, 84, 84); /* 半透明绿色背景 */
+    color: white; /* 字体颜色 */
+    border-radius: 5px; /* 圆角 */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); /* 阴影效果 */
+}
+
+@media (max-width: 500px) {
+    .flex-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+}

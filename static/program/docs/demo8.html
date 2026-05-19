@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>服务合同生成器</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../vendor/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<script src="../vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../js/popper.js?v=' + randomVersion + '"><\/script>');
+    </script>
+    <style>
+        body {
+            margin: 20px;
+            font-size: 14px;
+            background-color: #fff; /* 背景设置为白色 */
+        }
+
+        h1, h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .contract-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            background-color: #ffffff; /* 确保合同部分仍然是白色背景 */
+        }
+
+        .signature {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        hr {
+            border: 1px solid #000;
+        }
+
+        .editable {
+            border: 1px dashed #ccc;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>服务合同</h1>
+    <p class="text-center">合同编号：<strong class="editable" contenteditable="true">2023-001</strong></p>
+    <p class="text-center">日期：<strong class="editable" contenteditable="true">2023年10月1日</strong></p>
+
+    <div class="contract-section">
+        <h2>一、合同双方</h2>
+        <p><strong>甲方：</strong><span class="editable" contenteditable="true">张三</span></p>
+        <p><strong>地址：</strong><span class="editable" contenteditable="true">北京市朝阳区某某街道</span></p>
+        <p><strong>乙方：</strong><span class="editable" contenteditable="true">李四</span></p>
+        <p><strong>地址：</strong><span class="editable" contenteditable="true">上海市浦东新区某某路</span></p>
+    </div>
+
+    <div class="contract-section">
+        <h2>二、合同内容</h2>
+        <p>甲方委托乙方提供以下服务：</p>
+        <ol>
+            <li class="editable" contenteditable="true">服务项目一</li>
+            <li class="editable" contenteditable="true">服务项目二</li>
+            <li class="editable" contenteditable="true">服务项目三</li>
+        </ol>
+    </div>
+
+    <div class="contract-section">
+        <h2>三、费用及支付</h2>
+        <p>服务费用为：<strong class="editable" contenteditable="true">人民币壹万元整</strong>。</p>
+        <p>支付方式：甲方应在合同签署后<input type="number" class="editable" contenteditable="true">天内支付全部费用。</p>
+    </div>
+
+    <div class="contract-section">
+        <h2>四、违约条款</h2>
+        <p>如甲方未按期支付费用，乙方有权停止服务并追求违约赔偿。</p>
+    </div>
+
+    <div class="contract-section">
+        <h2>五、其他条款</h2>
+        <p>本合同自双方签字盖章之日起生效，具备法律效力。</p>
+    </div>
+
+    <div class="signature">
+        <div>
+            <hr>
+            <p>甲方签字：</p>
+            <p>(签字或盖章)</p>
+        </div>
+        <div>
+            <hr>
+            <p>乙方签字：</p>
+            <p>(签字或盖章)</p>
+        </div>
+    </div>
+
+</div>
+    <button id="renderPdf" class="btn btn-primary">生成 PDF</button>
+
+<script type="text/javascript" src="./js/html2canvas.js"></script>
+<script type="text/javascript" src="./js/jsPdf.debug.js"></script>
+<script type="text/javascript">
+    var downPdf = document.getElementById("renderPdf");
+    downPdf.onclick = function () {
+        html2canvas(document.body).then(function (canvas) {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4'); // 创建 PDF，设置为 A4 尺寸
+            const imgWidth = 210; // A4 宽度
+            const pageHeight = pdf.internal.pageSize.height;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            let heightLeft = imgHeight;
+
+            let position = 0;
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            pdf.save('合同.pdf'); // 保存为合同.pdf
+        }).catch(function (error) {
+            console.error('生成 PDF 时发生错误:', error); // 捕获并显示错误
+        });
+    }
+</script>
+</body>
+</html>

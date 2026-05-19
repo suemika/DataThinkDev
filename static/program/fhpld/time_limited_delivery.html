@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>石横特钢 | 发货配料单列表</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../vendor/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="../bootstrap-icons-1.11.3/font/bootstrap-icons.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./css/util.css?v=' + randomVersion + '">');
+        document.write('<script src="vendor/util/util_link.js"?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+    </script>
+
+    <style>
+        /* 搜索容器 */
+        #search-container {
+            margin: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #search-box {
+            border: 2px solid #007bff;
+            outline: none;
+            padding: 10px 15px;
+            font-size: 1rem;
+        }
+
+        #search-box::placeholder {
+            color: rgba(128, 128, 128, 0.5);
+        }
+
+        /* 其他输入框和按钮样式 */
+        .form-control {
+            border: 1px solid #ced4da;
+            border-radius: 10px 0 0 10px;
+            padding: 10px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        #reloadBtn {
+            border-radius: 10px 0 0 10px !important;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        #submitBtn {
+            border-radius: 0 10px 10px 0 !important;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 列表项样式 */
+        .list-group-item {
+            padding: 15px;
+            border: 1px solid #ccc;
+            margin: 8px 0;
+            transition: all 0.3s;
+            cursor: pointer;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .list-group-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .list-group {
+            border-radius: 10px;
+        }
+
+        .confirmed {
+            background-color: rgba(212, 237, 218, 0.9);
+            border-left: 4px solid #28a745;
+        }
+
+        .not-confirmed {
+            background-color: rgba(248, 215, 218, 0.9);
+            border-left: 4px solid #dc3545;
+        }
+
+        #showData_area {
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        #department-wrapper {
+            margin: 10px;
+        }
+
+        .input-group {
+            padding: 0;
+        }
+
+        .status-icon {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+
+        .car-number {
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+
+        .bi-truck {
+            color: #007bff;
+            margin-right: 10px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0069d9;
+            border-color: #0062cc;
+        }
+
+        .delivery-number.unconfirmed-number:hover {
+            background-color: rgba(220, 53, 69, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .delivery-number.unconfirmed-number .bi-exclamation-circle {
+            color: #dc3545;
+            font-size: 0.7rem;
+        }
+
+
+        .delivery-number.confirmed-number:hover {
+            background-color: rgba(40, 167, 69, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* 发货通知单号行样式 */
+        .delivery-row {
+            display: flex;
+            align-items: flex-start;
+            margin: 8px 0;
+            gap: 10px;
+        }
+
+        .delivery-label-cell {
+            font-weight: bold;
+            flex-shrink: 0;
+            padding-top: 3px;
+        }
+
+        .delivery-content-cell {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            align-items: center;
+        }
+
+        /* 调整原有样式 */
+        .info-row {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            gap: 10px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            min-width: 120px;
+            flex-shrink: 0;
+        }
+
+        /* 调整发货通知编号样式使其更适合块级显示 */
+        .delivery-number {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px;
+            margin: 2px 0;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .delivery-number.unconfirmed-number {
+            background-color: rgba(220, 53, 69, 0.15);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            color: #dc3545;
+        }
+
+        .delivery-number.confirmed-number {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        /* OA提示遮罩样式 - 优雅阻断但保留标题背景 */
+        .oa-block-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', system-ui, 'PingFang SC', Roboto, sans-serif;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .oa-block-card {
+            background: white;
+            border-radius: 32px;
+            max-width: 460px;
+            width: 90%;
+            padding: 2rem 1.8rem 2.2rem;
+            text-align: center;
+            box-shadow: 0 30px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255,255,240,0.2);
+            animation: slideUp 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        .oa-icon {
+            font-size: 4rem;
+            display: inline-block;
+            background: #f0f2f5;
+            width: 80px;
+            height: 80px;
+            line-height: 80px;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+            color: #2c7da0;
+        }
+
+        .oa-block-card h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0.5rem 0 0.8rem;
+            color: #1a3e50;
+        }
+
+        .oa-block-card p {
+            color: #4a6272;
+            font-size: 1rem;
+            margin-bottom: 1.2rem;
+            line-height: 1.5;
+        }
+
+        .time-hint {
+            background: #eef2fa;
+            padding: 0.6rem;
+            border-radius: 40px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #005e7c;
+            margin: 1rem 0;
+        }
+
+        .btn-oa-close {
+            background: #2c7da0;
+            color: white;
+            border: none;
+            border-radius: 60px;
+            padding: 10px 24px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 8px;
+        }
+
+        .btn-oa-close:hover {
+            background: #1f5e7a;
+            transform: scale(0.96);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 全局内容临时隐藏但保持布局 */
+        body.oa-blocked main, body.oa-blocked header, body.oa-blocked #search-container, body.oa-blocked #department-wrapper {
+            filter: blur(0px);
+            pointer-events: none;
+            user-select: none;
+        }
+        body.oa-blocked .loading-overlay {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+<!-- 遮罩层 -->
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-content">
+        <div class="diamond-loader">
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+        </div>
+        <div class="shadow"></div>
+        <p class="mt-3">正在加载，请稍候...</p>
+    </div>
+</div>
+
+<header class="background-container">
+    <img id="header-img" src="" alt="ST">
+    <h2 class="h2-container">钢材发货配料单列表</h2>
+</header>
+<main id="main-content">
+    <div id="container">
+        <div id="search-container" class="row justify-content-center my-3">
+            <div class="input-group" style="max-width: 600px;">
+                <button class="btn btn-primary rounded-start" id="reloadBtn" onclick="location.reload()">
+                    <i class="bi bi-arrow-clockwise"></i>刷新
+                </button>
+                <input type="text" id="search-box" class="form-control" placeholder="请输入车号,可模糊查询"
+                       aria-label="车号">
+                <button type="button" id="submitBtn" class="btn btn-primary" onclick="searchData()">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </div>
+        <div id="department-wrapper">
+            <section>
+                <div class="list-group" id="showData_area">
+                    <!-- 数据将填充到这里 -->
+                </div>
+            </section>
+        </div>
+    </div>
+</main>
+
+<script>
+    // ----------------------------- 时效控制（开始时间 & 结束时间）-----------------------------
+    // 开始生效时间：2026年4月30日 20:00:00
+    // 结束失效时间：2026年5月1日 07:00:00
+    const START_DATE = new Date(2026, 3, 30, 20, 0, 0);  // 4月30日 20:00
+    const END_DATE = new Date(2026, 4, 1, 7, 0, 0);     // 5月1日 07:00
+
+    let userName = null;
+    let isOaBlocked = false;
+    let exampleData = null;
+
+    // 检查当前时间是否在有效时段内
+    function checkTimeAndAuth() {
+        const now = new Date();
+        const isAfterStart = now.getTime() >= START_DATE.getTime();
+        const isBeforeEnd = now.getTime() < END_DATE.getTime();
+        const isValidPeriod = isAfterStart && isBeforeEnd;
+
+        console.log(`[时效控制] 当前时间: ${now.toLocaleString()}`);
+        console.log(`[时效控制] 开始时间: ${START_DATE.toLocaleString()}, 结束时间: ${END_DATE.toLocaleString()}`);
+        console.log(`[时效控制] 是否在有效期内: ${isValidPeriod}`);
+
+        if (isValidPeriod) {
+            // 有效时段内 → 使用测试账号
+            userName = '012345-OA测试人员';
+            isOaBlocked = false;
+            console.log("[时效控制] 当前在有效时段内，采用测试账号: 012345-测试人员");
+            return true;
+        } else {
+            // 未到开始时间 或 已过结束时间 → 需要OA登录
+            userName = null;
+            isOaBlocked = true;
+            if (!isAfterStart) {
+                console.warn("[时效控制] 未到开始时间 (2026-04-30 20:00:00)，需要OA登录访问");
+            } else if (!isBeforeEnd) {
+                console.warn("[时效控制] 已超过结束时间 (2026-05-01 07:00:00)，需要OA登录访问");
+            }
+            return false;
+        }
+    }
+
+    // 显示OA登录拦截遮罩
+    function showOaRequiredModal() {
+        if (document.getElementById('oaForceOverlay')) return;
+
+        document.body.classList.add('oa-blocked');
+
+        const now = new Date();
+        const nowStr = now.toLocaleString('zh-CN', { hour12: false });
+
+        const overlayDiv = document.createElement('div');
+        overlayDiv.id = 'oaForceOverlay';
+        overlayDiv.className = 'oa-block-overlay';
+        overlayDiv.innerHTML = `
+            <div class="oa-block-card">
+                <div class="oa-icon">
+                    <i class="bi bi-shield-lock" style="font-size: 3rem;"></i>
+                </div>
+                <h3>⛔ 访问受限</h3>
+                <p>当前不在测试开放时段，请使用 <strong style="color:#1f6392;">OA系统</strong> 扫码登录访问本系统。<br>仅授权内部人员操作。</p>
+                <div class="time-hint">
+                    📅 测试开放时段: 2026-04-30 20:00  ~ 2026-05-01 07:00<br>
+                    🕒 当前系统时间: ${nowStr}
+                </div>
+                <button class="btn-oa-close" id="oaConfirmBtn">我知道了，前往OA登录</button>
+            </div>
+        `;
+
+        document.body.appendChild(overlayDiv);
+
+        const confirmBtn = document.getElementById('oaConfirmBtn');
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', () => {
+                window.location.href = 'http://edi.sdstg.com/'
+            });
+        }
+
+        const loadingOverlay = document.getElementById('loading-overlay');
+        if (loadingOverlay) loadingOverlay.style.display = 'none';
+
+        if (window.util && util.loading && typeof util.loading.hide === 'function') {
+            util.loading.hide();
+        }
+    }
+
+    // 获取数据（仅当在有效时段内才执行）
+    async function fetchData() {
+        try {
+            const response = await fetchDataFromAPI('651', {});
+            if (response?.data?.data) {
+                exampleData = response.data.data;
+                populateMergedData(exampleData);
+            } else {
+                document.querySelector('.background-container').style.display = 'none';
+                document.getElementById('search-container').style.display = 'none';
+                toggleNoDataMessage(false);
+            }
+        } catch (error) {
+            showMsg('更新过程中遇到错误，请重试！', true);
+            console.error('请求失败:', error);
+        }
+
+        const errorAlert = document.getElementById('errorAlert');
+        if (errorAlert) errorAlert.classList.add('d-none');
+    }
+
+    // 合并发货通知单
+    function mergeDeliveries(data) {
+        const merged = {};
+        data.forEach(item => {
+            const key = item.车号;
+            if (!merged[key]) {
+                merged[key] = {
+                    车号: item.车号,
+                    发货通知单号: [],
+                    发货通知单状态: [],
+                    状态: item.状态,
+                    仓库: item.仓库,
+                    区域: item.区域
+                };
+            }
+            merged[key].发货通知单号.push(item.发货通知单号);
+            merged[key].发货通知单状态.push(item.状态);
+            if (item.状态 === '未确认') {
+                merged[key].状态 = '未确认';
+            }
+        });
+        return Object.values(merged);
+    }
+
+    // 渲染数据
+    function populateMergedData(data) {
+        if (!data || data.length === 0) {
+            const area = document.getElementById('showData_area');
+            if (area) area.innerHTML = '<div class="alert alert-secondary text-center">暂无发运数据</div>';
+            return;
+        }
+        const mergedData = mergeDeliveries(data);
+        const showDataArea = document.getElementById('showData_area');
+        showDataArea.innerHTML = '';
+
+        mergedData.forEach(item => {
+            const listItem = document.createElement('div');
+            const isConfirmed = item.状态 === '已确认';
+            listItem.className = 'list-group-item ' + (isConfirmed ? 'confirmed' : 'not-confirmed');
+            listItem.onclick = () => editPage(item.车号, item.区域);
+
+            let deliveryNumbersHtml = '';
+            if (item.发货通知单号 && item.发货通知单号.length > 0) {
+                deliveryNumbersHtml = item.发货通知单号.map((num, index) => {
+                    const isNumConfirmed = item.发货通知单状态[index] === '已确认';
+                    if (!isNumConfirmed) {
+                        return `<span class="delivery-number unconfirmed-number" title="未确认的发货通知单">
+                        <i class="bi bi-exclamation-circle me-1"></i>${escapeHtml(num)}
+                    </span>`;
+                    } else {
+                        return `<span class="delivery-number confirmed-number" title="已确认的发货通知单">
+                        ${escapeHtml(num)}
+                    </span>`;
+                    }
+                }).join(', ');
+            }
+
+            listItem.innerHTML = `
+                <div class="car-number">
+                    <i class="bi bi-truck"></i>
+                    <strong>${escapeHtml(item.车号)}</strong>
+                    <span class="ms-auto">
+                        <i class="bi ${isConfirmed ? 'bi-check-circle-fill text-success' : 'bi-exclamation-triangle-fill text-danger'} status-icon"></i>
+                        ${item.状态}
+                    </span>
+                </div>
+                <div class="delivery-row">
+                    <div class="delivery-label-cell">发货通知单号：</div>
+                    <div class="delivery-content-cell">${deliveryNumbersHtml}</div>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">仓库:</span>
+                    <span>${escapeHtml(item.仓库)}</span>
+                </div>
+            `;
+            showDataArea.appendChild(listItem);
+        });
+    }
+
+    // 搜索功能
+    function searchData() {
+        if (isOaBlocked) {
+            showOaRequiredModal();
+            return;
+        }
+        if (!exampleData) {
+            const area = document.getElementById('showData_area');
+            if(area) area.innerHTML = '<div class="alert alert-secondary text-center">数据未加载，请刷新页面</div>';
+            return;
+        }
+        var input = document.getElementById('search-box');
+        var filter = input.value.toLowerCase().replace(/\s+/g, '');
+        const filteredData = exampleData.filter(item => item.车号.toLowerCase().includes(filter));
+        const hasMatches = filteredData.length > 0;
+        toggleNoDataMessage(hasMatches);
+        populateMergedData(filteredData);
+    }
+
+    function toggleNoDataMessage(hasMatches) {
+        const area = document.getElementById('showData_area');
+        if (!area) return;
+        if (!hasMatches) {
+            if (!document.getElementById('noDataMsg')) {
+                const noDataDiv = document.createElement('div');
+                noDataDiv.id = 'noDataMsg';
+                noDataDiv.className = 'alert alert-info text-center';
+                noDataDiv.innerText = '未找到相关车号数据';
+                area.appendChild(noDataDiv);
+            }
+        } else {
+            const existingMsg = document.getElementById('noDataMsg');
+            if (existingMsg) existingMsg.remove();
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // 水印获取及数据加载入口
+    async function fetchWatermark() {
+        const isValidPeriod = checkTimeAndAuth();
+        if (!isValidPeriod) {
+            if (document.getElementById('loading-overlay')) {
+                document.getElementById('loading-overlay').style.display = 'none';
+            }
+            showOaRequiredModal();
+            return;
+        }
+
+        try {
+            await fetchData();
+        } catch (error) {
+            document.querySelector('.background-container').style.display = 'none';
+            document.getElementById('search-container').style.display = 'none';
+        } finally {
+            if (window.util && util.loading && typeof util.loading.hide === 'function') {
+                util.loading.hide();
+            } else {
+                const loadingOverlay = document.getElementById('loading-overlay');
+                if (loadingOverlay) loadingOverlay.style.display = 'none';
+            }
+        }
+    }
+
+    // 编辑页面跳转
+    function editPage(carNumber, area) {
+        if (isOaBlocked) {
+            showOaRequiredModal();
+            return;
+        }
+        if (!userName) {
+            alert("身份信息已经失效，请重新打开页面！");
+            return;
+        }
+        const areaMapping = { "东区": 1, "西区": 2, "新区": 3 };
+        const randomVersion = Math.random();
+        const quyu = areaMapping[area] || 0;
+        carNumber = encodeURIComponent(carNumber);
+        $(location).attr("href", `editPage.html?v=${randomVersion}&carNumber=${carNumber}&personID=${userName}&quyu=${quyu}`);
+    }
+
+    // 页面启动
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('loading-overlay').style.display = 'flex';
+
+        const isValid = checkTimeAndAuth();
+        if (!isValid) {
+            document.getElementById('loading-overlay').style.display = 'none';
+            showOaRequiredModal();
+            return;
+        }
+
+        setTimeout(() => {
+            if (typeof util !== 'undefined' && util.loading && typeof util.loading.show === 'function') {
+                util.loading.show();
+            }
+            fetchWatermark();
+            if (util && util.loading && typeof util.loading.hide === 'function') {
+                util.loading.hide();
+            } else {
+                setTimeout(() => {
+                    const lo = document.getElementById('loading-overlay');
+                    if (lo) lo.style.display = 'none';
+                }, 800);
+            }
+        }, 100);
+    });
+
+    window.searchData = searchData;
+    window.toggleBackToTopButton = function() {};
+    window.editPage = editPage;
+</script>
+</body>
+</html>

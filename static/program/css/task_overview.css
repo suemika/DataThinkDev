@@ -1,0 +1,127 @@
+/* 添加样式以美化背景颜色 */
+.data-field {
+    background-color: #d3eafd;
+    padding: 8px;
+    margin: 4px;
+    border-radius: 4px;
+}
+
+/* 移除容器的最大宽度限制 */
+body, html {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* 防止水平滚动条出现 */
+}
+
+body {
+    margin-top: 0px; /* 调整为适当的值，以增加顶部外边距 */
+}
+
+.col-md-6 {
+    width: 80%;
+}
+
+ul {
+    margin: 0; /* 或其他适当的值 */
+}
+
+/* 图表容器的最小高度 */
+#echartsContainer {
+    min-height: 300px;
+}
+
+/* 分页样式 */
+.pagination {
+    justify-content: center;
+    height: 35px;
+}
+
+#currentPage {
+    padding: 0px;
+}
+
+#paginationSection {
+    display: none;
+}
+
+#paginationSection1 {
+    display: none;
+}
+
+#paginationSection2 {
+    display: none;
+}
+
+/* 添加样式以美化每页显示数的选择框 */
+#pageSizeSelect {
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    margin-right: 10px;
+}
+
+/* 更改总任务部分文字的背景颜色 */
+.total-tasks {
+    background-color: #cbe7ff; /* 更改为你喜欢的颜色 */
+}
+
+.total-hours {
+    background-color: #cbe7ff; /* 更改为你喜欢的颜色 */
+}
+
+.completed-tasks {
+    background-color: #cbe7ff; /* 更改为你喜欢的颜色 */
+}
+
+.completed-hours {
+    background-color: #cbe7ff; /* 更改为你喜欢的颜色 */
+}
+
+.in-progress-hours {
+    background-color: #cbe7ff; /* 更改为你喜欢的颜色 */
+}
+
+
+/* 更改个人任务部分文字的背景颜色 */
+.personal-tasks {
+    background-color: #c1e1c5; /* 更改为你喜欢的颜色 */
+}
+
+.personal-plan-hours {
+    background-color: #c1e1c5; /* 更改为你喜欢的颜色 */
+}
+
+.personal-hours {
+    background-color: #c1e1c5; /* 更改为你喜欢的颜色 */
+}
+
+.personal-completed-tasks {
+    background-color: #c1e1c5; /* 更改为你喜欢的颜色 */
+}
+
+.personal-completed-hours {
+    background-color: #c1e1c5; /* 更改为你喜欢的颜色 */
+}
+
+.personal-in-progress-hours {
+    background-color: #c1e1c5; /* 更改为你喜欢的颜色 */
+}
+
+/* 根据任务状态设置不同的背景颜色 */
+.in-progress {
+    background-color: #ffcccb; /* 进行中的背景颜色 */
+}
+
+.completed {
+    background-color: #c1e1c5; /* 已完成的背景颜色 */
+}
+
+.row {
+    display: flex;
+}
+
+.col-md-6 {
+    flex: 1;
+    margin: 0 8px; /* 可根据需要调整间距 */
+}

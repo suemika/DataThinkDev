@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大学生职业生涯</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="vendor/bootstrap5/css/bootstrap.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./css/util.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./css/phone_lists.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./css/professional-development-employee.css?v=' + randomVersion + '">');
+        document.write('<script src="vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="js/util.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="js/professional-development-employee.js?v=' + randomVersion + '"><\/script>');
+    </script>
+
+</head>
+
+<body>
+<header class="background-container">
+    <a href="http://edi.sdstg.com/" target="_self" rel="noopener">
+        <img id="header-img" src="" alt="ST">
+    </a>
+    <h2 class="h2-container">石横特钢集团有限公司大学生职业生涯</h2>
+</header>
+
+<main>
+    <div id="loading" style="display: none; margin-left: 10px;">正在加载...</div>
+    <div id="no-data-message" style="display: none;"></div>
+
+    <div class="container-fluid">
+        <div class="flex-container">
+            <div class="col-md-3 d-flex justify-content-center">
+                <img id="profile-photo" alt="Profile Photo" class="profile-photo" src="logo/logo_white.png">
+            </div>
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-header bg-warning text-white text-center">个人基本信息</div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <ul class="list-group">
+                                    <li class="list-group-item"><span class="label-value">工资编号：</span><span
+                                            id="salary-number"></span></li>
+                                    <li class="list-group-item"><span class="label-value">最高学历：</span><span
+                                            id="degree"></span></li>
+                                    <li class="list-group-item"><span class="label-value">毕业院校：</span><span
+                                            id="university"></span></li>
+                                    <li class="list-group-item"><span class="label-value">所在单位：</span><span
+                                            id="unit"></span></li>
+                                    <li class="list-group-item"><span class="label-value">车间/科室：</span><span
+                                            id="department"></span></li>
+
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <ul class="list-group">
+                                    <li class="list-group-item"><span class="label-value">姓名：</span><span
+                                            id="name"></span></li>
+                                    <li class="list-group-item"><span class="label-value">所学专业：</span><span
+                                            id="major"></span></li>
+                                    <li class="list-group-item"><span class="label-value">政治面貌：</span><span
+                                            id="political-status"></span></li>
+                                    <li class="list-group-item"><span class="label-value">所在岗位：</span><span
+                                            id="position"></span></li>
+                                    <li class="list-group-item"><span class="label-value">岗位经历：</span><span
+                                            id="work-experience"></span></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <ul class="list-group">
+                                    <li class="list-group-item"><span class="label-value">籍贯：</span><span
+                                            id="native-place"></span></li>
+                                    <li class="list-group-item"><span class="label-value">毕业时间：</span><span
+                                            id="graduation-time"></span></li>
+                                    <li class="list-group-item"><span class="label-value">婚恋状况：</span><span
+                                            id="marital-status"></span></li>
+                                    <li class="list-group-item"><span class="label-value">入厂时间：</span><span
+                                            id="induction-time"></span></li>
+
+                                    <li class="list-group-item"><span class="label-value">员工状态：</span><span
+                                            id="employee-type"></span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <!-- 第一列 -->
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-header bg-custom text-center">性格特质与面试情况</div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            <li class="list-group-item"><span class="label-value">MBTI性格测试类型：</span><span
+                                    id="mbti"></span></li>
+                            <li class="list-group-item"><span class="label-value">职业兴趣测试：</span><span
+                                    id="career-interest"></span></li>
+                            <li class="list-group-item"><span class="label-value">智力测试情况：</span><span
+                                    id="intelligence-test"></span></li>
+                            <li class="list-group-item"><span class="label-value">招聘面试评价：</span><span
+                                    id="interview-evaluation"></span></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-header bg-light text-center">职称聘任情况</div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-group">
+                                    <li class="list-group-item"><span class="label-value">现聘职称：</span><span
+                                            id="current-title"></span></li>
+                                    <li class="list-group-item"><span class="label-value">职称资格：</span><span
+                                            id="qualification"></span></li>
+                                    <li class="list-group-item"><span class="label-value">从事职种：</span><span
+                                            id="current-job"></span></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-group">
+                                    <li class="list-group-item"><span class="label-value">聘任时间：</span><span
+                                            id="hire-time"></span></li>
+                                    <li class="list-group-item"><span class="label-value">取得时间：</span><span
+                                            id="qualification-time"></span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-header bg-light text-center">个人自我认知与职业规划</div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            <li class="list-group-item"><span class="label-value">个人2年期满自我评价：</span><span
+                                    id="self-evaluation"></span></li>
+                            <li class="list-group-item"><span class="label-value">个人3-5年规划：</span><span
+                                    id="career-plan"></span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第二列 -->
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-header bg-info text-white text-center">培训与考评情况</div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-group">
+                                <li class="list-group-item"><span class="label-value">入厂培训：</span><span
+                                        id="training-induction"></span></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-group">
+                                <li class="list-group-item"><span class="label-value">维检技能培训：</span><span
+                                        id="training-evaluation"></span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-header bg-light text-center">培养过程评价情况</div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-group">
+                                <li class="list-group-item"><span class="label-value">专业导师：</span><span
+                                        id="mentor"></span></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-group">
+                                <li class="list-group-item"><span class="label-value">指导老师1：</span><span
+                                        id="instructor-1"></span></li>
+                                <li class="list-group-item"><span class="label-value">指导老师2：</span><span
+                                        id="instructor-2"></span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-header bg-light text-center">阶段性综合评价</div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th>类型</th>
+                                <th>应知</th>
+                                <th>应会</th>
+                                <th>师傅评价</th>
+                                <th>业绩</th>
+                            </tr>
+                            </thead>
+                            <tbody id="evaluation-table">
+                            <!-- 阶段性综合评价会填充到这里 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-header bg-light text-center">历年业绩情况</div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th>评价年份</th>
+                                <th>业绩排序</th>
+                                <th>定性等级</th>
+                            </tr>
+                            </thead>
+                            <tbody id="performance-table">
+                            <!-- 历年业绩情况会填充到这里 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-header bg-light text-center">月度考评情况</div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th>月份</th>
+                                <th>应知</th>
+                                <th>应会</th>
+                            </tr>
+                            </thead>
+                            <tbody id="monthly-evaluation-table">
+                            <!-- 历年业绩情况会填充到这里 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第三列 -->
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-header bg-danger">知识与技能掌握情况</div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            <li class="list-group-item"><span class="label-value">学习能力：</span><span
+                                    id="learning-ability"></span></li>
+                            <li class="list-group-item"><span class="label-value">工作技能：</span><span
+                                    id="work-skill"></span></li>
+                            <li class="list-group-item"><span class="label-value">管理知识水平：</span><span
+                                    id="management-knowledge"></span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 重大奖惩记录 -->
+                <div class="card mb-3">
+                    <div class="card-header bg-light text-center">重大奖惩记录</div>
+                    <div class="card-body">
+                        <h5>奖励记录</h5>
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th>项目</th>
+                                <th>金额</th>
+                                <th>日期</th>
+                            </tr>
+                            </thead>
+                            <tbody id="awards-table">
+                            <!-- 奖励记录会填充到这里 -->
+                            </tbody>
+                        </table>
+                        <h5>考核记录</h5>
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th>项目</th>
+                                <th>金额</th>
+                                <th>日期</th>
+                            </tr>
+                            </thead>
+                            <tbody id="penalties-table">
+                            <!-- 考核记录会填充到这里 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

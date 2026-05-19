@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>车险保费记录</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../vendor/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="../bootstrap-icons-1.11.3/font/bootstrap-icons.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="util/util.css?v=' + randomVersion + '">');
+    </script>
+    <style>
+        :root {
+            --secondary-color: #0092ff;
+            --accent-color: #ffb6c1;
+            --success-color: #9ade7b;
+            --danger-color: #ff899d;
+            --warning-color: #ffd89c;
+            --info-color: #9dd6ff;
+            --light-bg: #faf7ff;
+            --card-bg: #ffffff;
+            --text-color: #4a4a6a;
+            --text-light: #8888aa;
+            --border-radius: 16px;
+            --shadow: 0 8px 20px rgba(138, 121, 242, 0.12);
+            --transition: all 0.3s ease;
+        }
+
+        .header-link {
+            background: linear-gradient(45deg, var(--success-color), #85c97b);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            margin-left: 1rem;
+            transition: var(--transition);
+            box-shadow: 0 4px 10px rgba(154, 222, 123, 0.3);
+        }
+
+        .header-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(154, 222, 123, 0.4);
+        }
+
+        .card {
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: none;
+            margin-bottom: 1.5rem;
+            background: var(--card-bg);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: 0 12px 30px rgba(138, 121, 242, 0.15);
+        }
+
+        .card-header {
+            background: linear-gradient(to right, rgba(138, 121, 242, 0.1), rgba(178, 164, 255, 0.05));
+            border-bottom: 1px solid rgba(138, 121, 242, 0.1);
+            padding: 1rem 1.5rem;
+            border-top-left-radius: var(--border-radius) !important;
+            border-top-right-radius: var(--border-radius) !important;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* 表单样式 */
+        .form-label {
+            font-weight: 500;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e6e6f2;
+            transition: var(--transition);
+            font-size: 0.95rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(138, 121, 242, 0.2);
+        }
+
+        .btn {
+            border-radius: 12px;
+            padding: 0.75rem 1.25rem;
+            font-weight: 500;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            box-shadow: 0 4px 10px rgba(138, 121, 242, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(138, 121, 242, 0.4);
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        /* 记录项样式 */
+        .record {
+            background: var(--card-bg);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .record:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(138, 121, 242, 0.15);
+        }
+
+        .badge {
+            font-weight: 500;
+            padding: 0.5rem 0.8rem;
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+
+        /* 汇总样式 */
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.7rem 0;
+            border-bottom: 1px dashed rgba(138, 121, 242, 0.2);
+            font-size: 0.95rem;
+        }
+
+        .summary-item:last-child {
+            font-weight: 700;
+            color: var(--primary-color);
+            border-bottom: none;
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+            padding-top: 1rem;
+            border-top: 2px solid rgba(138, 121, 242, 0.1);
+        }
+
+        /* 图表容器 */
+        .chart-container {
+            width: 100%;
+            height: 280px;
+            border-radius: 12px;
+        }
+
+        .touch-chart {
+            -webkit-overflow-scrolling: auto; /* iOS 下滚动行为优化 */
+            touch-action: manipulation; /* 避免触发双指缩放或点击跳动 */
+        }
+
+        /* 导航标签页 */
+        .nav-tabs {
+            border-bottom: 2px solid rgba(138, 121, 242, 0.1);
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            color: var(--text-light);
+            font-weight: 500;
+            border-radius: 0;
+            padding: 0.55rem 0.45rem;
+            font-size: 0.9rem;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            background: transparent;
+            border-bottom: 3px solid var(--primary-color);
+            font-weight: 600;
+        }
+
+        /* 搜索框容器 */
+        #searchContainer {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* 搜索输入框 */
+        #search {
+            border-radius: 50px;
+            padding: 0.65rem 2.5rem 0.65rem 2.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #ddd;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        /* 聚焦状态 */
+        #search:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(138, 121, 242, 0.2);
+            outline: none;
+        }
+
+        /* 清除按钮 */
+        #searchClear {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        #searchClear:hover {
+            color: var(--danger-color);
+            transform: scale(1.1);
+        }
+
+        /* 日期筛选区域 */
+        .filter-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(138, 121, 242, 0.05);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+
+        /* 空状态 */
+        .empty {
+            padding: 3rem 1rem;
+            color: var(--text-light);
+        }
+
+        .empty i {
+            font-size: 3.5rem;
+            color: #dcdcff;
+            margin-bottom: 1rem;
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .record {
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            .container_main {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.7rem !important;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .chart-container {
+                height: 240px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .card-body {
+                padding: 1rem;
+            }
+
+            .form-control, .form-select, .btn {
+                padding: 0.65rem 0.9rem;
+            }
+
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-section > * {
+                width: 100%;
+            }
+        }
+
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--secondary-color);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+    </style>
+</head>
+<body class="poppins-bold">
+<main class="container_main">
+    <div class="container">
+        <h1 class="text-center mb-4">
+            <i class="bi bi-car-front me-2"></i>车险保费记录
+        </h1>
+
+
+        <div class="card mb-4">
+            <div class="card-body p-3">
+                <form class="row g-3 align-items-end" id="addForm">
+                    <div class="col-md-4">
+                        <label class="form-label small mb-1">保险公司</label>
+                        <select id="insuranceCompany" class="form-select">
+                            <option value="太平洋保险">太平洋保险</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">日期</label>
+                        <input id="date" type="date" class="form-control">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">金额 (元)</label>
+                        <input id="amount" class="form-control" placeholder="0.00">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">备注</label>
+                        <input id="note" type="text" class="form-control" placeholder="可选">
+                    </div>
+
+                    <div class="col-md-12 text-end">
+                        <button type="button" class="btn btn-primary" id="add" title="添加记录">
+                            <i class="bi bi-plus-circle me-1"></i> 添加记录
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="card">
+                    <div class="filter-section">
+                        <input type="date" id="startDate" class="form-control form-control-sm no-default-date">
+                        <span class="mx-2">至</span>
+                        <input type="date" id="endDate" class="form-control form-control-sm no-default-date">
+
+                        <button class="btn btn-sm btn-primary" id="filterRange">
+                            <i class="bi bi-funnel me-1"></i> 查询
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" id="showAll">
+                            <i class="bi bi-arrow-clockwise me-1"></i> 全部
+                        </button>
+                    </div>
+
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-list-check me-2"></i>
+                                <span class="fw-bold">车险记录</span>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="d-flex align-items-center">
+                                    <span class="me-2 small">排序:</span>
+                                    <select id="sortBy" class="form-select form-select-sm" style="width: 150px;">
+                                        <option value="date-desc">日期(新到旧)</option>
+                                        <option value="date-asc">日期(旧到新)</option>
+                                        <option value="amount-desc">金额(高到低)</option>
+                                        <option value="amount-asc">金额(低到高)</option>
+                                    </select>
+                                </div>
+                                <button id="toggleRecords" class="btn btn-sm btn-outline-secondary" type="button"
+                                        data-bs-toggle="tooltip" data-bs-placement="bottom" title="折叠/展开">
+                                    <i class="bi bi-chevron-down"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-0">
+                        <div id="list" class="d-none"></div>
+                    </div>
+                </div>
+            </div>
+
+            <aside class="col-lg-5">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-bar-chart-line me-2"></i>保费汇总</span>
+                        <button id="toggleSummary" class="btn btn-sm btn-outline-secondary" type="button"
+                                data-bs-toggle="tooltip" data-bs-placement="bottom" title="折叠/展开">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div class="card-body" id="summary"></div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- 图表部分 -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-graph-up me-2"></i>保费趋势</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="trendChart" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑模态框 -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">编辑车险记录</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm">
+                        <input type="hidden" id="editDate">
+                        <input type="hidden" id="editIndex">
+                        <div class="mb-3">
+                            <label class="form-label">保险公司</label>
+                            <select id="editInsuranceCompany" class="form-select">
+                                <option value="太平洋保险">太平洋保险</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">金额(元)</label>
+                            <input type="number" id="editAmount" class="form-control" step="0.01">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">备注</label>
+                            <input type="text" id="editNote" class="form-control">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="saveEdit">保存更改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    // 添加表单交互效果
+    document.addEventListener('DOMContentLoaded', function () {
+        const formInputs = document.querySelectorAll('.form-control, .form-select');
+        formInputs.forEach(input => {
+            input.addEventListener('focus', function () {
+                this.parentElement.classList.add('focused');
+            });
+            input.addEventListener('blur', function () {
+                this.parentElement.classList.remove('focused');
+            });
+        });
+
+        // 添加按钮点击效果
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(btn => {
+            btn.addEventListener('mousedown', function () {
+                this.style.transform = 'scale(0.98)';
+            });
+            btn.addEventListener('mouseup', function () {
+                this.style.transform = '';
+            });
+            btn.addEventListener('mouseleave', function () {
+                this.style.transform = '';
+            });
+        });
+
+    });
+</script>
+
+<script>
+    document.write('<script src="../vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="vendor/util/util_link.js"?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../js/popper.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../vendor/echarts/echarts.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="js/car.js?v=' + randomVersion + '"><\/script>');
+</script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>研发任务概况</title>
+    <!-- 每60秒刷新一次页面 -->
+    <meta http-equiv="refresh" content="60">
+    <!-- 设置网站图标 -->
+    <!-- 引入必要的JS库 -->
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="/logo.png?v=' + randomVersion + '"  type="image/png">');
+        document.write('<link rel="stylesheet" href="vendor/bootstrap5/css/bootstrap.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./css/util.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./css/task_overview.css?v=' + randomVersion + '">');
+        document.write('<script src="js/task_overview.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/echarts/echarts.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/elementui/js/vue.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/easyui/js-easyui/index.js?v=' + randomVersion + '"><\/script>');
+    </script>
+</head>
+<body>
+
+<div class="row">
+    <div class="col-12">
+        <!-- Bootstrap Card -->
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 total-tasks-section">
+                        <div class="d-flex flex-wrap">
+                            <!-- Display Data - First Row -->
+                            <p id="totalPlanHours" class="data-field total-plan-hours">月度计划工时：550</p>
+                            <p id="totalTasks" class="data-field total-tasks">总任务数：加载中...</p>
+                            <p id="totalHours" class="data-field total-hours">总工时：加载中...</p>
+                            <p id="completedTasks" class="data-field completed-tasks">已完成任务数：加载中...</p>
+                            <p id="completedHours" class="data-field completed-hours">已完成工时：加载中...</p>
+                            <p id="inProgressHours" class="data-field in-progress-hours">在开发工时：加载中...</p>
+                        </div>
+                        <!-- 柱状图容器 -->
+                        <div id="echartsContainer" style="height: 300px;"></div>
+                    </div>
+                    <div class="col-md-6 personal-tasks-section">
+                        <div class="d-flex flex-wrap">
+                            <!-- Display Data - Second Row -->
+                            <p id="personalPlanHours" class="data-field personal-plan-hours">个人月度计划工时：110</p>
+                            <p id="personalTasks" class="data-field personal-tasks">个人任务数：加载中...</p>
+                            <p id="personalHours" class="data-field personal-hours">个人工时：加载中...</p>
+                            <p id="personalCompletedTasks" class="data-field personal-completed-tasks">
+                                个人已完成任务数：加载中...</p>
+                            <p id="personalCompletedHours" class="data-field personal-completed-hours">
+                                个人已完成工时：加载中...</p>
+                            <p id="personalInProgressHours" class="data-field personal-in-progress-hours">
+                                个人在开发工时：加载中...</p>
+                        </div>
+                        <!-- 饼形图容器 -->
+                        <div id="pieChartContainer" style="height: 300px;"></div>
+                    </div>
+                </div>
+
+                <!-- Display Data Table -->
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped text-center">
+                        <!-- Table will be inserted here -->
+                    </table>
+                </div>
+
+                <!-- Display Data Table Controls -->
+                <div id="paginationSection" class="d-flex justify-content-center">
+                    <div id="paginationSection1">
+                        <label for="pageSizeSelect">每页显示数：</label>
+                        <select id="pageSizeSelect" onchange="changePageSize()">
+                            <option value="5" selected>5</option>
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                        </select>
+                    </div>
+                    <div id="paginationSection2">
+                        <!-- Pagination -->
+                        <nav aria-label="Page navigation" class="pagination justify-content-center">
+                            <ul class="pagination">
+                                <li class="page-item">
+                                    <a class="page-link" href="#" onclick="changePage('prev')">上一页</a>
+                                </li>
+                                <li class="page-item">
+                                    <span id="currentPage" class="page-link"></span>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#" onclick="changePage('next')">下一页</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

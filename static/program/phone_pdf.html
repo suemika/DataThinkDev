@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>石横特钢电话号码表</title>
+    <!-- 引入必要的JS库 -->
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="/logo.png?v=' + randomVersion + '"  type="image/png">');
+    </script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #pdf-container {
+            width: 100%;
+            height: 100%;
+        }
+
+    </style>
+</head>
+
+<body>
+<div id="pdf-container"></div>
+<script>
+    const randomParam = new Date().getTime(); // 使用当前时间戳
+    const pdfUrl = `https://www.shtggroup.com/utilFile/bgsdhhm/石横特钢电话号码表.pdf?v=${randomParam}`;
+
+    const pdfContainer = document.getElementById('pdf-container');
+    pdfContainer.innerHTML = `<iframe src="${pdfUrl}" width="100%" height="100%"></iframe>`;
+</script>
+</body>
+
+</html>
+

@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>精益认证节点</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../../logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../../bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="util/util.css?v=' + randomVersion + '">');
+        document.write('<script src="../../easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../util/util_link.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../../bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../../elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../js/popper.js?v=' + randomVersion + '"><\/script>');
+    </script>
+    <style>
+        .timeline-container {
+            position: relative;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+            margin: 10px;
+        }
+
+        .timeline-point {
+            position: absolute;
+            left: 8px;
+            top: 0;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #fff;
+            z-index: 1;
+        }
+
+        .timeline-point.completed {
+            background-image: url('png/completed.svg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .timeline-point.in-progress {
+            background-image: url('png/in-progress.svg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .timeline-point.pending {
+            background-image: url('png/pending.svg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .content-card {
+            flex: 1;
+            background: #f4f9ff;
+            border: 1px solid #dfeaf7;
+            padding: 10px;
+            border-radius: 15px;
+            margin-left: 40px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            font-size: 14px;
+        }
+
+        .detail-card {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .content-card h6 {
+            font-size: 14px;
+        }
+
+        .content-card p {
+            font-size: 13px;
+        }
+
+        .detail-card p {
+            margin: 5px 0;
+        }
+
+        .text-center {
+            margin-top: 10px;
+        }
+
+        .nav-item {
+            font-size: 16px;
+        }
+
+        .nav-pills {
+            justify-content: center;
+
+        }
+
+        .nav-pills .nav-link {
+            padding: 5px !important;
+        }
+
+        .nav-pills .nav-link.active {
+            background: #007bff;
+            color: #fff !important;
+        }
+
+        .custom-btn {
+            background: #007bff;
+            border: none;
+            transition: background 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .custom-btn:hover {
+            background: #007bff;
+        }
+
+        .badge-small {
+
+            font-size: 12px !important;
+            padding: 3px 6px !important;
+            border-radius: 8px !important;
+            height: 20px !important;
+        }
+
+        .mt-4 {
+            margin-top: 2px !important;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+
+            .content-card {
+                margin-left: 40px;
+                background: linear-gradient(135deg, #f4f9ff 0%, #e0e9ff 100%);
+            }
+
+            .user-name {
+                background-color: rgba(255, 255, 255, 0.5);
+                font-size: 18px;
+                border-radius: 10px;
+                z-index: 1001;
+            }
+        }
+
+        .disabled-button {
+            background-color: #fdfdfd;
+            color: white;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* 自定义.user-name位置 */
+        .user-name {
+            position: absolute;
+            top: 200px;
+            right: 10px;
+            margin-bottom: 5px;
+        }
+
+        .custom-btn:disabled {
+            background-color: grey;
+            color: white;
+            cursor: not-allowed;
+            opacity: 0.6;
+            border-color: grey;
+        }
+
+        #userName {
+            padding: 5px;
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* 自定义查看证书按钮样式 */
+        .custom-certificate-btn {
+            background: #007bff;
+            border: none;
+            color: white;
+            padding: 0.375rem 0.75rem;
+            border-radius: 10px;
+            transition: all 0.2s ease; /* 添加过渡效果使变化更平滑 */
+        }
+
+        /* 鼠标悬停状态 */
+        .custom-certificate-btn:hover {
+            background: #0069d9;
+            color: white;
+        }
+
+        /* 点击状态 */
+        .custom-certificate-btn:active,
+        .custom-certificate-btn:focus {
+            background: #0069d9 !important;
+            color: white !important;
+            box-shadow: none !important; /* 移除点击时的阴影效果 */
+            outline: none !important; /* 移除点击时的轮廓线 */
+        }
+
+        .text-success {
+            color: #16c17a !important;
+        }
+
+        .text-danger {
+            color: #f93139 !important;
+        }
+
+    </style>
+</head>
+
+<body class="poppins-bold">
+<div class="user-name"><span id="userName"></span></div>
+
+<header class="background-container">
+    <img id="header-img" src="" alt="ST">
+</header>
+<main class="container mt-4" id="mainContent">
+    <ul class="nav nav-pills mt-4" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="lean-student-tab" data-bs-toggle="pill" data-bs-target="#lean-student"
+                    type="button" role="tab" aria-controls="lean-student" aria-selected="true" data-role="精益学员">
+                精益学员
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="lean-backbone-tab" data-bs-toggle="pill" data-bs-target="#lean-backbone"
+                    type="button" role="tab" aria-controls="lean-backbone" aria-selected="false" data-role="精益骨干">
+                精益骨干
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="lean-coach-tab" data-bs-toggle="pill" data-bs-target="#lean-coach"
+                    type="button" role="tab" aria-controls="lean-coach" aria-selected="false" data-role="精益教练">
+                精益教练
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="senior-coach-tab" data-bs-toggle="pill" data-bs-target="#senior-coach"
+                    type="button" role="tab" aria-controls="senior-coach" aria-selected="false" data-role="资深教练">
+                资深教练
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content mt-4">
+        <div class="tab-pane fade show active" id="timeline" role="tabpanel" aria-labelledby="timeline-tab">
+            <div class="timeline-container" id="timeline-content"></div>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <button id="signup-button" class="btn custom-btn btn-lg text-light">立即报名</button>
+    </div>
+
+    <!-- Modal HTML (Add this to your HTML body) -->
+    <div class="modal fade" id="projectExperienceModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">申请考试</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="project-experience">请输入您的项目经验：
+                        <br><span class="text-danger">要求报名人员参与单个精益项目6个月以上。</span>
+                    </label>
+                    <textarea id="project-experience" class="form-control" rows="4"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="submit-experience">提交经验</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal HTML (Add this to your HTML body) -->
+    <div class="modal fade" id="optionsModal" tabindex="-1" aria-labelledby="optionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="optionsModalLabel">请选择您要访问的页面</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>您已完成考试，请选择以下选项：</p>
+                    <button type="button" class="btn btn-primary" id="summaryButton">个人总结</button>
+                    <button type="button" class="btn btn-primary" id="selfAssessmentButton">精益认证个人自评表
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script>
+
+    // 全局变量
+    let userName = getNameFromUrl("userName");
+    let currentRole;
+    let nowRole;
+    let tabRole = '精益学员';
+    let userStatus;
+    let userData;
+    let userNa;
+
+    const ROLES = {
+        LEAN_STUDENT: "精益学员",
+        LEAN_BACKBONE: "精益骨干",
+        LEAN_COACH: "精益教练",
+        SENIOR_COACH: "资深教练"
+    };
+
+    const completedText = "已通过";
+    const redirectURL = `lean_list.html?gzbh=${userName}`;
+    const redirectSummaryURL = `work_summary.html?userName=${userName}&role=${tabRole}`;
+    const redirectSelfAssessmentURL = `lean_intro.html?userName=${userName}&role=${tabRole}`;
+
+    // 加载并生成时间线
+    async function loadAndGenerateTimeline(userName, currentRole) {
+        const {currentData: loadedData, userStatus: loadedStatus} = await queryUserData(userName, currentRole);
+        userData = loadedData;
+        userStatus = loadedStatus;
+        generateTimeline(userData, currentRole);
+    }
+
+    // 加载用户列表
+    async function loadList(userName) {
+        const response = await fetchDataFromAPI('662', userName);
+        let currentRole = null;
+        let userStatus = null;
+        let userNa = null;
+        if (response.data.status === 0) {
+            currentRole = response.data.user;
+            userStatus = response.data.user_status;
+            const userNameElement = document.getElementById('userName');
+            if (userNameElement && response.data.user_name) {
+                userNameElement.textContent = response.data.user_name;
+            }
+        }
+        updateTabAccessibility(currentRole, userStatus);
+        return {currentRole, userStatus, userNa};
+    }
+
+    // 更新标签页的可访问性
+    function updateTabAccessibility(currentRole, userStatus) {
+        const roleButtons = document.querySelectorAll('.nav-link');
+        roleButtons.forEach((button) => {
+            const role = button.getAttribute('data-role');
+            const isActiveRole = role === currentRole;
+            const isEnabled = role === ROLES.LEAN_STUDENT ||
+                (role === ROLES.LEAN_BACKBONE && userStatus);
+            //||(role === ROLES.LEAN_COACH && userStatus && currentRole === ROLES.LEAN_BACKBONE) ||
+            // (role === ROLES.SENIOR_COACH && userStatus && currentRole === ROLES.SENIOR_COACH);
+
+            button.disabled = !isEnabled && !isActiveRole;
+            if (button.disabled) {
+                button.classList.add('disabled-button');
+            } else {
+                button.classList.remove('disabled-button');
+            }
+        });
+    }
+
+    // 查询用户数据
+    async function queryUserData(userName, currentRole) {
+        const response = await fetchDataFromAPI('663', {
+            workId: userName,
+            role: currentRole,
+        });
+        let currentData = null;
+        let userStatus = null;
+        if (response.data.status === 0) {
+            currentData = response.data.certifications;
+            userStatus = response.data.user_status;
+        }
+        return {currentData, userStatus};
+    }
+
+    // 生成时间线
+    function generateTimeline(roleData, role) {
+        const timelineContainer = document.getElementById('timeline-content');
+        timelineContainer.innerHTML = '';
+
+        const examStage = roleData.find(item => item.stage_name === "认证考试");
+        if (examStage && examStage.status === "已完成") {
+            timelineContainer.classList.add('completed-exam');
+        } else {
+            timelineContainer.classList.remove('completed-exam');
+        }
+
+        roleData.forEach(item => {
+            timelineContainer.innerHTML += createTimelineItem(item, role);
+        });
+
+        updateSignupButton(roleData, role);
+    }
+
+    // 获取角色对应的ID
+    function getRoleId(role) {
+        switch (role) {
+            case ROLES.LEAN_STUDENT:
+                return 'student';
+            case ROLES.LEAN_BACKBONE:
+                return 'backbone';
+            case ROLES.LEAN_COACH:
+                return 'coach';
+            case ROLES.SENIOR_COACH:
+                return 'senior';
+            default:
+                return 'student';
+        }
+    }
+
+    // 申请考试
+    async function applyForExam(userName, currentRole, projectExperience) {
+        var stage_name;
+        if (currentRole === ROLES.LEAN_STUDENT)
+            stage_name = "认证考试";
+        else if (currentRole === ROLES.LEAN_BACKBONE)
+            stage_name = "项目经验审核";
+
+        const feedbackData = {
+            workId: userName,
+            role: currentRole,
+            stage_name: stage_name,
+            project_experience: projectExperience
+        };
+        try {
+            const response = await fetchDataFromAPI('667', feedbackData);
+            if (response.data.status === 0) {
+                if (currentRole === ROLES.LEAN_STUDENT)
+                    alert("申请考试成功!");
+                else if (currentRole === ROLES.LEAN_BACKBONE)
+                    alert("申请考试成功，请等待审核");
+                updateSignupButtonAfterExamApplied();
+                location.reload();
+            } else {
+                console.error("Apply for Exam Error: ", response.data.data.msg);
+                alert("考试申请失败，请重试。");
+            }
+        } catch (error) {
+            console.error("Fetch Data Error: ", error);
+            alert("请求失败，请稍后再试。");
+        }
+    }
+
+    // 骨干申请
+    async function applyForSignUp(userName) {
+        const feedbackData = {
+            workId: userName
+        };
+        try {
+            const response = await fetchDataFromAPI('692', feedbackData);
+            if (response.data.status === 0) {
+                alert("申请成功！");
+                location.reload();
+            } else {
+                console.error("Apply for Exam Error: ", response.data.msg);
+                alert("考试申请失败，请重试。");
+            }
+        } catch (error) {
+            console.error("Fetch Data Error: ", error);
+            alert("请求失败，请稍后再试。");
+        }
+    }
+
+    // 更新考试申请后的按钮状态
+    function updateSignupButtonAfterExamApplied() {
+        const signupButton = document.getElementById('signup-button');
+        signupButton.innerText = "等待考试";
+        signupButton.disabled = true;
+    }
+
+    // 更新报名按钮状态
+    function updateSignupButton(roleData, role) {
+        const signupButton = document.getElementById('signup-button');
+        signupButton.disabled = false;
+        signupButton.innerText = "立即报名";
+        signupButton.onclick = () => location.href = redirectURL;
+
+        switch (role) {
+            case ROLES.LEAN_STUDENT:
+                handleLeanStudent(roleData, signupButton);
+                break;
+            case ROLES.LEAN_BACKBONE:
+                handleLeanBackbone(roleData, signupButton);
+                break;
+            case ROLES.LEAN_COACH:
+                handleLeanCoach(roleData, signupButton);
+                break;
+            case ROLES.SENIOR_COACH:
+                handleSeniorCoach(roleData, signupButton);
+                break;
+            default:
+                break;
+        }
+    }
+
+    function tabTab() {
+        const leanBackboneTab = document.getElementById('lean-backbone-tab');
+        const leanStudentTab = document.getElementById('lean-student-tab');
+
+        leanStudentTab.classList.remove('active');
+        leanBackboneTab.classList.add('active');
+
+        loadAndGenerateTimeline(userName, ROLES.LEAN_BACKBONE)
+    }
+
+    // 处理精益学员角色的按钮状态
+    function handleLeanStudent(roleData, signupButton) {
+        const registrationStage = roleData.find(item => item.stage_name === "认证报名");
+        const examStage = roleData.find(item => item.stage_name === "认证考试");
+        if (!userStatus && nowRole !== ROLES.LEAN_STUDENT) {
+            userStatus = true;
+        }
+
+        if (userStatus && nowRole === ROLES.LEAN_STUDENT) {
+            // 精益学员已完成
+            signupButton.innerText = "申请骨干报名";
+            signupButton.onclick = tabTab;
+            return;
+        } else if (userStatus && userData) {
+            signupButton.innerText = completedText;
+            signupButton.disabled = true;
+            return;
+        }
+
+        if (registrationStage) {
+            if (registrationStage.status === "进行中") {
+                // 若认证报名处于进行中状态，设置按钮文本为"请等待审核"，并禁用按钮
+                signupButton.innerText = "请等待审核";
+                signupButton.disabled = true;
+            } else if (registrationStage.status === "已完成") {
+                // 若认证报名已完成，设置按钮文本为"申请考试"，并绑定点击事件
+                signupButton.innerText = "申请考试";
+                signupButton.onclick = async () => {
+                    if (confirm("已经学习完成，确认考试吗？")) {
+                        await applyForExam(userName, currentRole);
+                    }
+                };
+            }
+        }
+
+        if (examStage) {
+            if (examStage.status === "进行中") {
+                // 若认证考试处于进行中状态，更新按钮状态为"等待考试"
+                updateSignupButtonAfterExamApplied();
+            } else if (examStage.status === "已完成" && examStage.exam_result === "已通过") {
+                // 若认证考试已完成，设置按钮文本为"已通过"，并禁用按钮
+                signupButton.innerText = completedText;
+                signupButton.disabled = true;
+            }
+        }
+    }
+
+    // 处理精益骨干角色的按钮状态
+    function handleLeanBackbone(roleData, signupButton) {
+        const registrationStage = roleData.find(item => item.stage_name === "认证考试");
+        const leanStage = roleData.find(item => item.stage_name === "认证学习");
+        if (userStatus && userData) {
+            // 若用户状态为已完成且有用户数据，设置按钮文本为"已通过"，并禁用按钮
+            signupButton.innerText = completedText;
+            signupButton.disabled = true;
+            return;
+        }
+
+        if (leanStage && leanStage.status === "未开始") {
+            // 若认证学习阶段未开始，设置按钮文本为"申请报名"，并绑定点击事件
+            signupButton.innerText = "申请报名";
+            signupButton.onclick = async () => {
+                await applyForSignUp(userName);
+            };
+            return;
+        }
+
+        if (registrationStage) {
+            if (registrationStage.status === "未开始") {
+                // 若认证考试阶段未开始，设置按钮文本为"申请考试"，并绑定点击事件以显示项目经验模态框
+                signupButton.innerText = "申请考试";
+                signupButton.onclick = () => {
+                    const modal = new bootstrap.Modal(document.getElementById('projectExperienceModal'));
+                    modal.show();
+                };
+            } else if (registrationStage.status === "进行中") {
+                // 若认证考试阶段进行中，设置按钮文本为"请等待考试"，并禁用按钮
+                signupButton.innerText = "请等待考试";
+                signupButton.disabled = true;
+            } else if (registrationStage.status === "已完成") {
+                // 若认证考试阶段已完成，设置按钮文本为"填写信息"，并绑定点击事件以显示选项模态框
+                signupButton.innerText = "填写信息";
+                signupButton.onclick = () => {
+                    const optionsModal = new bootstrap.Modal(document.getElementById('optionsModal'));
+                    optionsModal.show();
+                };
+            }
+        }
+    }
+
+    // 处理精益教练角色的按钮状态
+    function handleLeanCoach(roleData, signupButton) {
+        const registrationStage = roleData.find(item => item.stage_name === "认证报名");
+
+        if (userStatus && userData) {
+            // 若用户状态为已完成且有用户数据，设置按钮文本为"已通过"，并禁用按钮
+            signupButton.innerText = completedText;
+            signupButton.disabled = true;
+        }
+
+        if (registrationStage) {
+            if (registrationStage.status === "未开始") {
+                // 若认证报名阶段未开始，设置按钮文本为"立即报名"，并绑定点击事件进行页面跳转
+                signupButton.innerText = "立即报名";
+                signupButton.onclick = () => location.href = redirectURL;
+            } else if (registrationStage.status === "进行中") {
+                // 若认证报名阶段进行中，设置按钮文本为"请等待审核"，并禁用按钮
+                signupButton.innerText = "请等待审核";
+                signupButton.disabled = true;
+            }
+        }
+    }
+
+    // 处理资深教练角色的按钮状态
+    function handleSeniorCoach(roleData, signupButton) {
+        if (userStatus && userData) {
+            // 若用户状态为已完成且有用户数据，设置按钮文本为"已达到当前阶段，不可重复报名"，并禁用按钮
+            signupButton.innerText = "已达到当前阶段，不可重复报名";
+            signupButton.disabled = true;
+        }
+    }
+
+    // 创建时间线项目 - 精益学员
+    function createLeanStudentTimelineItem(data) {
+        let statusClass, badgeClass;
+        if (data.status === "已完成") {
+            statusClass = "completed";
+            badgeClass = "bg-success";
+        } else if (data.status === "进行中") {
+            statusClass = "in-progress";
+            badgeClass = "bg-warning";
+        } else {
+            statusClass = "pending";
+            badgeClass = "bg-secondary";
+        }
+
+        let canViewCertificate = data.stage_name === "认证考试" && data.exam_result === "已通过" && (data.status === "已完成" || userStatus);
+
+        // 检查是否需要隐藏考试时间地点信息
+        const shouldHideExamInfo = data.exam_result === "已通过" || data.exam_result === "未通过";
+        // 检查是否需要隐藏考试成绩div（有成绩但状态为"已开始"）
+        const shouldHideScoreDiv = data.exam_score && data.exam_result !== "已通过" && data.exam_result !== "未通过";
+
+        // 设置考试结果文字颜色
+        const resultColorClass = data.exam_result === "已通过" ? "text-success" :
+            data.exam_result === "未通过" ? "text-danger" : "";
+
+        return `
+        <div class="timeline-item">
+            <div class="timeline-point ${statusClass}">
+            </div>
+            <div class="content-card">
+                <h6 class="mb-2 fw-bold">
+                    ${data.stage_name}
+                    ${data.stage_name === "认证考试" ? `<span class="badge ${badgeClass} badge-small">${data.status}</span>` : ''}
+                </h6>
+                ${data.stage_name === "认证学习" ? `
+                    <p>${data.stage_description}</p>
+                ` : (data.stage_name !== "认证考试" ? `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <p class="flex-grow-1 mb-0">${data.stage_description}</p>
+                        <span class="badge ${badgeClass} badge-small">${data.status}</span>
+                    </div>
+                ` : '')}
+                ${data.stage_name === "认证报名" && data.status !== "已完成" && data.start_time ? `
+                    <div class="card mt-3 p-2 bg-primary text-light rounded">
+                        <p class="mb-1"><strong>报名时间:</strong> <span>${data.start_time ? new Date(data.start_time).toLocaleString() : "暂无"}</span></p>
+                        <p class="mb-1"><strong>审核时间:</strong> <span>${data.end_time ? new Date(data.end_time).toLocaleString() : "暂无"}</span></p>
+                    </div>
+                ` : ''}
+                ${data.stage_name === "认证考试" && data.status !== "未开始" ? `
+                    <div class="mt-2">
+                        ${!shouldHideExamInfo ? `
+                            <div class="card p-2 mb-3">
+                                <p><strong>考试时间、地点:</strong></p>
+                                <p>${data.exam_time || "暂无"}</p>
+                                <p>${data.exam_location || "暂无"}</p>
+                            </div>
+                        ` : ''}
+                        ${!shouldHideScoreDiv ? `
+                            <div class="card p-2">
+                                <h6 class="fw-bold d-flex justify-content-between">
+                                    <span>考试成绩:</span>
+                                    ${data.exam_score ? `
+                                        <span class="${resultColorClass}">
+                                            ${data.exam_score} 分 ${data.exam_result || ""}
+                                        </span>
+                                    ` : `
+                                        <span class="${resultColorClass}">${data.exam_result || "无结果"}</span>
+                                    `}
+                                </h6>
+                            </div>
+                        ` : ''}
+                        ${canViewCertificate ? `
+                             <button class="btn custom-certificate-btn mt-2" onclick="location.href='zhengshu.html?userName=${userName}&tabRole=${tabRole}'">查看证书</button>
+                        ` : ''}
+                    </div>
+                ` : `<div class="mt-2">
+                        ${canViewCertificate ? `
+                             <button class="btn custom-certificate-btn mt-2" onclick="location.href='zhengshu.html?userName=${userName}&tabRole=${tabRole}'">查看证书</button>
+                        ` : ''}
+                    </div>`}
+            </div>
+        </div>
+    `;
+    }
+
+    // 创建时间线项目 - 精益骨干
+    function createLeanBackboneTimelineItem(data) {
+        let statusClass, badgeClass;
+        if (data.status === "已完成") {
+            statusClass = "completed";
+            badgeClass = "bg-success";
+        } else if (data.status === "进行中") {
+            statusClass = "in-progress";
+            badgeClass = "bg-warning";
+        } else {
+            statusClass = "pending";
+            badgeClass = "bg-secondary";
+        }
+
+        // 精益骨干不显示证书按钮
+        let canViewCertificate = false;
+
+        // 检查是否需要隐藏考试时间地点信息
+        const shouldHideExamInfo = data.exam_result === "已通过" || data.exam_result === "未通过";
+        // 检查是否需要隐藏考试成绩div（有成绩但状态为"已开始"）
+        const shouldHideScoreDiv = data.exam_score && data.exam_result !== "已通过" && data.exam_result !== "未通过";
+
+        // 设置考试结果文字颜色
+        const resultColorClass = data.exam_result === "已通过" ? "text-success" :
+            data.exam_result === "未通过" ? "text-danger" : "";
+
+        return `
+        <div class="timeline-item">
+            <div class="timeline-point ${statusClass}">
+            </div>
+            <div class="content-card">
+                <h6 class="mb-2 fw-bold">
+                    ${data.stage_name}
+                    ${data.stage_name === "认证考试" ? `<span class="badge ${badgeClass} badge-small">${data.status}</span>` : ''}
+                </h6>
+                ${data.stage_name === "认证学习" ? `
+                    <p>${data.stage_description}</p>
+                ` : (data.stage_name !== "认证考试" ? `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <p class="flex-grow-1 mb-0">${data.stage_description}</p>
+                        <span class="badge ${badgeClass} badge-small">${data.status}</span>
+                    </div>
+                ` : '')}
+                ${data.stage_name === "认证报名" && data.status !== "已完成" && data.start_time ? `
+                    <div class="card mt-3 p-2 bg-primary text-light rounded">
+                        <p class="mb-1"><strong>报名时间:</strong> <span>${data.start_time ? new Date(data.start_time).toLocaleString() : "暂无"}</span></p>
+                        <p class="mb-1"><strong>审核时间:</strong> <span>${data.end_time ? new Date(data.end_time).toLocaleString() : "暂无"}</span></p>
+                    </div>
+                ` : ''}
+                ${data.stage_name === "认证考试" && data.status !== "未开始" ? `
+                    <div class="mt-2">
+                        ${!shouldHideExamInfo ? `
+                            <div class="card p-2 mb-3">
+                                <p><strong>考试时间、地点:</strong></p>
+                                <p>${data.exam_time || "暂无"}</p>
+                                <p>${data.exam_location || "暂无"}</p>
+                            </div>
+                        ` : ''}
+                        ${!shouldHideScoreDiv ? `
+                            <div class="card p-2">
+                                <h6 class="fw-bold d-flex justify-content-between">
+                                    <span>考试成绩:</span>
+                                    ${data.exam_score ? `
+                                        <span class="${resultColorClass}">
+                                            ${data.exam_score} 分 ${data.exam_result || ""}
+                                        </span>
+                                    ` : `
+                                        <span class="${resultColorClass}">${data.exam_result || "无结果"}</span>
+                                    `}
+                                </h6>
+                            </div>
+                        ` : ''}
+                        ${canViewCertificate ? `
+                             <button class="btn custom-certificate-btn mt-2" onclick="location.href='zhengshu.html?userName=${userName}&tabRole=${tabRole}'">查看证书</button>
+                        ` : ''}
+                    </div>
+                ` : `<div class="mt-2">
+                        ${canViewCertificate ? `
+                             <button class="btn custom-certificate-btn mt-2" onclick="location.href='zhengshu.html?userName=${userName}&tabRole=${tabRole}'">查看证书</button>
+                        ` : ''}
+                    </div>`}
+            </div>
+        </div>
+    `;
+    }
+
+    // 创建时间线项目 - 精益教练
+    function createLeanCoachTimelineItem(data) {
+        return ''
+    }
+
+    // 创建时间线项目 - 资深教练
+    function createSeniorCoachTimelineItem(data) {
+        return ''
+    }
+
+    // 通用创建时间线项目函数
+    function createTimelineItem(data, role) {
+        switch (role) {
+            case ROLES.LEAN_STUDENT:
+                return createLeanStudentTimelineItem(data);
+            case ROLES.LEAN_BACKBONE:
+                return createLeanBackboneTimelineItem(data);
+            case ROLES.LEAN_COACH:
+                return createLeanCoachTimelineItem(data);
+            case ROLES.SENIOR_COACH:
+                return createSeniorCoachTimelineItem(data);
+            default:
+                return createLeanStudentTimelineItem(data);
+        }
+    }
+
+    // 加载用户角色
+    async function loadUserRole(userName) {
+        const response = await fetchDataFromAPI('690', userName);
+        return response.data.status;
+    }
+
+    // 页面加载完成后的初始化操作
+    document.addEventListener("DOMContentLoaded", async function () {
+        // 检查是否获取到userName
+        var userRole = await loadUserRole(userName);
+        if (!userName || userRole === 0) {
+            // 弹出提示并重定向到另一个页面
+            alert("无权限访问，请退出。");
+            window.location.href = "http://edi.sdstg.com/"; // 这里设置你的重定向URL
+            return; // 确保后续的代码不再执行
+        }
+
+        const signupButton = document.getElementById('signup-button');
+        signupButton.innerText = "立即报名";
+        signupButton.onclick = () => location.href = redirectURL;
+
+        const headerImg = document.getElementById('header-img');
+        headerImg.src = '../logo/font_logo2.png';
+
+        const {currentRole: loadedRole, userStatus: loadedStatus, userNa: loadedNa} = await loadList(userName);
+        currentRole = loadedRole;
+        userStatus = loadedStatus;
+        nowRole = loadedRole;
+        userNa = loadedNa;
+        if (!currentRole) {
+            return;
+        }
+
+        // 根据条件激活精益骨干标签页
+        if (currentRole === ROLES.LEAN_BACKBONE) {
+            const leanBackboneTab = document.getElementById('lean-backbone-tab');
+            const leanStudentTab = document.getElementById('lean-student-tab');
+
+            leanStudentTab.classList.remove('active');
+            leanBackboneTab.classList.add('active');
+            currentRole = ROLES.LEAN_BACKBONE;
+            tabRole = ROLES.LEAN_BACKBONE;
+        }
+
+        await loadAndGenerateTimeline(userName, currentRole);
+
+        document.querySelectorAll('.nav-link').forEach(button => {
+            button.addEventListener('click', async () => {
+                const role = button.getAttribute('data-role');
+                currentRole = role;
+                tabRole = role;
+                await loadAndGenerateTimeline(userName, role);
+            });
+        });
+
+        const submitExperienceButton = document.getElementById('submit-experience');
+        if (submitExperienceButton) {
+            submitExperienceButton.onclick = async () => {
+                const projectExperience = document.getElementById('project-experience').value.trim();
+                if (projectExperience) {
+                    if (confirm("是否确认提交？")) {
+                        await applyForExam(userName, currentRole, projectExperience);
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('projectExperienceModal'));
+                        modal.hide();
+                    }
+                } else {
+                    alert("项目经验不能为空！");
+                }
+            };
+        }
+
+        document.getElementById('summaryButton').onclick = () => {
+            window.location.href = redirectSummaryURL;
+        };
+
+        document.getElementById('selfAssessmentButton').onclick = () => {
+            window.location.href = redirectSelfAssessmentURL;
+        };
+    });
+</script>
+</body>
+
+</html>

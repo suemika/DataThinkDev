@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>油耗电耗计算</title>
+    <link rel="icon" href="/logo.png" type="image/png">
+    <link rel="stylesheet" href="vendor/bootstrap5/css/bootstrap.css">
+    <style>
+        :root {
+            --fuel-color: #f97316;
+            --fuel-light: #fff7ed;
+            --fuel-border: #fed7aa;
+            --elec-color: #0ea5e9;
+            --elec-light: #f0f9ff;
+            --elec-border: #bae6fd;
+            --bg: #f8fafc;
+        }
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        /* 顶部标题栏 */
+        .hero-bar {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: #fff;
+            padding: 28px 0 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .hero-bar h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -.02em;
+        }
+        .hero-bar .sub {
+            font-size: .85rem;
+            opacity: .55;
+            margin-top: 4px;
+        }
+        /* 卡片 */
+        .card-fuel, .card-elec, .card-param, .card-result {
+            border: none;
+            border-radius: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+            transition: box-shadow .2s;
+        }
+        .card-fuel:hover, .card-elec:hover, .card-param:hover { box-shadow: 0 2px 8px rgba(0,0,0,.08), 0 8px 24px rgba(0,0,0,.06); }
+        .card-fuel .card-header {
+            background: linear-gradient(135deg, #fff7ed, #ffedd5);
+            border-bottom: 1px solid #fed7aa;
+            font-weight: 700;
+            color: #c2410c;
+            font-size: 1.05rem;
+            border-radius: 14px 14px 0 0 !important;
+            padding: 14px 20px;
+        }
+        .card-elec .card-header {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border-bottom: 1px solid #bae6fd;
+            font-weight: 700;
+            color: #0369a1;
+            font-size: 1.05rem;
+            border-radius: 14px 14px 0 0 !important;
+            padding: 14px 20px;
+        }
+        .card-param .card-header {
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 700;
+            color: #475569;
+            font-size: 1.05rem;
+            border-radius: 14px 14px 0 0 !important;
+            padding: 14px 20px;
+        }
+        .card-body { padding: 20px; }
+        .card-result { text-align: center; padding: 20px 12px; }
+        .card-result .period { font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; margin-bottom: 10px; font-weight: 600; }
+        .card-result .cost-item { margin-bottom: 8px; }
+        .card-result .cost-label { font-size: .75rem; color: #94a3b8; }
+        .card-result .cost-value { font-size: 1.15rem; font-weight: 700; }
+        .cost-fuel  { color: #ea580c; }
+        .cost-elec  { color: #0284c7; }
+        .cost-muted { color: #64748b; }
+        .card-result .mileage { font-size: .8rem; color: #64748b; margin-top: 6px; }
+        /* 输入框 */
+        .form-label { font-weight: 600; font-size: .82rem; color: #475569; margin-bottom: 4px; }
+        .form-control, .input-group-text {
+            border-radius: 10px;
+            border-color: #e2e8f0;
+            padding: 9px 14px;
+            font-size: .95rem;
+        }
+        .form-control:focus {
+            border-color: #94a3b8;
+            box-shadow: 0 0 0 3px rgba(148,163,184,.15);
+        }
+        .input-group .form-control { border-radius: 10px 0 0 10px; }
+        .input-group .btn { border-radius: 0 10px 10px 0; }
+        /* 按钮 */
+        .btn-calc {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 40px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all .2s;
+            box-shadow: 0 2px 8px rgba(99,102,241,.3);
+        }
+        .btn-calc:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(99,102,241,.4);
+            color: #fff;
+        }
+        .btn-calc:active { transform: translateY(0); }
+        /* 图表容器 */
+        .chart-wrap {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        /* 油价提示 */
+        #oilPriceUpdate { font-size: .72rem; color: #65a30d; }
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .card-result { margin-bottom: 12px; }
+        }
+
+        /* 图标用 Unicode */
+        .icon-fuel::before { content: '⛽ '; }
+        .icon-elec::before { content: '⚡ '; }
+        .icon-dist::before { content: '🛣️ '; }
+        .icon-day::before  { content: '📅 '; }
+    </style>
+</head>
+<body>
+
+<!-- 顶部 -->
+<div class="hero-bar">
+    <div class="container">
+        <h1>⛽ 油耗 · 电耗 费用计算器</h1>
+        <div class="sub">山东泰安实时油价 — <span id="heroOilTime">获取中…</span></div>
+    </div>
+</div>
+
+<div class="container" style="max-width: 1060px;">
+
+    <!-- 输入区 -->
+    <div class="row g-3 mb-4">
+        <!-- 油耗卡片 -->
+        <div class="col-lg-6">
+            <div class="card card-fuel h-100">
+                <div class="card-header"><span class="icon-fuel"></span>燃油参数</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-sm-4">
+                            <label for="fuelConsumption" class="form-label">百公里油耗（升）</label>
+                            <input type="number" step="0.1" class="form-control" id="fuelConsumption" value="8.2">
+                        </div>
+                        <div class="col-sm-4">
+                            <label for="fuelPrice92" class="form-label">92# 油价</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" class="form-control" id="fuelPrice92" value="8.68">
+                                <button class="btn btn-outline-secondary btn-sm" type="button" id="fetchOilPrice" title="获取泰安实时油价">🔄</button>
+                            </div>
+                            <small id="oilPriceUpdate" style="display:none"></small>
+                        </div>
+                        <div class="col-sm-4">
+                            <label for="fuelPrice95" class="form-label">95# 油价</label>
+                            <input type="number" step="0.01" class="form-control" id="fuelPrice95" value="9.31">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 电耗卡片 -->
+        <div class="col-lg-6">
+            <div class="card card-elec h-100">
+                <div class="card-header"><span class="icon-elec"></span>电动参数</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label for="electricConsumption" class="form-label">百公里电耗（千瓦时）</label>
+                            <input type="number" step="0.1" class="form-control" id="electricConsumption" value="19">
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="electricPrice" class="form-label">电价（元/千瓦时）</label>
+                            <div class="input-group">
+                                <input type="number" step="0.001" class="form-control" id="electricPrice" value="0.385">
+                                <button class="btn btn-outline-secondary btn-sm" type="button" id="toggleElecRef" title="山东电价参考">💡</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 山东充电桩电价参考 -->
+                    <div id="elecRefPanel" style="display:none; margin-top:12px; padding:10px; background:#f0f9ff; border-radius:10px; border:1px solid #bae6fd; text-align:center;">
+                        <img src="https://img.ma3you.com/media/uploads/img_files/5baf856d5f76d5cdb02dede7a6751baa/84cc4775c7af42b1bea415c8521da325_op.jpg" 
+                             alt="山东充电桩电价" 
+                             style="max-width:100%; border-radius:8px;" 
+                             id="elecPriceImg">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通用参数 + 按钮 -->
+    <div class="card card-param mb-4">
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-sm-5">
+                    <label for="distance" class="form-label"><span class="icon-dist"></span>每日行驶距离（公里）</label>
+                    <input type="number" step="1" class="form-control" id="distance" value="70">
+                </div>
+                <div class="col-sm-3">
+                    <label for="daysPerMonth" class="form-label"><span class="icon-day"></span>每月出行天数</label>
+                    <input type="number" step="1" class="form-control" id="daysPerMonth" value="25">
+                </div>
+                <div class="col-sm-4 d-flex align-items-end">
+                    <button type="button" class="btn btn-calc w-100" id="calculate-button">
+                        📊 计算费用
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 结果区 -->
+    <div class="row g-3 mb-4" id="result-section" style="display:none;">
+        <div class="col-sm-6 col-lg-3">
+            <div class="card card-result">
+                <div class="period">📆 每天</div>
+                <div class="mileage">行驶 <strong id="dailyDistance">-</strong> 公里</div>
+                <hr class="my-2">
+                <div class="cost-item"><span class="cost-label">电费</span><br><span class="cost-value cost-elec" id="dailyElectricCost">-</span> 元</div>
+                <div class="cost-item"><span class="cost-label">92# 油费</span><br><span class="cost-value cost-fuel" id="dailyFuelCost92">-</span> 元</div>
+                <div class="cost-item"><span class="cost-label">95# 油费</span><br><span class="cost-value cost-fuel" id="dailyFuelCost95">-</span> 元</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card card-result">
+                <div class="period">📅 每月</div>
+                <div class="mileage">行驶 <strong id="monthlyDistance">-</strong> 公里</div>
+                <hr class="my-2">
+                <div class="cost-item"><span class="cost-label">电费</span><br><span class="cost-value cost-elec" id="monthlyElectricCost">-</span> 元</div>
+                <div class="cost-item"><span class="cost-label">92# 油费</span><br><span class="cost-value cost-fuel" id="monthlyFuelCost92">-</span> 元</div>
+                <div class="cost-item"><span class="cost-label">95# 油费</span><br><span class="cost-value cost-fuel" id="monthlyFuelCost95">-</span> 元</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card card-result">
+                <div class="period">📆 每年</div>
+                <div class="mileage">行驶 <strong id="yearlyDistance">-</strong> 公里</div>
+                <hr class="my-2">
+                <div class="cost-item"><span class="cost-label">电费</span><br><span class="cost-value cost-elec" id="yearlyElectricCost">-</span> 元</div>
+                <div class="cost-item"><span class="cost-label">92# 油费</span><br><span class="cost-value cost-fuel" id="yearlyFuelCost92">-</span> 元</div>
+                <div class="cost-item"><span class="cost-label">95# 油费</span><br><span class="cost-value cost-fuel" id="yearlyFuelCost95">-</span> 元</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card card-result">
+                <div class="period">📍 每公里</div>
+                <hr class="my-2">
+                <div class="cost-item"><span class="cost-label">电费</span><br><span class="cost-value cost-elec" id="perKmElectricCost">-</span> 元</div>
+                <div class="cost-item"><span class="cost-label">92# 油费</span><br><span class="cost-value cost-fuel" id="perKmFuelCost92">-</span> 元</div>
+                <div class="cost-item"><span class="cost-label">95# 油费</span><br><span class="cost-value cost-fuel" id="perKmFuelCost95">-</span> 元</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 柱状图 -->
+    <div class="chart-wrap">
+        <div id="resultChart" style="width: 100%; height: 420px;"></div>
+    </div>
+
+    <!-- 近3个月油价走势 -->
+    <div class="chart-wrap">
+        <div id="trendChart" style="width: 100%; height: 380px;"></div>
+    </div>
+
+</div>
+
+<script src="vendor/bootstrap5/js/bootstrap.js"></script>
+<script src="vendor/echarts/echarts.js"></script>
+<script src="vendor/elementui/js/jquery-3.7.0.min.js"></script>
+<script src="vendor/elementui/js/vue.js"></script>
+<script src="vendor/easyui/js-easyui/axios.min.js"></script>
+<script src="vendor/easyui/js-easyui/index.js"></script>
+<script src="js/fuel_cost_calculator.js"></script>
+
+</body>
+</html>

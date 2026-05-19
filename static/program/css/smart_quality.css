@@ -1,0 +1,142 @@
+/* 表单样式 */
+.container-content {
+    z-index: 2;
+    position: relative;
+    text-align: left;
+    background-color: #f8f9fa;
+}
+
+.alert-custom {
+    padding: 10px;
+    margin-bottom: 20px;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.alert-custom.success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-custom.error {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.alert-custom.fade-in {
+    opacity: 1;
+}
+
+.form-inline .form-control, .form-inline .form-label {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.form-inline .form-control {
+    width: auto;
+    flex: 1;
+}
+
+.star {
+    color: red;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-label {
+    width: 100px;
+    text-align: right;
+    margin-right: 10px;
+}
+
+.form-inline {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.form-container {
+    text-align: left;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.submit-btn {
+    width: 100px;
+    height: 50px;
+    font-size: 20px;
+}
+
+h5 {
+    background-color: #1a5eb7;
+    padding: 10px;
+    border-radius: 5px;
+    color: #ffffff;
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+/* 二维码图片样式 */
+#qr-code {
+    position: absolute; /* 绝对定位 */
+    top: 20px; /* 距顶部20px */
+    right: 20px; /* 距右边20px */
+    width: 20px; /* 设置初始宽度 */
+    height: auto; /* 自适应高度 */
+    cursor: pointer; /* 鼠标悬停时显示手型 */
+    z-index: 1000; /* 确保二维码在顶部 */
+}
+
+/* 悬浮框样式 */
+#qr-hover-box {
+    display: none; /* 初始隐藏 */
+    position: absolute;
+    top: 45px; /* 定位于二维码下方 */
+    right: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 2000;
+}
+
+/* 悬浮框中的文本样式 */
+#qr-hover-text {
+    margin-top: 5px; /* 与二维码之间的间距 */
+    font-size: 14px; /* 文字大小 */
+    color: #333; /* 文字颜色 */
+    text-align: center; /* 文本居中 */
+}
+
+#qr-img {
+    width: 200px; /* 可以调整二维码显示的大小 */
+    height: auto;
+}
+
+/* 放大显示样式 */
+#qr-modal {
+    display: none; /* 初始隐藏 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.alert {
+    margin-top: 20px;
+}

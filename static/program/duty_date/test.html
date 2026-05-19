@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>值班日历测试</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<script src="fullcalendar-6.1.19/dist/index.global.min.js?v=' + randomVersion + '"><\/script>');
+    </script>
+    <style>
+        body {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        #calendar {
+            max-width: 1200px;
+            margin: 40px auto;
+            min-height: 800px;
+        }
+
+        .fc-event {
+            cursor: pointer;
+        }
+
+        .duty-event {
+            background-color: #4a6cf7;
+            border-color: #4a6cf7;
+            color: white;
+        }
+
+        .holiday-event {
+            background-color: #fc5c7d;
+            border-color: #fc5c7d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<h1>值班日历测试</h1>
+<div id="calendar"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('DOM 加载完成');
+
+        const calendarEl = document.getElementById('calendar');
+        console.log('日历元素:', calendarEl);
+
+        if (!calendarEl) {
+            alert('找不到日历容器元素');
+            return;
+        }
+
+        // 创建测试事件
+        const events = [
+            {
+                id: '1',
+                title: '值班: 张三, 李四\n领导: 王五',
+                start: '2026-01-01',
+                allDay: true,
+                className: 'duty-event'
+            },
+            {
+                id: '2',
+                title: '元旦',
+                start: '2026-01-01',
+                allDay: true,
+                className: 'holiday-event'
+            },
+            {
+                id: '3',
+                title: '值班: 赵六, 钱七',
+                start: '2026-01-05',
+                allDay: true,
+                className: 'duty-event'
+            },
+            {
+                id: '4',
+                title: '春节',
+                start: '2026-02-17',
+                end: '2026-02-24',
+                allDay: true,
+                className: 'holiday-event'
+            }
+        ];
+
+        // 初始化日历
+        try {
+            console.log('开始初始化日历...');
+
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'zh-cn',
+                firstDay: 1, // 周一为第一天
+                initialDate: '2026-01-01',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                buttonText: {
+                    today: '今天',
+                    month: '月',
+                    week: '周',
+                    day: '日'
+                },
+                events: events,
+                eventDisplay: 'block',
+                eventDidMount: function (info) {
+                    // 可以在这里添加自定义样式
+                    console.log('事件渲染:', info.event.title);
+                },
+                eventClick: function (info) {
+                    alert('事件: ' + info.event.title);
+                },
+                dateClick: function (info) {
+                    alert('点击日期: ' + info.dateStr);
+                }
+            });
+
+            // 渲染日历
+            calendar.render();
+            console.log('日历渲染成功');
+
+            // 测试事件
+            setTimeout(() => {
+                console.log('日历事件数量:', calendar.getEvents().length);
+            }, 100);
+
+        } catch (error) {
+            console.error('日历初始化失败:', error);
+            alert('日历初始化失败: ' + error.message);
+        }
+    });
+</script>
+</body>
+</html>

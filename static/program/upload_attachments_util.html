@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <title>上传文件</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="/logo.png?v=' + randomVersion + '"  type="image/png">');
+        document.write('<link rel="stylesheet" href="vendor/bootstrap5/css/bootstrap.css?v=' + randomVersion + '">');
+        document.write('<script src="vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/bootstrap5/js/bootstrap.js?v=' + randomVersion + '"><\/script>');
+    </script>
+</head>
+<body>
+<div class="container mt-5">
+    <h2 class="mb-4">上传文件</h2>
+
+    <!-- 显示错误消息 -->
+    <div id="error-container"></div>
+
+    <div class="mb-3">
+        <label for="excel_file" class="form-label">选择文件</label>
+        <input type="file" class="form-control" id="excel_file">
+    </div>
+    <button type="button" class="btn btn-primary" id="upload-button">上传文件</button>
+
+    <!-- 显示上传中消息 -->
+    <div id="uploading-container" style="display: none;" class="alert alert-info" role="alert">上传中，请等待...</div>
+
+    <!-- 显示成功消息 -->
+    <div id="success-container" style="display: none;" class="alert alert-success" role="alert">上传成功！</div>
+
+    <!-- 显示数据量较多消息 -->
+    <div id="waiting-container" style="display: none;" class="alert alert-warning" role="alert">数据量较多，请稍等...
+    </div>
+
+</div>
+
+<script src="js/upload_attachments_util.js"></script>
+</body>
+</html>

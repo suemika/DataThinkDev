@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>职称评审系统</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+    <script>
+        // 获取当前时间戳作为版本号
+        const version = Date.now();
+    </script>
+
+    <link rel="icon" href="../vendor/logo.png?v=1" type="image/png">
+    <link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.css?v=${version}">
+    <link rel="stylesheet" href="vendor/css/util.css"?v=${version}">
+    <script src="../vendor/easyui/js-easyui/axios.min.js?v=${version}"></script>
+    <script src="../vendor/bootstrap5/js/bootstrap.js?v=${version}"></script>
+    <script src="vendor/util/util_link.js"?v=${version}"></script>
+    <script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=${version}"></script>
+    <style>
+        #backButton {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .list-block {
+            background-color: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 20px;
+            box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .arrow {
+            color: #ccc;
+            font-weight: bold;
+            font-size: 18px;
+            float: right;
+            margin-left: 10px;
+        }
+
+        .disabled {
+            pointer-events: none; /* 禁止点击 */
+            color: #6c757d; /* 显示为灰色，表示不可点击 */
+            background-color: #f8f9fa; /* 修改背景颜色 */
+        }
+
+        .submit-btn {
+            display: block;
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            margin: 30px auto;
+            width: calc(100% - 40px);
+            max-width: 300px;
+        }
+
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+
+    </style>
+</head>
+<body>
+
+<header class="background-container">
+    <a href="http://edi.sdstg.com/" target="_self" rel="noopener">
+        <img id="header-img" src="" alt="ST">
+    </a>
+    <h2 class="h2-container">石横特钢集团有限公司职称评审系统</h2>
+</header>
+
+<main class="container mt-4" id="mainContent">
+    <div class="d-flex justify-content-between mb-3">
+        <button id="refresh" class="btn btn-info">刷新</button>
+    </div>
+
+    <div id="errorAlert" class="alert alert-danger d-none" role="alert"></div>
+
+    <div class="list-group" id="achievementLinks">
+        <a data-link="work_achievements.html" id="workAchievementsLink" href="#"
+           class="list-group-item list-group-item-action">
+            近2年工作专业成果 <font color="red">[未填写]</font> <span class="arrow">></span>
+        </a>
+        <a data-link="innovation_projects.html" id="innovationProjectsLink" href="#"
+           class="list-group-item list-group-item-action">
+            近2年公司内创新项目 <font color="red">[未填写]</font> <span class="arrow">></span>
+        </a>
+        <a data-link="papers_publications.html" id="papersPublicationsLink" href="#"
+           class="list-group-item list-group-item-action">
+            论文、著作 <font color="red">[未填写]</font> <span class="arrow">></span>
+        </a>
+        <a data-link="patents.html" id="patentsLink" href="#" class="list-group-item list-group-item-action">
+            专利 <font color="red">[未填写]</font> <span class="arrow">></span>
+        </a>
+        <a data-link="technology_awards.html" id="technologyAwardsLink" href="#"
+           class="list-group-item list-group-item-action">
+            科技进步奖 <font color="red">[未填写]</font> <span class="arrow">></span>
+        </a>
+    </div>
+    <div class="d-flex justify-content-between mb-3">
+        <button id="submitBtn" class="btn submit-btn">提交</button>
+    </div>
+
+</main>
+
+<script>
+
+    const workID = getNameFromUrl("workID");
+    let uuid = workID;
+
+    $(document).ready(function () {
+
+        loadList();
+
+        // 处理点击事件
+        $('.list-group-item').click(function () {
+            if (!$(this).hasClass('disabled')) {
+                const link = $(this).data('link');
+                window.location.href = `${link}?uuid=${uuid}&workID=${workID}`;
+            }
+        });
+
+        $("#submitBtn").click(async function () {
+            const response = await fetchDataFromAPI('634', uuid);
+            if (response.data.msg === "1") {
+
+                // 提交成功
+                showMsg("提交成功，请退出。", true);
+
+                // 禁用所有列表项
+                $('.list-group-item').addClass('disabled');
+
+                // 禁用提交和刷新按钮
+                $('#submitBtn').prop('disabled', true);
+                $('#refresh').prop('disabled', true);
+
+
+            } else {
+                hideAllContent();
+            }
+        });
+
+        $("#refresh").click(function () {
+            loadList();
+        });
+    });
+
+    // 获取权限
+    async function loadList() {
+        const response = await fetchDataFromAPI('628', workID);
+
+        if (response.data.msg === 200) {
+            uuid = response.data.data[0]['ID'];
+            await handlePermission(uuid);
+        } else {
+            hideAllContent();
+        }
+    }
+
+    // 权限处理
+    async function handlePermission(uuid) {
+        const response = await fetchDataFromAPI('632', uuid);
+        const data = response.data.data.item;
+
+        if (data && data.length > 0) {
+            const updates = {
+                "专业成果": $("#workAchievementsLink"),
+                "创新项目": $("#innovationProjectsLink"),
+                "论文": $("#papersPublicationsLink"),
+                "专利": $("#patentsLink"),
+                "科技进步奖": $("#technologyAwardsLink")
+            };
+
+            // 遍历数据，更新内容
+            data.forEach(item => {
+                // 更新内容之前不改变其顺序
+                if (updates[item.名称]) {
+                    updates[item.名称].html(item.结果 + " <span class='arrow'>></span>");
+                }
+            });
+        }
+    }
+
+    function hideAllContent() {
+        $('#mainContent').hide(); // 隐藏 main 内容
+        $('.background-container').hide(); // 隐藏背景容器
+    }
+</script>
+</body>
+</html>

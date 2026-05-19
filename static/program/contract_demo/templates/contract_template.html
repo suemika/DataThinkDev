@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title }}</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .contract-content {
+            pointer-events: none;
+            user-select: none;
+        }
+        .editable-field {
+            border-bottom: 2px dotted #666;
+            display: inline-block;
+            min-width: 200px;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5 contract-content">
+    <h2 class="text-center mb-4">{{ title }}</h2>
+    
+    <div class="mb-4">
+        <p>合同编号：<span class="editable-field">{{ contract_id }}</span></p>
+        <p>签订部门：<span class="editable-field">{{ department }}</span></p>
+    </div>
+    
+    <div class="border p-4">
+        {{ content|safe }}
+        
+        <div class="mt-4">
+            <h5>标准条款：</h5>
+            <ol>
+                <li>本合同自双方签字盖章之日起生效</li>
+                <li>争议解决方式为提交签约地人民法院诉讼</li>
+                <li>合同修改需双方书面同意</li>
+            </ol>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 每30秒刷新一次页面 -->
+    <!-- <meta http-equiv="refresh" content="30"> -->
+    <title>石横特钢集团 | 电话查询</title>
+
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="/logo.png?v=' + randomVersion + '"  type="image/png">');
+        document.write('<link rel="stylesheet" href="vendor/bootstrap5/css/bootstrap.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="bootstrap-icons-1.11.3/font/bootstrap-icons.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./css/util.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./css/phone_lists.css?v=' + randomVersion + '">');
+        document.write('<script src="js/phone_lists.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="js/util.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        // document.write('<script src="js/baidu-firework.js?v=' + randomVersion + '"><\/script>');
+    </script>
+</head>
+<body>
+<!-- 遮罩层 -->
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-content">
+
+        <div class="diamond-loader">
+            <!-- 静态阴影 -->
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+        </div>
+        <div class="shadow"></div>
+        <p class="mt-3">正在加载，请稍候...</p>
+    </div>
+</div>
+
+<header class="background-container">
+    <a href="http://edi.sdstg.com/" target="_self" rel="noopener">
+        <img id="header-img" src="" alt="ST" class="img-fluid">
+    </a>
+    <h2 class="h2-container"><i class="bi bi-telephone-fill me-2"></i>石横特钢集团有限公司电话查询</h2>
+</header>
+
+<nav aria-label="breadcrumb" class="container-nav">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="http://edi.sdstg.com/"><i class="bi bi-house-door me-1"></i>首页</a>
+        </li>
+        <li class="breadcrumb-item active"><i class="bi bi-telephone me-1"></i>电话查询</li>
+    </ol>
+</nav>
+
+<main id="main-content">
+    <div id="search-container" class="row justify-content-center my-3 g-2">
+        <div class="col-12">  <!-- 改为 col-12 使内容占满容器宽度 -->
+            <div class="d-flex justify-content-center">  <!-- 添加 justify-content-center -->
+                <div class="input-group-t me-2" style="max-width: 500px;">  <!-- 限制输入框组最大宽度 -->
+                    <input type="text" id="search-box" class="form-control shadow-sm"
+                           placeholder="支持姓名简拼(如:zs-张三)、模糊查询(搜索姓名中的任意部分)" onkeydown="handleKeyDown(event)">
+                    <button type="button" id="submitBtn" class="btn btn-primary shadow-sm" onclick="filterTable()">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+                <div class="ms-2 mt-1" style="display: none;">  <!-- 添加左边距 -->
+                    <a class="btn btn-primary rounded-4 shadow-sm align-self-center" id="pdf-link-button" href="#"
+                       target="_blank" rel="noopener">
+                        <i class="bi bi-file-earmark-pdf me-1"></i>全览
+                    </a>
+                </div>
+            </div>
+            <!-- 新增拨号提示 -->
+            <div class="dial-tip">
+                <i class="bi bi-telephone-outbound"></i>使用手机拨打<span>"8"</span>开头座机时，请在号码前加拨<span>"512"</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="department-wrapper" class="d-flex flex-column align-items-center">
+        <div id="department-buttons" class="d-flex flex-wrap justify-content-center mb-4">
+            <!-- 部门按钮将在这里动态生成 -->
+        </div>
+        <div id="table-container" class="w-100">
+            <!-- 表格将在这里生成 -->
+        </div>
+
+        <div id="no-data-message" class="alert alert-info shadow-sm" style="display: none;">
+            <i class="bi bi-info-circle me-2"></i>无匹配数据
+        </div>
+    </div>
+</main>
+
+</body>
+</html>

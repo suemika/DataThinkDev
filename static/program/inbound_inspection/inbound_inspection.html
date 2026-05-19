@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>进厂车辆随机抽检</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../vendor/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="../bootstrap-icons-1.11.3/font/bootstrap-icons.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./css/inbound_inspection.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./css/util.css?v=' + randomVersion + '">');
+        document.write('<script src="../vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/util/util_link.js"?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../js/popper.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="./js/inbound_inspection.js?v=' + randomVersion + '"><\/script>');
+    </script>
+
+</head>
+<body>
+
+<header class="background-container">
+    <img id="header-img" src="" alt="ST">
+    <h2 class="h2-container">进厂车辆随机抽检</h2>
+</header>
+
+<main class="container">
+    <div class="container-fluid px-0">
+     <div class="user-name"><span id="userName"></span></div>
+
+        <!-- 参数设置卡片 -->
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-sliders me-2"></i>抽检参数设置
+            </div>
+            <div class="card-body">
+                <form id="inspectionForm">
+                    <div class="form-row">
+                        <div class="form-col col-12 col-md-6 col-lg-3">
+                            <label for="checkCount" class="form-label">抽查车数</label>
+                            <input type="number" class="form-control" id="checkCount" min="1" max="50"
+                                   placeholder="请输入抽查车辆数量" required value="1">
+                        </div>
+
+                        <div class="form-col col-12 col-md-6 col-lg-3">
+                            <label for="materialName" class="form-label">物料名称</label>
+                            <input type="text" class="form-control" id="materialName"
+                                   placeholder="请输入物料名称">
+                        </div>
+
+                        <div class="form-col col-12 col-md-6 col-lg-3">
+                            <label for="warehouse" class="form-label">卸车仓库/料场</label>
+                            <input type="text" class="form-control" id="warehouse"
+                                   placeholder="请输入卸车位置">
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="resetBtn">
+                            <i class="bi bi-arrow-clockwise me-1"></i>重置
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="submit-btn">
+                            <i class="bi bi-search me-1"></i>开始随机抽检
+                        </button>
+
+                    </div>
+                    <div class="form-text">*系统将自动筛选出 10 分钟内的待检车辆，并随机抽取车牌号进行抽查；若待检车辆数量不足，则按实际可抽取车辆执行。
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <!-- 抽检结果卡片 -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="bi bi-card-checklist me-2"></i>随机抽检结果
+                </div>
+                <div>
+                    <span class="badge bg-primary" id="resultCount">0</span> 辆车
+                </div>
+            </div>
+
+            <!-- 批量操作栏 - 始终显示 (移除了active类控制) -->
+            <div class="batch-actions" id="batchActions">
+                <div class="d-flex justify-content-between align-items-center w-100">
+                    <div class="batch-info">
+                        <div class="check-all-container">
+                            <input type="checkbox" id="checkAll" class="form-check-input">
+                            <label for="checkAll" class="form-check-label mb-0">全选</label>
+                        </div>
+                        <span>已选择 <span class="batch-count" id="selectedCount">0</span> 辆车</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-0">
+                <div class="table-container">
+                    <table class="table table-hover" id="inspectionTable">
+                        <thead>
+                        <tr>
+                            <th scope="col" width="50">
+                                <input type="checkbox" id="headerCheckbox" class="form-check-input">
+                            </th>
+                            <th scope="col">#</th>
+                            <th scope="col">供应商名称</th>
+                            <th scope="col">物料名称</th>
+                            <th scope="col">一检时间</th>
+                            <th scope="col">车号</th>
+                            <th scope="col">卸车料场</th>
+                            <th scope="col">检斤通知单号</th>
+                            <th scope="col">抽检状态</th>
+                        </tr>
+                        </thead>
+                        <tbody id="inspectionTableBody">
+                        <!-- 初始状态显示空状态 -->
+                        <tr id="emptyStateRow">
+                            <td colspan="9" class="empty-state">
+                                <i class="bi bi-clipboard-check"></i>
+                                <p class="mb-0">暂无抽检数据</p>
+                                <small>请设置抽检参数并点击"开始随机抽检"按钮</small>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- 底部确认抽检按钮 (移动端友好) -->
+            <div class="bottom-confirm-wrapper">
+                <button type="button" class="btn btn-success bottom-confirm-btn" id="confirmCheckBtn">
+                    <i class="bi bi-check-circle me-1"></i>确认抽检选中车辆
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>

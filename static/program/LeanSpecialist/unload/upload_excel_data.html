@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上传Excel文件</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../vendor/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="util/util.css?v=' + randomVersion + '">');
+        document.write('<script src="../vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/util/util_link.js"?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../js/popper.js?v=' + randomVersion + '"><\/script>');
+    </script>
+
+</head>
+<body class="poppins-bold">
+
+<main class="container_main">
+    <div>
+        <h2 class="mb-4">上传Excel文件</h2>
+
+        <div id="error-container"></div>
+
+        <div class="mb-3">
+            <label for="module_select" class="form-label">选择模块</label>
+            <select class="form-select" id="module_select">
+                <option selected disabled>请选择模块</option>
+                <option value="1">学员考试信息</option>
+                <option value="6">骨干考试信息</option>
+                <option value="2">认证预评价表</option>
+                <option value="3">认证评审表</option>
+                <option value="4">认证结果审核表</option>
+                <option value="5">课程实训任务明细表</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="excel_file" class="form-label">选择Excel文件</label>
+            <input type="file" class="form-control" id="excel_file" accept=".xlsx,.xls">
+        </div>
+        <button type="button" class="btn btn-primary" id="upload-button">上传Excel文件</button>
+
+        <div id="uploading-container" style="display: none;" class="alert alert-info" role="alert">上传中，请等待...
+        </div>
+        <div id="success-container" style="display: none;" class="alert alert-success" role="alert">上传成功！</div>
+        <div id="waiting-container" style="display: none;" class="alert alert-warning" role="alert">数据量较多，请稍等...
+        </div>
+    </div>
+</main>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById('upload-button').onclick = uploadExcelFile;
+    });
+
+    function uploadExcelFile() {
+        clearMessages();
+        displayUploadingMessage();
+
+        const fileInput = document.getElementById('excel_file');
+        const moduleSelect = document.getElementById('module_select'); // 获取模块选择下拉框
+
+        // 检查模块选择
+        if (moduleSelect.value === '请选择模块') {
+            displayError("请选择模块");
+            clearUploadingMessage();
+            return;
+        }
+
+        // 检查文件选择
+        if (!fileInput.files || fileInput.files.length === 0) {
+            displayError("请选择一个文件");
+            clearUploadingMessage();
+            return;
+        }
+
+        const file = fileInput.files[0];
+
+        // 验证文件类型
+        if (!/\.xlsx$/.test(file.name)) {
+            displayError("请上传有效的 Excel 文件（.xlsx）");
+            clearUploadingMessage();
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+            try {
+                const base64String = btoa(String.fromCharCode(...new Uint8Array(event.target.result))); // 转换为 Base64
+
+                const formData = new FormData();
+                formData.append('req', '688'); // 添加 req 参数
+                // 创建包含 base 和 module 数据的对象
+                const dataObject = {
+                    base: base64String,
+                    module: moduleSelect.value
+                };
+
+                // 将数据对象转为 JSON 字符串并添加到 FormData
+                formData.append('data', JSON.stringify(dataObject));
+
+                // 禁用按钮以避免重复点击
+                const uploadButton = document.getElementById('upload-button');
+                uploadButton.disabled = true;
+
+                axios.post('/imc/customOpt', formData, {})
+                    .then(response => {
+                        if (response.status !== 200) {
+                            displayError(response.data.error);
+                        } else {
+                            displaySuccess();
+                            // 3秒后清除成功消息
+                            setTimeout(clearMessages, 3000);
+                        }
+                    })
+                    .catch(error => {
+                        displayError("上传文件时发生错误：" + error.message);
+                    })
+                    .finally(() => {
+                        clearUploadingMessage();
+                        uploadButton.disabled = false; // 上传结束后重新启用按钮
+                    });
+            } catch (error) {
+                displayError("转换为 Base64 时发生错误：" + error.message);
+                clearUploadingMessage();
+            }
+        };
+
+        reader.onerror = function () {
+            displayError("读取文件时发生错误。");
+            clearUploadingMessage();
+        };
+
+        // 使用 readAsArrayBuffer 方法
+        reader.readAsArrayBuffer(file); // 以二进制 ArrayBuffer 的方式读取文件
+    }
+
+    function clearMessages() {
+        clearSuccessMessage();
+        clearUploadingMessage();
+        clearErrorMessage();
+    }
+
+    function clearUploadingMessage() {
+        document.getElementById('uploading-container').style.display = 'none';
+    }
+
+    function clearSuccessMessage() {
+        document.getElementById('success-container').style.display = 'none';
+    }
+
+    function clearErrorMessage() {
+        document.getElementById('error-container').innerHTML = "";
+    }
+
+    function displayUploadingMessage() {
+        document.getElementById('uploading-container').style.display = 'block';
+    }
+
+    function displaySuccess() {
+        document.getElementById('success-container').style.display = 'block';
+        // 清空文件输入框和模块选择
+        document.getElementById('excel_file').value = '';
+        document.getElementById('module_select').selectedIndex = 0; // 默认选择第一个选项
+    }
+
+    function displayError(errorMessage) {
+        document.getElementById('error-container').innerHTML = '<div class="alert alert-danger" role="alert">' + errorMessage + '</div>';
+    }
+
+</script>
+</body>
+</html>

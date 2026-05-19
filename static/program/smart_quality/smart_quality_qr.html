@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品质量现场监督抽查二维码</title>
+    <!-- 引入必要的JS库 -->
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../vendor/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./util/util_smart_quality.css?v=' + randomVersion + '">');
+        document.write('<script src="../vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/bootstrap5/js/bootstrap.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/util/util_link.js"?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+    </script>
+    <style>
+
+        /* 图片容器 */
+        .img-container {
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* 图片样式 */
+        .centered-img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto 20px; /* 图片水平居中，底部留白 */
+        }
+
+        /* 下载按钮样式 */
+        .download-btn {
+            display: block;
+            width: fit-content;
+            margin: 0 auto; /* 按钮水平居中 */
+        }
+    </style>
+</head>
+<body class="poppins-bold">
+<header class="background-container">
+    <img id="header-img" src="" alt="ST">
+    <h2 class="h2-container">二维码</h2>
+</header>
+<main>
+    <div class="container" id="mainContent">
+        <div class="img-container">
+            <img id="SQCP-img" src="" alt="rq image" class="centered-img">
+            <a id="SQCP-href" download class="btn btn-primary download-btn">下载图片</a>
+        </div>
+    </div>
+</main>
+</body>
+</html>

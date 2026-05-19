@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>创新项目</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+    <script>
+        // 获取当前时间戳作为版本号
+        const version = Date.now();
+    </script>
+
+    <link rel="icon" href="../vendor/logo.png?v=1" type="image/png">
+    <link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.css?v=${version}">
+    <link rel="stylesheet" href="vendor/css/util.css"?v=${version}">
+    <script src="../vendor/easyui/js-easyui/axios.min.js?v=${version}"></script>
+    <script src="../vendor/bootstrap5/js/bootstrap.js?v=${version}"></script>
+    <script src="vendor/util/util_link.js"?v=${version}"></script>
+    <script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=${version}"></script>
+    <style>
+        #backButton {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .list-block {
+            background-color: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 20px;
+            box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f0f0f0;
+            padding: 15px 10px;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .submit-btn {
+            display: block;
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            margin: 30px auto;
+            width: calc(100% - 40px);
+            max-width: 300px;
+            font-size: 16px;
+        }
+
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            text-align: center;
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        td.center {
+            text-align: center;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .selected {
+            background-color: #007bff !important; /* 确保选中时背景颜色优先 */
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<header class="background-container">
+    <a href="http://edi.sdstg.com/" target="_self" rel="noopener">
+        <img id="header-img" src="" alt="ST">
+    </a>
+    <h2 class="h2-container">近2年公司内创新项目</h2>
+</header>
+<main class="container mt-4">
+    <div class="d-flex justify-content-between mb-3">
+        <button onclick="goBack()" class="btn btn-primary">返回</button>
+        <button id="submitBtn" class="btn btn-success">新增</button>
+        <button id="updateBtn" class="btn btn-info" disabled>修改</button>
+        <button id="deleteBtn" class="btn btn-danger" disabled>删除</button>
+    </div>
+
+    <div id="errorAlert" class="alert alert-danger d-none" role="alert"></div>
+
+    <div class="list-block" id="achievementsList">
+        <h5>创新项目列表</h5>
+        <div id="listContainer"></div>
+    </div>
+</main>
+
+<script>
+    const uuid = getNameFromUrl('uuid');
+    const workID = getNameFromUrl('workID');
+    const edit_name = 'innovation_projects';
+    const add_href = `${edit_name}_edit.html?uuid=${uuid}&workID=${workID}`;
+    $(document).ready(function () {
+
+        if (workID === "null") {
+            goBack();
+        }
+
+        loadList();
+
+        $("#submitBtn").click(function () {
+            const rowCount = $('#listContainer table tbody tr').length;
+            if (rowCount >= 10) {
+                showMsg('数量已达到上限，无法新增更多。');
+                $(this).prop('disabled', true);
+                return;
+            }
+            window.location.href = add_href;
+        });
+
+        $(document).on('click', '#listContainer table tbody tr', function () {
+            $(this).toggleClass('selected').siblings().removeClass('selected');
+            $('#deleteBtn').prop('disabled', $('#listContainer table tbody tr.selected').length === 0);
+            $('#updateBtn').prop('disabled', $('#listContainer table tbody tr.selected').length === 0);
+        });
+
+        $("#updateBtn").click(async function () {
+            const $selectedRow = $('#listContainer table tbody tr.selected');
+            if ($selectedRow.length === 0) {
+                showMsg('请先选择一项进行修改。');
+                return;
+            }
+            const itemId = $selectedRow.data('id');
+
+            window.location.href = `${edit_name}_edit.html?uuid=${uuid}&workID=${workID}&itemId=${itemId}`;
+
+        });
+
+        $("#deleteBtn").click(async function () {
+            const $selectedRow = $('#listContainer table tbody tr.selected');
+            if ($selectedRow.length === 0) {
+                showMsg('请先选择一项进行删除。');
+                return;
+            }
+            const itemId = $selectedRow.data('id');
+
+            const confirmDelete = confirm('确认要删除选中的项目吗？');
+            if (!confirmDelete) return;
+
+            const response = await deleteItem(itemId);
+
+            if (response.msg === '删除成功') {
+                await loadList();
+            } else {
+                showMsg(response.msg);
+            }
+        });
+    });
+
+    async function deleteItem(itemId) {
+        const formData = new FormData();
+        formData.append('del_name', 'ZCJ_创新项目');
+        formData.append('itemId', itemId);
+        formData.append('pid', getNameFromUrl('uuid'));
+        return await fetchDataFromAPI('631', Object.fromEntries(formData));
+    }
+
+    async function loadList() {
+        const formData = new FormData();
+        formData.append('name', 'innovation_projects');
+        formData.append('pid', getNameFromUrl('uuid'));
+
+        const response = await fetchDataFromAPI('629', Object.fromEntries(formData));
+        const result = response.data.data.item;
+        const listContainer = $("#listContainer");
+
+        listContainer.empty();
+
+        if (result && result.length > 0) {
+            const tableHtml = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">序号</th>
+                            <th style="width: 100px;">级别</th>
+                            <th>名称</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${result.map((item, index) => `
+                            <tr data-id="${item.id}">
+                                <td class="center">${index + 1}</td>
+                                <td>${item.Title}</td>
+                                <td>${item.Description}</td>
+                            </tr>`).join('')}
+                    </tbody>
+                </table>`;
+            listContainer.append(tableHtml);
+
+            if (result.length >= 10) {
+                $("#submitBtn").prop('disabled', true);
+            }
+        } else {
+            listContainer.append('<div class="list-item">没有找到内容，请点击新增</div>');
+        }
+    }
+
+    function goBack() {
+        window.location.href = `main.html?uuid=${getNameFromUrl('uuid')}`;
+    }
+
+</script>
+</body>
+</html>

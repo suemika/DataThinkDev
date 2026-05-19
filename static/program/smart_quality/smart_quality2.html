@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品质量现场监督抽查</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../vendor/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="../bootstrap-icons-1.11.3/font/bootstrap-icons.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./util/util_smart_quality.css?v=' + randomVersion + '">');
+        document.write('<script src="../vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<link rel="stylesheet" href="../select2/select2.css?v=' + randomVersion + '">');
+        document.write('<script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/util/util_link.js"?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="./js/wgs84togcj02.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../select2/select2.js?v=' + randomVersion + '"><\/script>');
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c80ff;
+            --primary-light: #e6f0ff;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --success-light: #e8f5e9;
+            --danger-color: #dc3545;
+            --danger-light: #fdecea;
+            --warning-color: #ffc107;
+            --warning-light: #fff8e1;
+            --info-color: #17a2b8;
+            --info-light: #e1f5fe;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --border-radius: 10px;
+            --box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* 头部样式 */
+        .app-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1a6de0 100%);
+            color: white;
+            padding: 25px 0 20px;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 30px;
+            border-radius: 0 0 20px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ffd700, #ff9800, #ffd700);
+            animation: shimmer 3s infinite linear;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200px 0; }
+            100% { background-position: calc(200px + 100%) 0; }
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 25px;
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+            margin: 0;
+            font-weight: 700;
+            font-size: 1.9rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .app-title i {
+            margin-right: 15px;
+            font-size: 2.2rem;
+            background: rgba(255,255,255,0.2);
+            padding: 12px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* 位置信息样式 */
+        .location-info {
+            background: white;
+            border-left: 5px solid var(--info-color);
+            border-radius: var(--border-radius);
+            padding: 15px 25px;
+            margin: 20px auto;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            align-items: center;
+            max-width: 1200px;
+            transition: var(--transition);
+        }
+
+        .location-info:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .location-info i {
+            color: var(--info-color);
+            font-size: 1.7rem;
+            margin-right: 15px;
+        }
+
+        /* 主内容区域 */
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            margin: 0 auto 30px;
+            max-width: 1200px;
+            transition: var(--transition);
+        }
+
+        .main-card:hover {
+            box-shadow: 0 12px 25px rgba(0,0,0,0.12);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #4a90e2 0%, #2c80ff 100%);
+            color: white;
+            padding: 20px 30px;
+            border-bottom: none;
+            position: relative;
+        }
+
+        .card-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+        }
+
+        .card-header h3 {
+            margin: 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+        }
+
+        .card-header i {
+            margin-right: 12px;
+            font-size: 1.6rem;
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            font-size: 1.05rem;
+        }
+
+        .form-label i {
+            margin-right: 10px;
+            color: var(--primary-color);
+            background: var(--primary-light);
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .form-control {
+            border: 2px solid #e1e5eb;
+            border-radius: var(--border-radius);
+            padding: 12px 18px;
+            transition: var(--transition);
+            font-size: 1rem;
+            background: #fafbfc;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(44, 128, 255, 0.2);
+            background: white;
+        }
+
+        /* 问题组样式 */
+        .issue-group {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .issue-group:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+            border-color: #cbd5e0;
+        }
+
+        .issue-group h5 {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1a6de0 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin: -25px -25px 25px -25px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 10px rgba(44, 128, 255, 0.3);
+        }
+
+        .issue-group h5 i {
+            margin-right: 12px;
+            font-size: 1.4rem;
+        }
+
+        .issue-control {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+
+        .issue-control:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 25px;
+            margin-top: 10px;
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .form-check-input {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+            border: 2px solid #adb5bd;
+        }
+
+        .form-check-label {
+            cursor: pointer;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        /* 问题描述区域 */
+        .issue-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            border-left: 5px solid var(--warning-color);
+            display: none;
+            animation: fadeIn 0.4s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .issue-section textarea {
+            width: 100%;
+            border: 2px solid #e1e5eb;
+            border-radius: 8px;
+            padding: 15px;
+            resize: vertical;
+            min-height: 120px;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .issue-section textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(44, 128, 255, 0.15);
+        }
+
+        .file-upload-label {
+            display: block;
+            margin-top: 20px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .file-upload-label i {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        .form-control-file {
+            margin-top: 10px;
+            padding: 15px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            background: #f9f9f9;
+            width: 100%;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .form-control-file:hover {
+            border-color: var(--primary-color);
+            background: #f0f6ff;
+        }
+
+        /* 按钮区域 */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 50px;
+            flex-wrap: wrap;
+        }
+
+        .endCheckBtn {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            border-radius: 10px;
+        }
+
+        .action-btn {
+            min-width: 180px;
+            padding: 16px 32px;
+            font-size: 1.15rem;
+            font-weight: 600;
+            border-radius: var(--border-radius);
+            border: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .action-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, var(--success-color) 0%, #20c374 100%);
+            color: white;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(40, 167, 69, 0.3);
+        }
+
+        .end-check-btn {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #5a6268 100%);
+            color: white;
+        }
+
+        .end-check-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(108, 117, 125, 0.3);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .action-btn:disabled:hover::before {
+            left: -100%;
+        }
+
+        /* 消息提示 */
+        .alert-custom {
+            padding: 18px 25px;
+            margin-bottom: 30px;
+            border-radius: var(--border-radius);
+            border: none;
+            display: flex;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            box-shadow: var(--box-shadow);
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .alert-custom.success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border-left: 5px solid #28a745;
+        }
+
+        .alert-custom.error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border-left: 5px solid #dc3545;
+        }
+
+        .alert-custom.fade-in {
+            opacity: 1;
+        }
+
+        .alert-custom i {
+            margin-right: 12px;
+            font-size: 1.5rem;
+        }
+
+        /* 模态框样式 */
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1a6de0 100%);
+            color: white;
+            border-bottom: none;
+            border-radius: 20px 20px 0 0;
+            padding: 25px 30px;
+        }
+
+        .modal-title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            font-size: 1.3rem;
+        }
+
+        .modal-title i {
+            margin-right: 12px;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .loading-spinner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+        }
+
+        .spinner-grow {
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+
+            .app-title {
+                font-size: 1.6rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .endCheckBtn {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .action-btn {
+                width: 100%;
+                max-width: 320px;
+            }
+
+            .radio-group {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .issue-group {
+                padding: 20px;
+            }
+
+            .card-body {
+                padding: 25px;
+            }
+
+            .location-info, .alert-custom {
+                margin-left: 15px;
+                margin-right: 15px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container_main {
+                padding: 0 15px;
+            }
+
+            .app-header {
+                padding: 20px 0 15px;
+                border-radius: 0 0 15px 15px;
+            }
+
+            .card-body {
+                padding: 20px;
+            }
+
+            .action-btn {
+                min-width: auto;
+                padding: 14px 24px;
+                font-size: 1.05rem;
+            }
+
+            .issue-group h5 {
+                font-size: 1.1rem;
+                padding: 12px 15px;
+            }
+        }
+
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1a6de0;
+        }
+
+        /* 选择框样式优化 */
+        .select2-container--default .select2-selection--single {
+            border: 2px solid #e1e5eb;
+            border-radius: var(--border-radius);
+            padding: 10px;
+            height: auto;
+            background: #fafbfc;
+            transition: var(--transition);
+        }
+
+        .select2-container--default .select2-selection--single:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(44, 128, 255, 0.2);
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 100%;
+        }
+
+        /* 分割线样式 */
+        hr {
+            border: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #e1e5eb, transparent);
+            margin: 40px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部 -->
+    <header class="app-header">
+        <div class="header-content">
+            <h1 class="app-title">
+                <i class="bi bi-clipboard-check"></i>产品质量现场监督抽查
+            </h1>
+        </div>
+    </header>
+
+    <main class="container_main">
+        <div id="mainContent">
+            <!-- 位置信息 -->
+            <div class="location-info">
+                <i class="bi bi-geo-alt-fill"></i>
+                <span id="locationText">当前位置: 加载中...</span>
+            </div>
+
+            <div class="endCheckBtn">
+                <button id="endCheckBtn" class="action-btn end-check-btn">
+                    <i class="bi bi-stop-circle me-2"></i>结束检查
+                </button>
+            </div>
+
+            <!-- 消息提示 -->
+            <div id="messageAlert" class="alert-custom d-none">
+                <i class="bi bi-info-circle"></i>
+                <span id="messageText"></span>
+            </div>
+
+            <!-- 主卡片 -->
+            <div class="main-card">
+                <div class="card-header">
+                    <h3><i class="bi bi-building"></i><span id="workshopName">加载中...</span></h3>
+                </div>
+
+                <div class="card-body">
+                    <form id="qualityForm">
+                        <!-- 工资编号 -->
+                        <div class="form-group">
+                            <label for="salaryNumber" class="form-label">
+                                <i class="bi bi-person-badge"></i>工资编号
+                            </label>
+                            <input type="text" class="form-control" id="salaryNumber" placeholder="请输入您的工资编号"
+                                   required>
+                        </div>
+
+                        <!-- 品类选择 -->
+                        <div class="form-group">
+                            <label for="brand" class="form-label">
+                                <i class="bi bi-tags"></i>品类
+                            </label>
+                            <select id="brand" class="form-control" required>
+                                <option value="" disabled selected>请选择牌号</option>
+                                <option value="牌号1">牌号1</option>
+                                <option value="牌号2">牌号2</option>
+                                <option value="牌号3">牌号3</option>
+                                <option value="牌号4">牌号4</option>
+                                <option value="牌号5">牌号5</option>
+                            </select>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- 问题组将在这里动态生成 -->
+                        <div id="issueGroupsContainer"></div>
+                    </form>
+
+                    <!-- 操作按钮 -->
+                    <div class="action-buttons">
+                        <button type="button" id="submitBtn" class="action-btn submit-btn">
+                            <i class="bi bi-send-check me-2"></i>提交检查
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 提交模态框 -->
+        <div class="modal fade" id="submissionModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="loading-spinner">
+                            <span class="spinner-grow text-primary" role="status"></span>
+                            <span class="ms-3">正在提交，请稍候...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 结束检查确认模态框 -->
+        <div class="modal fade" id="endCheckModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="bi bi-exclamation-triangle"></i>确认结束检查
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>您确定要结束本次检查吗？结束检查后，当前未提交的数据将不会被保存。</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-danger" id="confirmEndCheck">确认结束</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 定义所有问题组的数据
+        const issueGroups = [
+            {
+                title: "外形尺寸",
+                issues: [
+                    {name: "innerDiameter", label: "内径", idPrefix: "shape"},
+                    {name: "ribSpacing", label: "横肋间距", idPrefix: "shape"},
+                    {name: "ribHeight", label: "横肋高", idPrefix: "shape"},
+                    {name: "bendHead", label: "弯头", idPrefix: "shape"},
+                    {name: "flatHead", label: "扁头", idPrefix: "shape"},
+                    {name: "otherShape", label: "其他", idPrefix: "shape"}
+                ]
+            },
+            {
+                title: "表面质量",
+                issues: [
+                    {name: "scab", label: "结疤", idPrefix: "surface"},
+                    {name: "crack", label: "裂纹", idPrefix: "surface"},
+                    {name: "winding", label: "缠绕", idPrefix: "surface"},
+                    {name: "otherSurface", label: "其它", idPrefix: "surface"}
+                ]
+            },
+            {
+                title: "包装标识",
+                issues: [
+                    {name: "nameplate", label: "标牌", idPrefix: "packagingLabel"},
+                    {name: "endUneven", label: "端部不齐", idPrefix: "packagingLabel"},
+                    {name: "windingPackaging", label: "缠绕", idPrefix: "packagingLabel"},
+                    {name: "otherPackaging", label: "其它", idPrefix: "packagingLabel"}
+                ]
+            },
+            {
+                title: "力学性能",
+                issues: [
+                    {name: "yield", label: "屈服", idPrefix: "mechanicalProperties"},
+                    {name: "tensile", label: "抗拉", idPrefix: "mechanicalProperties"},
+                    {name: "elongation", label: "延伸", idPrefix: "mechanicalProperties"},
+                    {name: "otherMechanicalProperties", label: "其它", idPrefix: "mechanicalProperties"}
+                ]
+            },
+            {
+                title: "其他问题",
+                issues: [
+                    {name: "other", label: "是否有其他问题", idPrefix: "que"}
+                ]
+            }
+        ];
+
+        let workshopName = '正在获取';
+        let currentLocation = {lon: null, lat: null};
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            // 生成问题组
+            const issueGroupsContainer = document.getElementById('issueGroupsContainer');
+            issueGroupsContainer.innerHTML = generateAllIssueGroups();
+
+            // 初始化Select2
+            $('#brand').select2({
+                placeholder: "请选择牌号",
+                allowClear: true,
+                width: '100%'
+            });
+
+            const mainContent = document.getElementById('mainContent');
+
+            try {
+                await getLocation();
+                mainContent.style.display = 'block';  // 如果位置获取成功，显示内容
+            } catch (error) {
+                mainContent.style.display = 'none';  // 隐藏内容，不显示表单
+                showMsg('获取位置失败: ' + error.message, false);
+            }
+
+            // 禁用按钮
+            const submitBtn = document.getElementById('submitBtn');
+            const endCheckBtn = document.getElementById('endCheckBtn');
+            submitBtn.disabled = true;
+            endCheckBtn.disabled = true;
+
+            try {
+                const response = await loadList();
+                // 成功后启用按钮
+                if (response !== null) {
+                    const data = response.data.data;
+                    const brandSelect = $('#brand');
+                    brandSelect.empty();
+                    brandSelect.append('<option value="">请选择牌号</option>');
+                    data.forEach(item => {
+                        brandSelect.append(`<option value="${item.id}">${item.name}</option>`);
+                    });
+                    brandSelect.trigger('change');
+                    submitBtn.disabled = false; // 启用提交按钮
+                    endCheckBtn.disabled = false; // 启用结束检查按钮
+                } else {
+                    console.error('未找到数据');
+                    showMsg('未被定义的位置', true);
+                    submitBtn.disabled = true; // 确保在未找到数据的情况下继续禁用按钮
+                    endCheckBtn.disabled = true; // 禁用结束检查按钮
+                }
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                showMsg('加载数据失败: ' + error.message, false);
+                submitBtn.disabled = true;
+                endCheckBtn.disabled = true;
+            }
+
+            // 添加事件监听器
+            submitBtn.addEventListener('click', () => submitSmartQuality(submitBtn));
+            endCheckBtn.addEventListener('click', endCheck);
+            document.getElementById('confirmEndCheck').addEventListener('click', confirmEndCheck);
+        });
+
+        async function getLocation() {
+            try {
+                const response = await fetchDataFromAPI('639', {
+                    lon: 116.535,
+                    lat: 36.227,
+                });
+                workshopName = response.data.workshopName || '未知车间';
+                document.getElementById('workshopName').innerHTML = `车间名称: ${workshopName}`;
+
+                // 保存位置信息
+                currentLocation.lon = response.data.lon;
+                currentLocation.lat = response.data.lat;
+
+                // 更新位置显示
+                const locationElement = document.getElementById('locationText');
+                if (response.data.lon && response.data.lat) {
+                    locationElement.innerHTML = `当前位置: ${workshopName} (经度: ${response.data.lon}, 纬度: ${response.data.lat})`;
+                } else {
+                    locationElement.innerHTML = `当前位置: ${workshopName}`;
+                }
+            } catch (error) {
+                showMsg('获取车间名称失败: ' + error.message, false);
+                throw error; // 重新抛出错误，由调用函数捕获
+            }
+        }
+
+        async function loadList() {
+            const response = await fetchDataFromAPI('671', workshopName);
+            if (response.data.status === 0) {
+                return response; // 返回响应数据
+            }
+            return null;
+        }
+
+        // 显示和隐藏描述和文件上传框
+        function toggleSection(radio, sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.style.display = (radio.value === '是') ? 'block' : 'none';
+
+                // 添加动画
+                if (radio.value === '是') {
+                    section.style.animation = 'fadeIn 0.3s ease-in-out';
+                }
+            }
+        }
+
+        // 处理表单提交
+        async function submitSmartQuality(button) {
+            if (!validateForm()) return;
+
+            const form = document.getElementById('qualityForm');
+            const rows = form.querySelectorAll('.issue-group');
+            const formData = new FormData();
+
+            const selectedValue = document.getElementById('brand').value;
+            const salaryNumber = document.getElementById('salaryNumber').value;
+
+            if (!selectedValue) {
+                showMsg('请选择牌号', false);
+                $('#brand').select2('open');
+                return;
+            }
+
+            if (!salaryNumber) {
+                showMsg('请填写工资编号', false);
+                document.getElementById('salaryNumber').focus();
+                return;
+            }
+
+            $('#submissionModal').modal('show');
+
+            formData.append('lon', 116.535);
+            formData.append('lat', 36.227);
+            // 从当前位置中提取经纬度
+            if (currentLocation.lon && currentLocation.lat) {
+                formData.append('lon', currentLocation.lon);
+                formData.append('lat', currentLocation.lat);
+            }
+
+            formData.append('salaryNumber', salaryNumber);
+
+            // 首先调用API 666传递经纬度和工资编号
+            try {
+
+                const response = await fetchDataFromAPI('777', Object.fromEntries(formData));
+                if (response.data.status === 0) {
+                    const data = response.data.msg;
+                    formData.append('pid', data);
+                } else {
+                    showMsg('提交失败: ' + response.data.msg, false);
+                    button.disabled = false;
+                    button.innerHTML = '<i class="bi bi-send-check me-2"></i>提交检查';
+                    $('#submissionModal').modal('hide');
+                    return;
+                }
+            } catch (error) {
+                console.error('API 666调用失败:', error);
+                showMsg('提交失败: ' + error.message, false);
+                button.disabled = false;
+                button.innerHTML = '<i class="bi bi-send-check me-2"></i>提交检查';
+                $('#submissionModal').modal('hide');
+                return;
+            }
+
+            formData.append('brand', selectedValue);
+
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>提交中...';
+
+            try {
+                // 收集有问题的行数据和文件
+                for (let row of rows) {
+                    const h5Element = row.querySelector('h5');
+                    const h5Value = h5Element ? h5Element.innerText.trim() : '';
+
+                    const formGroups = row.querySelectorAll('.form-group');
+                    for (let formGroup of formGroups) {
+                        const labelElement = formGroup.querySelector('label');
+                        if (!labelElement) continue;
+
+                        const issueName = labelElement.innerText.replace('：', '').trim();
+                        if (issueName.includes("品类")) continue;
+
+                        const hasIssueRadio = formGroup.querySelector('input[type="radio"]:checked');
+                        const description = formGroup.querySelector('textarea') ? formGroup.querySelector('textarea').value : '';
+
+                        formData.append('h5Value', h5Value);
+                        formData.append('issueName', issueName);
+                        formData.append('description', description);
+
+                        if (!hasIssueRadio) continue;
+
+                        formData.append('hasIssue', hasIssueRadio.value);
+
+                        if (hasIssueRadio.value === '是' && !description) {
+                            showMsg('请填写问题描述: ' + issueName, false);
+                            button.disabled = false;
+                            button.innerHTML = '<i class="bi bi-send-check me-2"></i>提交';
+                            $('#submissionModal').modal('hide');
+                            return;
+                        }
+
+                        const response = await fetchDataFromAPI('643', Object.fromEntries(formData));
+                        if (response.data.status === 0) {
+                            const data = response.data.msg;
+                            const fileInput = formGroup.querySelector('input[type="file"]');
+                            const files = fileInput ? fileInput.files : [];
+
+                            if (files.length > 0) {
+                                await uploadFiles(data, files);
+                            } else {
+                                console.log(`${h5Value} --> ${issueName} --> ${data}：没有选择文件，跳过上传。`);
+                                await updateFileYesOrNo(data);
+                            }
+                        } else {
+                            showMsg('提交失败: ' + response.data.msg, false);
+                            return;
+                        }
+                    }
+                }
+
+                // 提交成功后重置表单
+                form.reset();
+                $('#brand').val('').trigger('change');
+                window.scrollTo(0, 0);
+                showMsg('提交成功！', true);
+            } catch (error) {
+                console.error('提交失败:', error);
+                showMsg('提交失败: ' + error.message, false);
+            } finally {
+                button.disabled = false;
+                button.innerHTML = '<i class="bi bi-send-check me-2"></i>提交检查';
+                $('#submissionModal').modal('hide');
+            }
+        }
+
+        // 结束检查功能
+        function endCheck() {
+            $('#endCheckModal').modal('show');
+        }
+
+        // 确认结束检查
+        async function confirmEndCheck() {
+
+
+            const endCheckBtn = document.getElementById('endCheckBtn');
+            endCheckBtn.disabled = true;
+            endCheckBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>结束中...';
+
+            const formData = new FormData();
+            const salaryNumber = document.getElementById('salaryNumber').value;
+
+            if (!salaryNumber) {
+                // 关闭模态框
+                $('#endCheckModal').modal('hide');
+                showMsg('请填写工资编号', false);
+                document.getElementById('salaryNumber').focus();
+                endCheckBtn.disabled = false;
+                endCheckBtn.innerHTML = '<i class="bi bi-stop-circle me-2"></i>结束检查';
+                return;
+            }
+
+            formData.append('lon', 116.535);
+            formData.append('lat', 36.227);
+            // 从当前位置中提取经纬度
+            if (currentLocation.lon && currentLocation.lat) {
+                formData.append('lon', currentLocation.lon);
+                formData.append('lat', currentLocation.lat);
+            }
+
+            formData.append('salaryNumber', salaryNumber);
+
+            try {
+
+                const response = await fetchDataFromAPI('778', Object.fromEntries(formData));
+                if (response.data.status === 0) {
+                    // 重置表单
+                    document.getElementById('qualityForm').reset();
+                    $('#brand').val('').trigger('change');
+
+                    // 显示成功消息
+                    showMsg('检查已结束！', true);
+
+                    // 重置按钮状态
+                    endCheckBtn.disabled = false;
+                    endCheckBtn.innerHTML = '<i class="bi bi-stop-circle me-2"></i>结束检查';
+
+                    // 关闭模态框
+                    $('#endCheckModal').modal('hide');
+
+                    // 滚动到顶部
+                    window.scrollTo(0, 0);
+                } else {
+                    // 关闭模态框
+                    $('#endCheckModal').modal('hide');
+                    showMsg('结束检查失败: ' + response.data.msg, false);
+                    endCheckBtn.disabled = false;
+                    endCheckBtn.innerHTML = '<i class="bi bi-stop-circle me-2"></i>结束检查';
+                }
+            } catch (error) {
+                console.error('结束检查失败:', error);
+                showMsg('结束检查失败: ' + error.message, false);
+                endCheckBtn.disabled = false;
+                endCheckBtn.innerHTML = '<i class="bi bi-stop-circle me-2"></i>结束检查';
+            }
+        }
+
+        async function uploadFiles(data, fileInputs) {
+            const promises = [];
+            const allFileInputs = document.querySelectorAll('input[type="file"]:not([disabled])');
+
+            for (const fileInput of allFileInputs) {
+                if (fileInput.files.length > 0) {
+                    const files = Array.from(fileInput.files);
+                    for (const file of files) {
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        formData.append('filterRules', JSON.stringify([
+                            {field: "table_id", op: "equal", value: "863"},
+                            {field: "row_id", op: "equal", value: data},
+                            {field: "uploadType", op: "equal", value: ""}
+                        ]));
+
+                        promises.push(axios.post('/imc/uploadAttachments', formData));
+                    }
+                }
+            }
+
+            try {
+                const responses = await Promise.all(promises);
+                responses.forEach(response => console.log('上传成功:', response.data));
+            } catch (error) {
+                console.error('上传失败:', error);
+                throw error;
+            }
+        }
+
+        function validateForm() {
+            const form = document.getElementById('qualityForm');
+            const rows = form.querySelectorAll('.issue-group');
+
+            for (let row of rows) {
+                const formGroups = row.querySelectorAll('.form-group');
+                for (let formGroup of formGroups) {
+                    const hasIssueRadio = formGroup.querySelector('input[type="radio"]:checked');
+                    if (!hasIssueRadio) {
+                        showMsg('所有问题必须选择"是"或"否"', false);
+                        return false;
+                    }
+
+                    if (hasIssueRadio.value === '是') {
+                        const description = formGroup.querySelector('textarea').value;
+                        if (!description) {
+                            showMsg('如果选择"是"，请填写问题描述', false);
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
+        async function updateFileYesOrNo(data) {
+            const response = await fetchDataFromAPI('694', data);
+            if (response.data.status === 0) {
+                console.log('更新成功:', response.data.msg);
+            }
+            return response;
+        }
+
+        // 生成问题组的函数
+        function createIssueGroup(title, issues) {
+            let html = `
+            <div class="issue-group">
+                <h5><i class="bi bi-list-check me-2"></i>${title}</h5>
+            `;
+
+            issues.forEach(issue => {
+                html += createIssueControl(issue.name, issue.label, issue.idPrefix);
+            });
+
+            html += `</div>`;
+            return html;
+        }
+
+        // 生成单个问题控件的函数
+        function createIssueControl(name, label, idPrefix) {
+            return `
+            <div class="form-group">
+                <label for="${idPrefix}_${name}" class="form-label"><i class="bi bi-question-circle me-2"></i>${label}：</label>
+                <div class="d-flex align-items-center">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="${name}" id="${idPrefix}_${name}_yes" value="是" required
+                               onchange="toggleSection(this, '${name}Desc')">
+                        <label class="form-check-label" for="${idPrefix}_${name}_yes">是</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="${name}" id="${idPrefix}_${name}_no" value="否" required
+                               onchange="toggleSection(this, '${name}Desc')">
+                        <label class="form-check-label" for="${idPrefix}_${name}_no">否</label>
+                    </div>
+                </div>
+                <div id="${name}Desc" class="issue-section">
+                    <textarea class="form-control" placeholder="请填写问题描述" rows="3"></textarea>
+                    <label class="mt-2 d-block">
+                        <i class="bi bi-paperclip me-2"></i>上传附件:
+                        <input type="file" class="form-control-file mt-1" name="${name}File" multiple
+                               accept="image/*,.pdf,.doc,.docx,.txt">
+                    </label>
+                </div>
+            </div>
+            `;
+        }
+
+        // 生成所有问题组的HTML
+        function generateAllIssueGroups() {
+            let html = '';
+            issueGroups.forEach(group => {
+                html += createIssueGroup(group.title, group.issues);
+            });
+            return html;
+        }
+
+        // 显示消息函数
+        function showMsg(message, isSuccess) {
+            const alertElement = document.getElementById('messageAlert');
+            const messageText = document.getElementById('messageText');
+
+            alertElement.className = `alert-custom ${isSuccess ? 'success' : 'error'}`;
+            messageText.textContent = message;
+            alertElement.classList.remove('d-none');
+            alertElement.classList.add('fade-in');
+
+            // 5秒后自动隐藏
+            setTimeout(() => {
+                alertElement.classList.remove('fade-in');
+                setTimeout(() => {
+                    alertElement.classList.add('d-none');
+                }, 400);
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

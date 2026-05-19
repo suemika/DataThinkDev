@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>石横特钢员工反映问题问卷</title>
+    <link rel="icon" href="/logo.png" type="image/png">
+    <link rel="stylesheet" href="../../bootstrap5/css/bootstrap.css">
+    <style>
+        body {
+            text-align: center; /* 设置整个页面的文本居中 */
+            background-color: #f8f9fa; /* 设置背景颜色 */
+        }
+
+        h2 {
+            color: #0095ff !important; /* 设置标题的颜色 */
+            margin-top: 30px; /* 设置标题的上边距 */
+            text-align: center; /* 设置标题文本居中 */
+        }
+
+        .alert-custom {
+            padding: 10px; /* 设置警告框的内边距 */
+            margin-bottom: 20px; /* 设置警告框的下边距 */
+            opacity: 0; /* 设置初始透明度为0，隐藏警告框 */
+            transition: opacity 0.3s ease-in-out; /* 设置透明度的过渡效果 */
+        }
+
+        .alert-custom.success {
+            background-color: #d4edda; /* 成功警告框的背景颜色 */
+            border-color: #c3e6cb; /* 成功警告框的边框颜色 */
+            color: #155724; /* 成功警告框的文字颜色 */
+        }
+
+        .alert-custom.error {
+            background-color: #f8d7da; /* 错误警告框的背景颜色 */
+            border-color: #f5c6cb; /* 错误警告框的边框颜色 */
+            color: #721c24; /* 错误警告框的文字颜色 */
+        }
+
+        .alert-custom.fade-in {
+            opacity: 1; /* 显示警告框 */
+        }
+
+        .form-inline .form-control, .form-inline .form-label {
+            display: inline-block; /* 使表单控件和标签显示为行内块元素 */
+            vertical-align: middle; /* 使表单控件和标签垂直对齐 */
+        }
+
+        .form-inline .form-control {
+            width: auto; /* 使表单控件宽度自动适应内容 */
+            flex: 1; /* 使表单控件占据剩余空间 */
+        }
+
+        .form-label {
+            width: 90px; /* 设置标签的宽度 */
+            text-align: right; /* 设置标签文本右对齐 */
+            margin-right: 10px; /* 设置标签的右边距 */
+        }
+
+        .form-inline {
+            display: flex; /* 使用Flexbox布局 */
+            align-items: center; /* 使表单控件和标签垂直居中对齐 */
+            margin-bottom: 15px; /* 设置每行表单的下边距 */
+        }
+
+        .form-container {
+            text-align: left; /* 设置表单容器内文本左对齐 */
+            max-width: 600px; /* 设置表单容器的最大宽度 */
+            margin: 0 auto; /* 使表单容器水平居中 */
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h2 class="mt-5" style="font-weight: bold;">
+        <img src="/logo.png" style="width: 45px; height: 45px;"> 石横特钢员工反映问题问卷
+    </h2>
+
+    <br>
+    <div id="divDesc" class="formfield mb-4">
+    <span class="description" style="font-weight: bold;">
+        为畅通员工建言献策渠道，营造开放式的管理氛围，及时发现和解决问题，给员工积极正确的引导，特建立员工反映问题的二维码渠道。<br>
+        员工可微信扫码反映问题，我们对您反映的问题将及时反馈、解决，处理结果向公司领导汇报。<br>
+    </span>
+        <span class="description" style="font-weight: bold; float: right;">
+        工&nbsp; &nbsp; 会<br>
+        2024年1月
+    </span>
+        <div style="clear: both;"></div> <!-- 清除浮动 -->
+    </div>
+
+    <div id="alertContainer"></div>
+
+    <div class="form-container">
+        <form>
+            <h3>1.基本信息</h3>
+            <div class="form-inline">
+                <label for="name" class="form-label">姓名：</label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="请输入您的姓名">
+            </div>
+
+            <div class="form-inline">
+                <label for="department" class="form-label">部门：</label>
+                <input type="text" class="form-control" id="department" name="department" placeholder="请输入您的部门">
+            </div>
+
+            <div class="form-inline">
+                <label for="phone" class="form-label">联系电话：</label>
+                <input type="text" class="form-control" id="phone" name="phone" placeholder="请输入您的联系电话">
+            </div>
+
+            <h3>2.您所反映、反馈的问题，请详细描述</h3>
+            <div class="form-inline">
+                <textarea class="form-control" id="description_issue" name="description_issue" rows="3"
+                          placeholder="请详细描述您的问题" style="width: 300px;"></textarea>
+            </div>
+
+            <h3>3.如有相关附件、图片等内容，请上传！【可多选】</h3>
+            <div class="form-inline">
+                <input class="form-control" type="file" id="attachment" multiple style="width: 300px;">
+            </div>
+            <h3>4.您希望反馈和处理的部门是：</h3>
+            <div class="form-inline">
+                <input type="text" class="form-control" id="feedback_department" name="feedback_department"
+                       style="width: 300px;">
+            </div>
+            <h3>4.您希望反馈的方式为？</h3>
+            <div class="form-inline">
+                <div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="phone_feedback" name="feedback_choice"
+                               value="电话">
+                        <label class="form-check-label" for="phone_feedback">电话</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="wechat_feedback" name="feedback_choice"
+                               value="微信回访">
+                        <label class="form-check-label" for="wechat_feedback">微信回访</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="meeting_feedback" name="feedback_choice"
+                               value="现场沟通">
+                        <label class="form-check-label" for="meeting_feedback">现场沟通</label>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center;">
+                <button type="button" id="submitBtn" class="btn btn-primary" onclick="submitFeedback(this)">提交
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="divPowerBy" style="margin: 20px 0; text-align: center;">
+    <div class='wjfooter'>
+        <span id='spanPower' style="font-size: 8px; font-weight: bold; color: rgb(26,183,150); ">
+            <img src="/logo.png"
+                 style="width: 20px; height: 20px;"> © 2024-现在 石横特钢 数智中心 <span>提供技术支持</span>
+        </span>
+    </div>
+</div>
+
+<script src="../../easyui/js-easyui/axios.min.js"></script>
+<script src="../../elementui/js/jquery-3.7.0.min.js"></script>
+<script src="../js/popper.js"></script>
+
+<script>
+    // 提交反馈表单
+    function submitFeedback(button) {
+        button.disabled = true; // 禁用按钮以防止重复提交
+        const formData = {
+            name: $('#name').val(), // 获取姓名
+            department: $('#department').val(), // 获取部门
+            phone: $('#phone').val(), // 获取联系电话
+            description_issue: $('#description_issue').val(), // 获取问题描述
+            feedback_department: $('#feedback_department').val(), // 获取希望反馈和处理的部门
+            feedbackChoice: document.querySelector('input[name="feedback_choice"]:checked')?.value || '' // 获取希望的反馈方式
+        };
+
+        axios.post('/imc/customOpt', {
+            req: '494',
+            data: JSON.stringify(formData)
+        })
+            .then(response => {
+                const data = response.data.data.msg; // 获取响应数据中的信息
+                console.log('响应数据:', data);
+                uploadFiles(data); // 调用文件上传函数
+                button.disabled = false; // 重新启用按钮
+                // 重置表单
+                document.querySelector('form').reset();
+                showAlert('提交成功！', true); // 显示成功提示
+            })
+            .catch(error => {
+                console.error('请求失败:', error); // 打印错误信息
+                button.disabled = false; // 重新启用按钮
+                showAlert('提交失败！', false); // 显示失败提示
+            });
+    }
+
+    // 上传文件
+    function uploadFiles(data) {
+        const fileInput = document.getElementById('attachment');
+        if (!fileInput.files.length) return;
+
+        const files = Array.from(fileInput.files); // 获取文件列表
+        files.forEach(file => {
+            const formData = new FormData();
+            formData.append('file', file); // 将文件添加到FormData对象
+            formData.append('filterRules', JSON.stringify([
+                {field: "table_id", op: "equal", value: "647"},
+                {field: "row_id", op: "equal", value: data},
+                {field: "uploadType", op: "equal", value: ""}
+            ]));
+
+            axios.post('/imc/uploadAttachments', formData)
+                .then(response => {
+                    console.log('响应数据:', response.data); // 打印响应数据
+                })
+                .catch(error => {
+                    console.error('请求失败:', error); // 打印错误信息
+                });
+        });
+    }
+
+    // 显示提示信息
+    function showAlert(message, isSuccess) {
+        const alertContainer = document.getElementById('alertContainer');
+        const existingAlert = alertContainer.querySelector('.alert');
+        if (existingAlert) alertContainer.removeChild(existingAlert);
+
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert mt-3 alert-custom ${isSuccess ? 'success' : 'error'} fade-in`; // 根据是否成功设置提示框的样式
+        alertDiv.innerHTML = message; // 设置提示信息
+        alertContainer.appendChild(alertDiv); // 将提示框添加到容器中
+
+        setTimeout(() => {
+            alertDiv.classList.remove('fade-in'); // 3秒后移除淡入效果
+            setTimeout(() => {
+                if (alertContainer.contains(alertDiv)) alertContainer.removeChild(alertDiv); // 再过0.3秒后移除提示框
+            }, 300);
+        }, 3000);
+    }
+</script>
+</body>
+</html>

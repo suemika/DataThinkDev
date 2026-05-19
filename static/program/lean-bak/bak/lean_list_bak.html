@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>石横特钢 | 精益认证首页</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href=' + randomVersion + '"../../../logo.png?v=" type="image/png">');
+        document.write('<link rel="stylesheet" href=' + randomVersion + '"../../../bootstrap5/css/bootstrap.min.css?v=">');
+        document.write('<link rel="stylesheet" href=' + randomVersion + '"../../css/util.css?v=">');
+        document.write('<script src=' + randomVersion + '"../../../easyui/js-easyui/axios.min.js?v="><\/script>');
+        document.write('<script src=' + randomVersion + '"../../util/util_link.js?v="><\/script>');
+        document.write('<script src=' + randomVersion + '"../../../bootstrap5/js/bootstrap.bundle.min.js?v="><\/script>');
+        document.write('<script src=' + randomVersion + '"../../../elementui/js/jquery-3.7.0.min.js?v="><\/script>');
+        document.write('<script src=' + randomVersion + '"../../js/popper.js?v="><\/script>');
+    </script>
+    <style>
+        body {
+            background-color: #f0f8ff;
+            font-family: Arial, sans-serif;
+        }
+
+        .timeline-container {
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .timeline-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 5px;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom,
+            #28a745 0%, #28a745 40%, #007bff 40%, #dedede 60%, #dedede 100%);
+            z-index: 0;
+        }
+
+        .timeline-container.completed-exam::before {
+            background: linear-gradient(to bottom,
+            #28a745 0%, #28a745 100%);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .timeline-point {
+            position: absolute;
+            left: 8px;
+            top: 0;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #fff;
+            z-index: 1;
+        }
+
+        .timeline-point.completed {
+            background-color: #28a745;
+        }
+
+        .timeline-point.in-progress {
+            background-color: #007bff;
+        }
+
+        .timeline-point.pending {
+            background-color: #dedede;
+        }
+
+        .content-card {
+            flex: 1;
+            background: #f4f9ff;
+            border: 1px solid #dfeaf7;
+            padding: 10px;
+            border-radius: 15px;
+            margin-left: 40px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .detail-card {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .detail-card p {
+            margin: 5px 0;
+        }
+
+        .nav-tabs {
+            font-size: 16px; /* 适当调整标签的字体大小 */
+            border-bottom: 2px solid #dfeaf7;
+        }
+
+        .nav-tabs .nav-link {
+            padding: 5px !important;
+        }
+
+        .nav-tabs .nav-link.active {
+            background-color: #3c84ff;
+            color: #fff !important;
+        }
+
+        .custom-btn {
+            background: linear-gradient(90deg, #4facff 0%, #00d2ff 100%);
+            border: none;
+        }
+
+        .custom-btn:hover {
+            background: linear-gradient(90deg, #00d2ff 0%, #4facff 100%);
+        }
+
+        .badge-small {
+            font-size: 12px !important;
+            padding: 3px 6px !important;
+            border-radius: 8px !important;
+            height: 20px !important;
+        }
+
+        .nav-link.disabled {
+            color: #aaa !important;
+            background-color: #f6f6f6 !important;
+            border-color: #ddd !important;
+            cursor: not-allowed !important;
+        }
+
+        .mt-4 {
+            margin-top: 10px !important;
+        }
+
+    </style>
+</head>
+<body>
+<header class="background-container">
+    <img id="header-img" src="" alt="ST">
+    <h2 class="h2-container">精益认证</h2>
+</header>
+<main class="container mt-4" id="mainContent">
+    <ul class="nav nav-tabs mt-4" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="lean-student-tab" data-bs-toggle="tab" data-bs-target="#lean-student"
+                    type="button" role="tab" aria-controls="lean-student" aria-selected="true" data-role="精益学员">
+                精益学员
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="lean-backbone-tab" data-bs-toggle="tab" data-bs-target="#lean-backbone"
+                    type="button" role="tab" aria-controls="lean-backbone" aria-selected="false" data-role="精益骨干">
+                精益骨干
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="lean-coach-tab" data-bs-toggle="tab" data-bs-target="#lean-coach" type="button"
+                    role="tab" aria-controls="lean-coach" aria-selected="false" data-role="精益教练">
+                精益教练
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="senior-coach-tab" data-bs-toggle="tab" data-bs-target="#senior-coach"
+                    type="button" role="tab" aria-controls="senior-coach" aria-selected="false" data-role="资深教练">
+                资深教练
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content mt-4">
+        <div class="tab-pane fade show active" id="timeline" role="tabpanel" aria-labelledby="timeline-tab">
+            <div class="timeline-container" id="timeline-content"></div>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <button id="signup-button" class="btn custom-btn btn-lg text-light">立即报名</button>
+    </div>
+</main>
+<script>
+    const defaultData = [
+        {
+            stage_name: "认证报名",
+            status: "待审核",
+            stage_description: "完成认证报名",
+            start_time: null,
+            end_time: null,
+        },
+        {
+            stage_name: "认证考试",
+            status: "未开始",
+            start_time: null,
+            end_time: null,
+        },
+        {
+            stage_name: "认证结果",
+            status: "未开始",
+            start_time: null,
+            end_time: null,
+        }
+    ];
+
+    const role_mapping = {
+        "精益学员": "lean-student",
+        "精益骨干": "lean-backbone",
+        "精益教练": "lean-coach",
+        "资深教练": "senior-coach"
+    };
+
+    let userName = getNameFromUrl("gzbh");
+    let currentRole;
+    let userStatus;
+
+    document.addEventListener("DOMContentLoaded", async function () {
+        await loadList();
+        await loadAndGenerateTimeline(currentRole || "");
+
+        document.querySelectorAll('.nav-link').forEach(button => {
+            button.addEventListener('click', async () => {
+                const role = button.getAttribute('data-role');
+                await loadAndGenerateTimeline(role);
+            });
+        });
+    });
+
+    async function loadAndGenerateTimeline(role) {
+        currentRole = role; // 更新当前角色
+        const userData = await queryUserData();
+        generateTimeline(role, userData || defaultData);
+    }
+
+    async function loadList() {
+        const response = await fetchDataFromAPI('662', userName);
+        if (response.data.status === 0) {
+            currentRole = response.data.user;
+            userStatus = response.data.user_status;
+        } else {
+            currentRole = null;
+        }
+        updateTabAccessibility();
+    }
+
+    function updateTabAccessibility() {
+        const roleButtons = document.querySelectorAll('.nav-link');
+        roleButtons.forEach((button) => {
+            const role = button.getAttribute('data-role');
+            const isActiveRole = role === currentRole;
+
+            // 仅允许当前角色可点击
+            button.disabled = !isActiveRole;
+        });
+    }
+
+    async function queryUserData() {
+        const response = await fetchDataFromAPI('663', {
+            workId: userName,
+            role: currentRole,
+        });
+        return response.data.status === 0 ? response.data.certifications : null;
+    }
+
+    function generateTimeline(role, roleData) {
+        const timelineContainer = document.getElementById('timeline-content');
+        timelineContainer.innerHTML = '';
+
+        const examStage = roleData.find(item => item.stage_name === "认证考试");
+        if (examStage && examStage.status === "已完成") {
+            timelineContainer.classList.add('completed-exam');
+        } else {
+            timelineContainer.classList.remove('completed-exam');
+        }
+
+        roleData.forEach(item => {
+            timelineContainer.innerHTML += createTimelineItem(item);
+        });
+
+        console.log(roleData);
+        // 统一管理按钮的状态
+        updateSignupButton(roleData);
+    }
+
+    async function applyForExam() {
+        try {
+            const response = await fetchDataFromAPI('667', {
+                workId: userName,
+                role: currentRole,
+                stage_name: "认证考试",
+            });
+
+            if (response.data.status === 0) {
+                alert("考试申请成功！");
+                // 更新按钮状态为“等待考试”
+                updateSignupButtonAfterExamApplied();
+            } else {
+                alert("考试申请失败，请重试。");
+            }
+        } catch (error) {
+            console.error("Fetch Data Error: ", error);
+            alert("请求失败，请稍后再试。");
+        }
+    }
+
+    function updateSignupButton(roleData) {
+        const signupButton = document.getElementById('signup-button');
+
+        if (!roleData || roleData.length === 0) {
+            signupButton.innerText = "立即报名";
+            signupButton.onclick = () => location.href = `sign_up.html?userName=${userName}`;
+            signupButton.disabled = false;
+            return;
+        }
+
+        const registrationStage = roleData.find(item => item.stage_name === "认证报名");
+        const examStage = roleData.find(item => item.stage_name === "认证考试");
+
+        if (registrationStage) {
+            if (registrationStage.status === "进行中") {
+                signupButton.innerText = "请等待审核中...";
+                signupButton.disabled = true;
+            } else if (registrationStage.status === "已完成") {
+                signupButton.innerText = "申请考试";
+                signupButton.onclick = async () => {
+                    if (confirm("已经学习完成，确认考试吗？")) {
+                        await applyForExam();
+                    }
+                };
+                signupButton.disabled = false; // 允许点击
+            } else if (registrationStage.status === "未开始") {
+                signupButton.innerText = "立即报名";
+                signupButton.onclick = () => location.href = `sign_up.html?userName=${userName}`;
+                signupButton.disabled = false; // 确保按钮是可用的
+            }
+        }
+
+        if (examStage) {
+            if (examStage.status === "进行中") {
+                updateSignupButtonAfterExamApplied();
+            } else if (examStage.status === "已完成") {
+                signupButton.innerText = "阶段完成";
+                signupButton.disabled = true; // 禁用按钮
+            }
+        }
+    }
+
+    function updateSignupButtonAfterExamApplied() {
+        const signupButton = document.getElementById('signup-button');
+        signupButton.innerText = "等待考试";
+        signupButton.disabled = true; // 禁用按钮
+    }
+
+    function createTimelineItem(data) {
+
+        console.log(data)
+
+        let statusIcon, statusClass, badgeClass;
+        if (data.status === "已完成") {
+            statusIcon = "✔️";
+            statusClass = "completed";
+            badgeClass = "bg-success";
+        } else if (data.status === "进行中") {
+            statusIcon = "⏳";
+            statusClass = "in-progress";
+            badgeClass = "bg-warning";
+        } else {
+            statusIcon = "📋";
+            statusClass = "pending";
+            badgeClass = "bg-secondary";
+        }
+
+        return `
+    <div class="timeline-item">
+        <div class="timeline-point ${statusClass}">
+            ${statusIcon}
+        </div>
+        <div class="content-card">
+            <h6 class="mb-2 fw-bold">
+                ${data.stage_name}
+                 ${data.stage_name === "认证考试" ? `<span class="badge ${badgeClass} badge-small">${data.status}</span>` : ''}
+            </h6>
+
+            <!-- 合并后的条件判断 -->
+            ${data.stage_name === "认证学习" ? `
+                <p>${data.stage_description}</p>
+            ` : (data.stage_name !== "认证考试" ? `
+                <div class="d-flex justify-content-between align-items-center">
+                    <p class="flex-grow-1 mb-0">${data.stage_description}</p>
+                    <span class="badge ${badgeClass} badge-small">${data.status}</span>
+                </div>
+            ` : '')}
+
+            ${data.stage_name === "认证报名" && data.status !== "已完成" ? `
+            <div class="card mt-3 p-3 bg-primary text-light rounded">
+                <p class="mb-1"><strong>报名时间:</strong> <span>${data.start_time ? new Date(data.start_time).toLocaleString() : "暂无"}</span></p>
+                <p class="mb-1"><strong>审核时间:</strong> <span>${data.end_time ? new Date(data.end_time).toLocaleString() : "暂无"}</span></p>
+            </div>
+            ` : ''}
+
+            ${data.stage_name === "认证考试" ? `
+            <div class="mt-2">
+                <div class="card p-3 mb-3">
+                    <p><strong>考试时间、地点:</strong></p>
+                    <p>${data.exam_time ? new Date(data.exam_time).toLocaleString() : "未开始"} (${data.exam_location || "未开始"})</p>
+                </div>
+                <div class="card p-3">
+                    <h6 class="fw-bold">考试结果信息: ${data.exam_result || "无结果"}</h6>
+                </div>
+            </div>
+            ` : ''}
+        </div>
+    </div>`;
+    }
+
+</script>
+</body>
+</html>

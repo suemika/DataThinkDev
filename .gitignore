@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+venv/
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Claude / Hermes config (local only)
+.claude/
+
+# Uploads (user data)
+uploads_docx/
+attachment/
+
+# Database files
+*.db
+*.sqlite3
+
+# Large binary assets (use Git LFS or CDN if needed)
+static/program/contract_management/templates/
+static/program/fontawesome/
+static/program/pdfjs/
+static/program/ContractManagement/
+static/program/contract_templates/
+
+# Large fonts (exclude individual large files)
+static/program/fonts/SimSun.ttf
+static/program/fonts/*.ttf
+static/program/font/*.ttf
+static/program/contract_management/fonts/SimSun.ttf
+*.ttc
+
+# Other large static sub-apps (not needed for core program/)
+static/AQGL/
+static/JYB/
+static/jygl/
+static/hhtg/
+static/amissdk/
+static/amissdk*/
+static/resource/
+

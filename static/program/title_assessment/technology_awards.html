@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>科技进步奖</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+    <script>
+        // 获取当前时间戳作为版本号
+        const version = Date.now();
+    </script>
+
+    <link rel="icon" href="../vendor/logo.png?v=1" type="image/png">
+    <link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.css?v=${version}">
+    <link rel="stylesheet" href="vendor/css/util.css"?v=${version}">
+    <script src="../vendor/easyui/js-easyui/axios.min.js?v=${version}"></script>
+    <script src="../vendor/bootstrap5/js/bootstrap.js?v=${version}"></script>
+    <script src="vendor/util/util_link.js"?v=${version}"></script>
+    <script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=${version}"></script>
+    <style>
+        /* 简化和优化 CSS */
+        #backButton {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .list-block {
+            background-color: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 20px;
+            box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f0f0f0;
+            padding: 15px 10px;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-item .item-title {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .submit-btn {
+            display: block;
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            margin: 30px auto;
+            width: calc(100% - 40px);
+            max-width: 300px;
+            font-size: 16px;
+        }
+
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            text-align: center;
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* 选中样式 */
+        .selected {
+            background-color: #007bff !important; /* 确保选中时背景颜色优先 */
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<header class="background-container">
+    <a href="http://edi.sdstg.com/" target="_self" rel="noopener">
+        <img id="header-img" src="" alt="ST">
+    </a>
+    <h2 class="h2-container">科技进步奖</h2>
+</header>
+<main class="container mt-4">
+    <div class="d-flex justify-content-between mb-3">
+        <button onclick="goBack()" class="btn btn-primary">返回</button>
+        <button id="submitBtn" class="btn btn-success">新增</button>
+        <button id="updateBtn" class="btn btn-info" disabled>修改</button>
+        <button id="deleteBtn" class="btn btn-danger" disabled>删除</button>
+    </div>
+    <div id="errorAlert" class="alert alert-danger d-none" role="alert"></div>
+    <div class="list-block" id="achievementsList">
+        <h5>科技进步奖列表</h5>
+        <div id="listContainer"></div>
+    </div>
+</main>
+<script>
+    const uuid = getNameFromUrl('uuid');
+    const workID = getNameFromUrl('workID');
+    const edit_name = 'technology_awards';
+    const del_name = 'ZCJ_科技进步奖';
+
+    const main_href = `main.html?uuid=${uuid}`;
+    const add_href = `${edit_name}_edit.html?uuid=${uuid}&workID=${workID}`;
+
+    function goBack() {
+        window.location.href = main_href;
+    }
+
+    $(document).ready(function () {
+        if (workID === "null") {
+            goBack();
+        }
+        loadList();
+    });
+
+    $("#submitBtn").click(function () {
+        const rowCount = $('#listContainer table tbody tr').length; // 获取当前行数
+
+        if (rowCount >= 3) {
+            showMsg('数量已达到上限，无法新增更多。');
+            $(this).prop('disabled', true).addClass('disabled'); // 禁用按钮
+            return;
+        }
+
+        window.location.href = add_href;
+    });
+
+    $(document).on('click', '#listContainer table tbody tr', function () {
+        $(this).toggleClass('selected').siblings().removeClass('selected');
+        $('#deleteBtn').prop('disabled', !$(this).hasClass('selected'));
+        $('#updateBtn').prop('disabled', $('#listContainer table tbody tr.selected').length === 0);
+    });
+
+    $("#updateBtn").click(async function () {
+        const $selectedRow = $('#listContainer table tbody tr.selected');
+        if ($selectedRow.length === 0) {
+            showMsg('请先选择一项进行修改。');
+            return;
+        }
+        const itemId = $selectedRow.data('id');
+
+        window.location.href = `${edit_name}_edit.html?uuid=${uuid}&workID=${workID}&itemId=${itemId}`;
+
+    });
+
+    $("#deleteBtn").click(async function () {
+        const $selectedRow = $('#listContainer table tbody tr.selected');
+
+        if ($selectedRow.length === 0) {
+            showMsg('请先选择一项进行删除。');
+            return;
+        }
+
+        const itemId = $selectedRow.data('id'); // 获取选中行 ID
+        const formData = new FormData();
+        formData.append('del_name', del_name);
+        formData.append('itemId', itemId);
+        formData.append('pid', uuid);
+
+        const response = await fetchDataFromAPI('631', Object.fromEntries(formData));
+
+        if (response.msg === '删除成功') {
+            await loadList();
+            // 删除后重置删除和修改按钮状态
+            $('#deleteBtn').prop('disabled', true);
+            $('#updateBtn').prop('disabled', true);
+        } else {
+            showMsg(response.msg);
+            $('#submitBtn').prop('disabled', true);
+            $('#deleteBtn').prop('disabled', true);
+            $('#updateBtn').prop('disabled', true);
+            goBack();
+        }
+    });
+
+    async function loadList() {
+        const formData = new FormData();
+        formData.append('name', edit_name);
+        formData.append('pid', uuid);
+
+        const response = await fetchDataFromAPI('629', Object.fromEntries(formData));
+        const result = response.data.data.item;
+        const listContainer = $("#listContainer");
+
+        if (result && result.length > 0) {
+            listContainer.empty(); // 清空之前的数据
+            let tableHtml = `<table>
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">序号</th>
+                        <th style="width: 100px;">级别</th>
+                        <th>名称</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+            result.forEach((item, index) => {
+                tableHtml += `<tr data-id="${item.id}">
+                    <td class="center">${index + 1}</td>
+                    <td>${item.Title}</td>
+                    <td>${item.Description}</td>
+                </tr>`;
+            });
+
+            tableHtml += `</tbody></table>`;
+            listContainer.append(tableHtml); // 添加表格到容器中
+
+            // 检查当前行数以启用或禁用“新增”按钮
+            if (result.length >= 3) {
+                $("#submitBtn").prop('disabled', true).addClass('disabled');
+            } else {
+                $("#submitBtn").prop('disabled', false).removeClass('disabled'); // 启用按钮
+            }
+        } else {
+            listContainer.append('<div class="list-item">没有找到内容，请点击新增</div>');
+            $("#submitBtn").prop('disabled', false).removeClass('disabled'); // 如果没有记录，也启用“新增”按钮
+        }
+    }
+
+</script>
+</body>
+</html>

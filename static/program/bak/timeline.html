@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>石横特钢 | 精益认证</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../../logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../../bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="util/util.css?v=' + randomVersion + '">');
+        document.write('<script src="../../easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../util/util_link.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../../bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../../elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../js/popper.js?v=' + randomVersion + '"><\/script>');
+    </script>
+    <style>
+
+        .timeline-container {
+            position: relative;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+            margin: 10px;
+        }
+
+        .timeline-point {
+            position: absolute;
+            left: 8px;
+            top: 0;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #fff;
+            z-index: 1;
+        }
+
+        .timeline-point.completed {
+            background-image: url('png/completed.svg'); /* 设置背景图片地址 */
+            background-size: cover; /* 使图片覆盖元素 */
+            background-position: center; /* 图片居中对齐 */
+        }
+
+        .timeline-point.in-progress {
+            background-image: url('png/in-progress.svg'); /* 设置背景图片地址 */
+            background-size: cover; /* 使图片覆盖元素 */
+            background-position: center; /* 图片居中对齐 */
+        }
+
+        .timeline-point.pending {
+            background-image: url('png/pending.svg');
+            background-size: cover; /* 使图片覆盖元素 */
+            background-position: center; /* 图片居中对齐 */
+        }
+
+        .content-card {
+            flex: 1;
+            background: #f4f9ff;
+            border: 1px solid #dfeaf7;
+            padding: 10px;
+            border-radius: 15px;
+            margin-left: 40px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            font-size: 14px; /* 设置较小的字体大小 */
+        }
+
+        .detail-card {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .content-card h6 {
+            font-size: 14px; /* 设置 h6 的字体大小 */
+        }
+
+        .content-card p {
+            font-size: 13px; /* 设置段落的字体大小 */
+
+        }
+
+        .detail-card p {
+            margin: 5px 0;
+        }
+
+        .text-center {
+            margin-top: 10px;
+        }
+
+
+        .nav-item {
+            font-size: 16px; /* 设置所需字体大小 */
+        }
+
+        .nav-tabs {
+            justify-content: center;
+        }
+
+        .nav-tabs .nav-link {
+            padding: 5px !important;
+        }
+
+        .nav-tabs .nav-link.active {
+            background: #007bff;
+            color: #fff !important;
+        }
+
+        .custom-btn {
+            background: #007bff;
+            border: none;
+            transition: background 0.3s ease;
+
+            margin-bottom: 10px;
+
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .custom-btn:hover {
+            background: #007bff;
+        }
+
+        .badge-small {
+            font-size: 12px !important;
+            padding: 3px 6px !important;
+            border-radius: 8px !important;
+            height: 20px !important;
+        }
+
+        .mt-4 {
+            margin-top: 0 !important;
+        }
+
+        @media (max-width: 768px) {
+
+            .container {
+                width: 100%;
+            }
+
+            footer {
+                width: 100%;
+            }
+
+            .content-card {
+                margin-left: 40px;
+            }
+        }
+
+        .disabled-button {
+            background-color: #fdfdfd; /* 或者你可以使用其他颜色 */
+            color: white; /* 可以根据需要调整文本颜色 */
+            cursor: not-allowed; /* 光标样式，指示按钮不可点击 */
+            opacity: 0.6; /* 使按钮看起来更透明，增加禁用效果 */
+        }
+
+
+        .custom-btn:disabled {
+            background-color: grey; /* 设置禁用时的背景颜色 */
+            color: white; /* 设置禁用时的字体颜色 */
+            cursor: not-allowed; /* 设置光标样式 */
+            opacity: 0.6; /* 增加透明度来表示禁用状态 */
+            border-color: grey; /* 设置禁用时的边框颜色 */
+        }
+
+    </style>
+</head>
+<body class="poppins-bold">
+
+<header class="background-container">
+    <img id="header-img" src="" alt="ST">
+    <h2 class="poppins-bold-italic">精益认证平台</h2>
+</header>
+<main class="container mt-4" id="mainContent">
+    <ul class="nav nav-tabs mt-4" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="lean-student-tab" data-bs-toggle="tab" data-bs-target="#lean-student"
+                    type="button" role="tab" aria-controls="lean-student" aria-selected="true" data-role="精益学员">
+                精益学员
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="lean-backbone-tab" data-bs-toggle="tab" data-bs-target="#lean-backbone"
+                    type="button" role="tab" aria-controls="lean-backbone" aria-selected="false" data-role="精益骨干">
+                精益骨干
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="lean-coach-tab" data-bs-toggle="tab" data-bs-target="#lean-coach" type="button"
+                    role="tab" aria-controls="lean-coach" aria-selected="false" data-role="精益教练">
+                精益教练
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="senior-coach-tab" data-bs-toggle="tab" data-bs-target="#senior-coach"
+                    type="button" role="tab" aria-controls="senior-coach" aria-selected="false" data-role="资深教练">
+                资深教练
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content mt-4">
+        <div class="tab-pane fade show active" id="timeline" role="tabpanel" aria-labelledby="timeline-tab">
+            <div class="timeline-container" id="timeline-content"></div>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <button id="signup-button" class="btn custom-btn btn-lg text-light">立即报名</button>
+    </div>
+</main>
+<script>
+    const defaultData = [
+        {
+            stage_name: "认证报名",
+            status: "待审核",
+            stage_description: "完成认证报名",
+            start_time: null,
+            end_time: null,
+        },
+        {
+            stage_name: "认证考试",
+            status: "未开始",
+            start_time: null,
+            end_time: null,
+        },
+        {
+            stage_name: "认证结果",
+            status: "未开始",
+            start_time: null,
+            end_time: null,
+        }
+    ];
+
+    let userName = getNameFromUrl("userName");
+    let currentRole;
+    let tabRole = '精益学员';
+    let userStatus;
+    let userData;
+
+    let leanStudent = "精益学员"
+    let leanBackbone = "精益骨干"
+    let leanCoach = "精益教练"
+    let seniorCoach = "资深教练"
+
+    let completedText = "已通过"
+
+
+    document.addEventListener("DOMContentLoaded", async function () {
+
+
+
+        const headerImg = document.getElementById('header-img');
+        headerImg.src = '../logo/font_logo2.png'; // 设置图片源
+        const {currentRole: loadedRole, userStatus: loadedStatus} = await loadList(userName);
+        currentRole = loadedRole;
+        userStatus = loadedStatus;
+        await loadAndGenerateTimeline(userName, currentRole);
+
+        document.querySelectorAll('.nav-link').forEach(button => {
+            button.addEventListener('click', async () => {
+                const role = button.getAttribute('data-role');
+                currentRole = role;
+                tabRole = role;
+                await loadAndGenerateTimeline(userName, role);
+            });
+        });
+
+
+    });
+
+    async function loadAndGenerateTimeline(userName, currentRole) {
+        userData = await queryUserData(userName, currentRole);
+        //console.log(userData);
+        generateTimeline(userData || defaultData);
+    }
+
+    async function loadList(userName) {
+        const response = await fetchDataFromAPI('662', userName);
+        let currentRole = null;
+        let userStatus = null;
+        if (response.data.status === 0) {
+            currentRole = response.data.user;
+            userStatus = response.data.user_status;
+        }
+        updateTabAccessibility(currentRole, userStatus);
+        return {currentRole, userStatus};
+    }
+
+    function updateTabAccessibility(currentRole, userStatus) {
+        const roleButtons = document.querySelectorAll('.nav-link');
+        roleButtons.forEach((button) => {
+            const role = button.getAttribute('data-role');
+            const isActiveRole = role === currentRole;
+
+            // 确保“精益学员”标签一直可点击
+            if (role === leanStudent) {
+                button.disabled = false;
+                button.classList.remove('disabled-button'); // 移除禁用样式
+            } else {
+                button.disabled = !isActiveRole;
+                // 添加或移除禁用样式
+                if (button.disabled) {
+                    button.classList.add('disabled-button');
+                } else {
+                    button.classList.remove('disabled-button');
+                }
+            }
+
+            //console.log("role:", role)
+            //console.log("currentRole:", currentRole)
+
+            // 如果“精益学员”认证考试完成，“精益骨干”标签可点击
+            if (role === leanBackbone && userStatus) {
+                button.disabled = false;
+                button.classList.remove('disabled-button'); // 移除禁用样式
+            }
+            if (role === leanCoach && userStatus && currentRole === leanBackbone) {
+                button.disabled = false;
+                button.classList.remove('disabled-button'); // 移除禁用样式
+            }
+            if (role === seniorCoach && userStatus && currentRole === seniorCoach) {
+                button.disabled = false;
+                button.classList.remove('disabled-button'); // 移除禁用样式
+            }
+        });
+    }
+
+    async function queryUserData(userName, currentRole) {
+        const response = await fetchDataFromAPI('663', {
+            workId: userName,
+            role: currentRole,
+        });
+        return response.data.status === 0 ? response.data.certifications : null;
+    }
+
+    function generateTimeline(roleData) {
+        const timelineContainer = document.getElementById('timeline-content');
+        timelineContainer.innerHTML = '';
+
+        const examStage = roleData.find(item => item.stage_name === "认证考试");
+        if (examStage && examStage.status === "已完成") {
+            timelineContainer.classList.add('completed-exam');
+        } else {
+            timelineContainer.classList.remove('completed-exam');
+        }
+
+        roleData.forEach(item => {
+            timelineContainer.innerHTML += createTimelineItem(item);
+        });
+
+        // 统一管理按钮的状态
+        updateSignupButton(roleData);
+    }
+
+    async function applyForExam(userName, currentRole) {
+        try {
+            const response = await fetchDataFromAPI('667', {
+                workId: userName,
+                role: currentRole,
+                stage_name: "认证考试",
+            });
+
+            if (response.data.status === 0) {
+                alert("考试申请成功！");
+                // 更新按钮状态为“等待考试”
+                updateSignupButtonAfterExamApplied();
+                location.reload();
+            } else {
+                console.error("Apply for Exam Error: ", response.data.msg);
+                alert("考试申请失败，请重试。");
+            }
+        } catch (error) {
+            console.error("Fetch Data Error: ", error);
+            alert("请求失败，请稍后再试。");
+        }
+    }
+
+    function updateSignupButtonAfterExamApplied() {
+        const signupButton = document.getElementById('signup-button');
+        signupButton.innerText = "等待考试";
+        signupButton.disabled = true;
+    }
+
+
+    function updateSignupButton(roleData) {
+
+        const registrationStage = roleData.find(item => item.stage_name === "认证报名");
+        const examStage = roleData.find(item => item.stage_name === "认证考试");
+
+        const signupButton = document.getElementById('signup-button');
+        signupButton.innerText = "立即报名"; // 默认文本
+        signupButton.disabled = false; // 默认启用
+        //console.log("tabRole:", tabRole)
+        //console.log("userStatus:", userStatus)
+        // 根据用户角色和状态来修改按钮属性
+        if (tabRole === leanStudent && userStatus && userData) {
+            signupButton.innerText = completedText; // 修改文本
+            signupButton.disabled = true; // 禁用按钮
+
+            return;
+        } else if (tabRole === leanBackbone && userStatus && userData) {
+            signupButton.innerText = completedText; // 修改文本
+            signupButton.disabled = true; // 禁用按钮
+            if (registrationStage) {
+                if (registrationStage.status === "未开始") {
+                    signupButton.innerText = "立即报名";
+                    signupButton.onclick = () => location.href = `sign_up.html?userName=${userName}`;
+                    signupButton.disabled = false;
+                }
+            }
+            return;
+        } else if (tabRole === leanCoach && userStatus && userData) {
+            signupButton.innerText = completedText; // 修改文本
+            signupButton.disabled = true; // 禁用按钮
+            if (registrationStage) {
+                if (registrationStage.status === "未开始") {
+                    signupButton.innerText = "立即报名";
+                    signupButton.onclick = () => location.href = `sign_up.html?userName=${userName}`;
+                    signupButton.disabled = false;
+                }
+            }
+            return;
+        }
+
+        // 添加报名逻辑
+        if (tabRole !== leanCoach && tabRole !== seniorCoach) {
+            signupButton.onclick = () => location.href = `sign_up.html?userName=${userName}`;
+        } else {
+            signupButton.onclick = () => {
+                alert("您已达到当前阶段，不可重复报名。");
+            };
+        }
+
+        // 处理注册和考试阶段
+        if (!roleData || roleData.length === 0) {
+            signupButton.innerText = "立即报名";
+            signupButton.onclick = () => location.href = `sign_up.html?userName=${userName}`;
+            signupButton.disabled = false;
+            return;
+        }
+
+        if (registrationStage) {
+            if (registrationStage.status === "进行中") {
+                signupButton.innerText = "请等待审核";
+                signupButton.disabled = true;
+            } else if (registrationStage.status === "已完成") {
+                signupButton.innerText = "申请考试";
+                signupButton.onclick = async () => {
+                    if (confirm("已经学习完成，确认考试吗？")) {
+                        await applyForExam(userName, currentRole);
+                    }
+                };
+                signupButton.disabled = false;
+            } else if (registrationStage.status === "未开始") {
+                signupButton.innerText = "立即报名";
+                signupButton.onclick = () => location.href = `sign_up.html?userName=${userName}`;
+                signupButton.disabled = false;
+            }
+        }
+
+        if (examStage) {
+            if (examStage.status === "进行中") {
+                updateSignupButtonAfterExamApplied();
+            } else if (examStage.status === "已完成") {
+                signupButton.innerText = completedText;
+                signupButton.disabled = true;
+            }
+        }
+    }
+
+
+    function createTimelineItem(data) {
+        let statusIcon, statusClass, badgeClass;
+        if (data.status === "已完成") {
+            statusClass = "completed";
+            badgeClass = "bg-success";
+        } else if (data.status === "进行中") {
+            statusClass = "in-progress";
+            badgeClass = "bg-warning";
+        } else {
+            statusClass = "pending";
+            badgeClass = "bg-secondary";
+        }
+
+        return `
+        <div class="timeline-item">
+            <div class="timeline-point ${statusClass}">
+            </div>
+            <div class="content-card">
+                <h6 class="mb-2 fw-bold">
+                    ${data.stage_name}
+                    ${data.stage_name === "认证考试" ? `<span class="badge ${badgeClass} badge-small">${data.status}</span>` : ''}
+                </h6>
+                ${data.stage_name === "认证学习" ? `
+                    <p>${data.stage_description}</p>
+                ` : (data.stage_name !== "认证考试" ? `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <p class="flex-grow-1 mb-0">${data.stage_description}</p>
+                        <span class="badge ${badgeClass} badge-small">${data.status}</span>
+                    </div>
+                ` : '')}
+                ${data.stage_name === "认证报名" && data.status !== "已完成" ? `
+                    <div class="card mt-3 p-3 bg-primary text-light rounded">
+                        <p class="mb-1"><strong>报名时间:</strong> <span>${data.start_time ? new Date(data.start_time).toLocaleString() : "暂无"}</span></p>
+                        <p class="mb-1"><strong>审核时间:</strong> <span>${data.end_time ? new Date(data.end_time).toLocaleString() : "暂无"}</span></p>
+                    </div>
+                ` : ''}
+                ${data.stage_name === "认证考试" ? `
+                    <div class="mt-2">
+                        <div class="card p-3 mb-3">
+                            <p><strong>考试时间、地点:</strong></p>
+                            <p>${data.exam_time ? data.exam_time : "未开始"}</p>
+                        </div>
+                        <div class="card p-3">
+                            <h6 class="fw-bold">考试结果信息: ${data.exam_result || "无结果"}</h6>
+                        </div>
+                        ${
+            data.status === "已完成" ?
+                `<button class="btn btn-info mt-2" onclick="location.href='http://60.213.146.71:8075/webroot/decision/view/report?viewlet=%25E5%25BC%25A0%25E8%25B5%259B-%25E8%25A3%2585%25E5%25A4%2587%25E9%2583%25A8%252F%25E7%25B2%25BE%25E7%259B%258A%25E5%258A%259E%252F%25E8%25AE%25A4%25E8%25AF%2581%25E8%25AF%2581%25E4%25B9%25A6.cpt&ref_t=design&ref_c=605f99b3-0b12-473f-a83a-bd55af95d17f&fnumber=${userName}'">查看证书</button>`
+                : ''
+        }
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="../../easyui/js-easyui/axios.min.js"></script>
+    <style type="text/css">
+        #pdfBD {
+            margin-left: 50%;
+            transform: translateX(-50%);
+        }
+
+        #pdf-pagination {
+            position: fixed;
+            width: 100%;
+            font-size: 14px;
+            top: 100px;
+            left: 10px;
+            z-index: 100;
+        }
+
+        span {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+<canvas id="pdfBD"></canvas>
+<div id="pdf-pagination">
+    <span id="before" onclick="paginationClick(-1)">上一页</span>
+    <span id="current">1</span>
+    <span id="next" onclick="paginationClick(1)">下一页</span>
+</div>
+</body>
+<!-- <script src="https://lib.baomitu.com/pdf.js/2.7.570/pdf.js" type="text/javascript" charset="utf-8"></script> -->
+<script src="../pdfjs/build/pdf.mjs" type="text/javascript" charset="utf-8"></script>
+
+
+<script type="text/javascript">
+    let pdfValue = null;
+    let pageContent = {//法二，读取到的pdf信息记录
+        currentPage: 0,//当前页
+        countPage: 0,//总页数
+    }
+
+    function methodsOne(data) { //法一
+        // window.open("./js/pdfJS/web/viewer.html?fileAngularJS权威指南.pdf"  );//文件和viewer.html同路径
+        //window.open("http://192.168.3.131:8080/program/pdfjs/web/viewer.html?file=shtg_phone_lists.pdf" );//文件和viewer.html同路径
+        //window.open("./pdfjs/web/viewer.html?file=shtg_phone_lists.pdf"); //文件和viewer.html 不同路径，注意路径
+
+        let fileurl = encodeURIComponent('http://192.168.1.9/shtg_phone_lists.pdf') //路径转码
+
+        window.open("http://192.168.3.131:8080/program/pdfjs/web/viewer.html?file=" +data );
+
+        document.getElementById("pdf-pagination").display = 'none'; //隐藏分页器
+    }
+
+    function methodsTwo() { //法二
+        var loadingTask = pdfjsLib.getDocument('../pdf/shtg_phone_lists.pdf');
+        loadingTask.promise.then(function (pdf) {
+            console.log(pdf)
+            pdfValue = pdf;
+            pageContent.countPage = pdf.numPages;
+            changePage(pdf, 1)
+        });
+        document.getElementById("pdf-pagination").display = 'block'; //显示分页器
+    }
+
+
+    window.onload = function () {
+        fetchData();
+    };
+
+    function fetchData() {
+        axios.post('/imc/customOpt', {
+            req: '479',
+            data: {}
+        }, {
+            responseType: 'arraybuffer'
+        })
+            .then(function (response) {
+                const data = new Uint8Array(response.data);
+                console.log('响应数据:', data); // 调试输出
+                methodsOne(data);
+            })
+            .catch(function (error) {
+                console.error('Error fetching data:', error);
+                document.getElementById('pdf-pagination').innerText = '获取数据失败，请稍后重试。';
+            });
+    }
+
+
+    //翻页 type：1 下一页；-1：上一页
+    function paginationClick(type) {
+        if (type == 1) {
+            //下一页
+            pageContent.currentPage == pageContent.countPage ? "" : pageContent.currentPage += 1
+        } else {
+            //上一页
+            pageContent.currentPage == 1 ? "" : pageContent.currentPage -= 1
+        }
+        document.getElementById("current").innerHTML = pageContent.currentPage
+        changePage(pdfValue, pageContent.currentPage)
+    }
+
+    //通过页码，渲染当前页currentPage信息：pdf：读取的总的pdf信息，pageNum：需要获取的页数
+    function changePage(pdf, pageNum) {
+        if (pdf == null) return;
+        pdf.getPage(pageNum).then(function (page) {
+            // you can now use *page* here
+            var scale = 1.5;//放大倍数
+            var viewport = page.getViewport({
+                scale: scale,
+            });
+            // Support HiDPI-screens.
+            var outputScale = window.devicePixelRatio || 1;
+
+            var canvas = document.getElementById('pdfBD');
+            var context = canvas.getContext('2d');
+
+            canvas.width = Math.floor(viewport.width * outputScale);
+            canvas.height = Math.floor(viewport.height * outputScale);
+            canvas.style.width = Math.floor(viewport.width) + "px";
+            canvas.style.height = Math.floor(viewport.height) + "px";
+
+            var transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] :
+                null;
+            var renderContext = {
+                canvasContext: context,
+                transform: transform,
+                viewport: viewport
+            };
+            page.render(renderContext);
+        });
+    }
+</script>
+
+</html>
+

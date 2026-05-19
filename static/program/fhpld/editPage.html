@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>石横特钢 | 发货配料单确认</title>
+
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../vendor/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="../bootstrap-icons-1.11.3/font/bootstrap-icons.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./css/util.css?v=' + randomVersion + '">');
+        document.write('<script src="../vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/util/util_link.js"?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+    </script>
+
+    <style>
+        .card {
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            overflow: hidden;
+            border-left: 5px solid #007bff;
+        }
+
+        .confirmed {
+            background-color: rgba(212, 237, 218, 0.95);
+            border-left-color: #28a745;
+        }
+
+        .not-confirmed {
+            background-color: rgba(248, 215, 218, 0.95);
+            border-left-color: #dc3545;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .summary {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e6f0ff 100%);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 1.05rem;
+            border-left: 4px solid #007bff;
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .summary-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .summary-icon {
+            margin-right: 10px;
+            color: #007bff;
+            font-size: 1.2rem;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-title-icon {
+            margin-right: 10px;
+            color: #007bff;
+        }
+
+        .card-text {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            color: #495057;
+        }
+
+        .card-text-icon {
+            margin-right: 10px;
+            min-width: 20px;
+            text-align: center;
+            color: #6c757d;
+        }
+
+        .info-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+
+        .list-group-item {
+            background-color: #f8f9fa;
+            transition: all 0.3s;
+            margin-bottom: 8px;
+            border-radius: 8px !important;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 12px 15px;
+        }
+
+        .list-group-item:hover {
+            background-color: #e9ecef;
+        }
+
+        .product-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+            color: #343a40;
+        }
+
+        .btn-toggle {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            font-size: 0.85rem;
+        }
+
+        .btn-toggle i {
+            transition: transform 0.3s;
+        }
+
+        .btn-toggle.collapsed i {
+            transform: rotate(-90deg);
+        }
+
+        .details {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 6px;
+            border-left: 3px solid #6c757d;
+        }
+
+        .detail-item {
+            display: flex;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+
+        .detail-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            min-width: 80px;
+            color: #495057;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+            padding: 8px 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger:disabled {
+            background-color: #6c757d;
+            opacity: 0.8;
+        }
+
+        .btn-secondary {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-left: auto;
+            weight: 100px;
+        }
+
+        .status-confirmed {
+            background-color: rgba(40, 167, 69, 0.15);
+            color: #28a745;
+        }
+
+        .status-not-confirmed {
+            background-color: rgba(220, 53, 69, 0.15);
+            color: #dc3545;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        /* 自定义滚动条 */
+        .info-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .info-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .info-list::-webkit-scrollbar-thumb {
+            background: #adb5bd;
+            border-radius: 3px;
+        }
+
+        .info-list::-webkit-scrollbar-thumb:hover {
+            background: #6c757d;
+        }
+
+        .btn-primary{
+            padding: 8px 20px;
+        }
+
+    </style>
+</head>
+
+<body>
+<header class="background-container">
+    <img id="header-img" src="" alt="ST">
+    <h2 class="h2-container">钢材发货配料单确认</h2>
+</header>
+
+<main class="container">
+    <div id="department-wrapper"></div>
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchData();
+    });
+
+    window.onscroll = function () {
+        toggleBackToTopButton();
+    };
+
+    const getQueryVariable = (variable) => {
+        const query = window.location.search.substring(1);
+        const vars = query.split("&");
+        for (const pair of vars) {
+            const [key, value] = pair.split("=");
+            if (decodeURIComponent(key) === variable) {
+                return decodeURIComponent(value || "");
+            }
+        }
+        return null;
+    };
+
+    const fetchData = async () => {
+        try {
+            const carNumber = getQueryVariable("carNumber");
+            const quyuId = getQueryVariable("quyu");
+            const areaId = parseInt(quyuId, 10);
+            const areaMapping = {
+                "东区": 1,
+                "西区": 2,
+                "新区": 3
+            };
+            const areaName = Object.keys(areaMapping).find(key => areaMapping[key] === areaId);
+            const quyu = areaName || 0;
+
+            const formData = new FormData();
+            formData.append('carNumber', carNumber);
+            formData.append('quyu', quyu);
+
+            const response = await fetchDataFromAPI('650', Object.fromEntries(formData));
+            if (response?.data?.data) {
+                populateMergedData(response.data.data);
+            } else {
+                document.querySelector('.background-container').style.display = 'none';
+                toggleNoDataMessage(false);
+            }
+        } catch (error) {
+            console.error('服务器错误', error);
+            showMsg('更新过程中遇到错误，请重试！');
+        }
+    };
+
+    const populateMergedData = (data) => {
+        const cardContainer = document.getElementById("department-wrapper");
+        cardContainer.innerHTML = '';
+
+        // 按发货通知单号分组数据
+        const groupedData = data.reduce((acc, item) => {
+            (acc[item["发货通知单号"]] = acc[item["发货通知单号"]] || []).push(item);
+            return acc;
+        }, {});
+
+        // 为每个单号创建卡片
+        for (const [order, items] of Object.entries(groupedData)) {
+            const firstItem = items[0];
+            const isConfirmed = firstItem["状态"] === "已确认";
+
+            const card = document.createElement('div');
+            card.classList.add('card', 'mb-3', isConfirmed ? 'confirmed' : 'not-confirmed');
+
+            card.innerHTML = `
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-file-earmark-text card-title-icon"></i>
+                        单号: ${order}
+                        <span class="status-badge ${isConfirmed ? 'status-confirmed' : 'status-not-confirmed'}">
+                            <i class="bi ${isConfirmed ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'}"></i>
+                            ${firstItem["状态"]}
+                        </span>
+                    </h5>
+
+                    <p class="card-text"><i class="bi bi-geo-alt card-text-icon"></i>区域: ${firstItem["区域"]}</p>
+                    <p class="card-text"><i class="bi bi-building card-text-icon"></i>收货单位: ${firstItem["收货单位"]}</p>
+                    <p class="card-text"><i class="bi bi-truck card-text-icon"></i>车号: ${firstItem["车号"]}</p>
+                    <p class="card-text"><i class="bi bi-calendar card-text-icon"></i>日期: ${firstItem["日期"]}</p>
+                    <p class="card-text"><i class="bi bi-house card-text-icon"></i>仓库: ${firstItem["仓库"]}</p>
+
+                    <ul class="list-group info-list">
+                        ${items.map(item => `
+                            <li class="list-group-item">
+                                <div class="product-title">
+                                    <span>
+                                        <i class="bi bi-box-seam"></i>
+                                        ${item["产品名称"]} - ${item["长度"]}
+                                    </span>
+                                    <button class="btn btn-info btn-sm btn-toggle" data-bs-toggle="collapse" data-bs-target="#details-${order}-${item["产品名称"]}">
+                                        <i class="bi bi-chevron-down"></i> 详情
+                                    </button>
+                                </div>
+                                <div class="details collapse" id="details-${order}-${item["产品名称"]}">
+                                    <div class="detail-item"><span class="detail-label">长度:</span> ${item["长度"]}</div>
+                                    <div class="detail-item"><span class="detail-label">计量方式:</span> ${item["计量方式"]}</div>
+                                    <div class="detail-item"><span class="detail-label">请发件数:</span> ${item["请发件数"]}</div>
+                                    <div class="detail-item"><span class="detail-label">请发重量:</span> ${item["请发数量"]}</div>
+                                    <div class="detail-item"><span class="detail-label">实发件数:</span> ${item["实发件数"]}</div>
+                                    <div class="detail-item"><span class="detail-label">实发支数:</span> ${item["实发支数"]}</div>
+                                    <div class="detail-item"><span class="detail-label">实发数量:</span> ${item["实发数量"]}</div>
+                                    <div class="detail-item"><span class="detail-label">备注:</span> ${item["合同号"]}</div>
+                                </div>
+                            </li>
+                        `).join('')}
+                    </ul>
+
+                    <div class="summary">
+                      <div class="summary-item">
+                        <i class="bi bi-box-arrow-up summary-icon"></i>
+                        <span>请发重量: ${(items.reduce((sum, item) => sum + parseFloat(item["请发数量"] || 0), 0)).toFixed(3)} ${items.length > 0 ? items[0]["计量单位"] : ''}</span>
+                      </div>
+                      <div class="summary-item">
+                        <i class="bi bi-box-arrow-down summary-icon"></i>
+                        <span>实发重量: ${(items.reduce((sum, item) => sum + parseFloat(item["实发数量"] || 0), 0)).toFixed(3)} ${items.length > 0 ? items[0]["计量单位"] : ''}</span>
+                      </div>
+                      <div class="summary-item">
+                        <i class="bi bi-boxes summary-icon"></i>
+                        <span>请发件数: ${items.reduce((sum, item) => {
+                const num = Number(item["请发件数"]);
+                return sum + (isNaN(num) ? 0 : num);
+            }, 0)}</span>
+                      </div>
+                      <div class="summary-item">
+                        <i class="bi bi-box-seam summary-icon"></i>
+                        <span>实发件数: ${items.reduce((sum, item) => {
+                const num = Number(item["实发件数"]);
+                return sum + (isNaN(num) ? 0 : num);
+            }, 0)}</span>
+                      </div>
+                    </div>
+
+                    <p class="card-text"><i class="bi bi-clock card-text-icon"></i>发货时间: ${firstItem["发货时间"]}</p>
+                    <p class="card-text"><i class="bi bi-person-check card-text-icon"></i>确认人: ${firstItem["确认人"]}</p>
+                    <p class="card-text"><i class="bi bi-clock-history card-text-icon"></i>确认时间: ${firstItem["出厂时间"]}</p>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="history.back()">
+                            <i class="bi bi-reply"></i> 返回列表
+                        </button>
+                        <button class="btn btn-danger" ${isConfirmed ? 'disabled' : ''} onclick="confirmRemove('${order}')">
+                            <i class="bi bi-check-circle"></i> 确认发货
+                        </button>
+                    </div>
+                </div>
+            `;
+            cardContainer.appendChild(card);
+        }
+
+        // 初始化所有折叠组件
+        const collapseElements = document.querySelectorAll('.collapse');
+        collapseElements.forEach(el => {
+            new bootstrap.Collapse(el, {
+                toggle: false
+            });
+        });
+    };
+
+    async function confirmRemove(order) {
+        const cardContainer = document.getElementById("department-wrapper");
+        const cardToRemove = [...cardContainer.children].find(card =>
+            card.querySelector('.card-title').innerText.includes(order)
+        );
+
+        if (!cardToRemove) {
+            alert('未找到对应的发货单，请重试！');
+            return;
+        }
+
+        const statusElement = cardToRemove.querySelector('.status-badge');
+        if (!statusElement) {
+            alert('未找到状态信息，请重试！');
+            return;
+        }
+
+        const currentStatus = statusElement.innerText.trim();
+        if (currentStatus === '已确认') {
+            alert('该单号的状态已是"已确认"，请重新选中！');
+            return;
+        }
+
+        if (confirm(`您确定确认单号 ${order} 的发货吗？`)) {
+            const confirmButton = cardToRemove.querySelector('.btn-danger');
+            confirmButton.disabled = true;
+            confirmButton.innerHTML = '<i class="bi bi-arrow-repeat spin"></i> 处理中...';
+
+            const formData = new FormData();
+            const personID = getQueryVariable("personID");
+            formData.append('orderNumber', order);
+            formData.append('personID', personID);
+
+            try {
+                const response = await fetchDataFromAPI('652', Object.fromEntries(formData));
+                if (response.data.msg === "200") {
+                    // 更新UI反映新状态
+                    statusElement.innerHTML = '<i class="bi bi-check-circle-fill"></i> 已确认';
+                    statusElement.classList.remove('status-not-confirmed');
+                    statusElement.classList.add('status-confirmed');
+                    cardToRemove.classList.remove('not-confirmed');
+                    cardToRemove.classList.add('confirmed');
+                    confirmButton.disabled = true;
+                    confirmButton.innerHTML = '<i class="bi bi-check-circle"></i> 已确认';
+
+                    // 显示成功消息
+                    showMsg('发货确认成功！', false, 2000);
+                } else {
+                    confirmButton.disabled = false;
+                    confirmButton.innerHTML = '<i class="bi bi-check-circle"></i> 确认发货';
+                    showMsg(response.data.msg || '确认失败，请重试！');
+                }
+            } catch (error) {
+                console.error('确认失败:', error);
+                confirmButton.disabled = false;
+                confirmButton.innerHTML = '<i class="bi bi-check-circle"></i> 确认发货';
+                showMsg('网络错误，请重试！');
+            }
+        }
+    }
+
+    // 添加旋转动画
+    document.head.insertAdjacentHTML('beforeend', `
+        <style>
+            .spin {
+                animation: spin 1s linear infinite;
+            }
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+        </style>
+    `);
+</script>
+</body>
+</html>

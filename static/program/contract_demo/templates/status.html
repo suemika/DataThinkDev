@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>合同状态</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <div class="alert alert-success">
+        <h4>合同已提交审核</h4>
+        <p>合同编号：{{ contract_id }}</p>
+        <p>当前状态：科长审核中</p>
+    </div>
+    <a href="/generate_pdf/{{ contract_id }}" class="btn btn-success">生成PDF合同</a>
+</div>
+</body>
+</html>

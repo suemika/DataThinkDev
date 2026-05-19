@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>合同管理系统 - 流程选择</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../vendor/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="../bootstrap-icons-1.11.3/font/bootstrap-icons.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./util/util.css?v=' + randomVersion + '">');
+    </script>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-light: #e0e7ff;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-600: #6c757d;
+            --gray-400: #ced4da;
+            --gray-300: #dee2e6;
+            --success-color: #4cc9f0;
+            --warning-color: #f8961e;
+            --danger-color: #f72585;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --card-hover-shadow: 0 10px 20px rgba(67, 97, 238, 0.15);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --border-radius: 12px;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        /* 主容器 */
+        .flow-container {
+            width: 90%;
+            margin: 0 auto 3rem;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            background-color: white;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+        }
+
+        .flow-container:hover {
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        /* 流程标题 */
+        .flow-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 3px solid var(--primary-light);
+        }
+
+        .flow-header h3 {
+            color: var(--dark-color);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+        }
+
+        .flow-header p {
+            color: var(--gray-600);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* 流程选项 */
+        .flow-options {
+            display: flex;
+            justify-content: center;
+            gap: 2.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .flow-option {
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 2.5rem 2rem;
+            border-radius: var(--border-radius);
+            background-color: white;
+            width: 280px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flow-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .flow-option:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--card-hover-shadow);
+            border-color: rgba(67, 97, 238, 0.2);
+        }
+
+        .flow-option:hover::before {
+            opacity: 1;
+        }
+
+        .flow-option i {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .flow-option h3 {
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+            font-weight: 600;
+            font-size: 1.3rem;
+        }
+
+        .flow-option p {
+            color: var(--gray-600);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        /* 步骤内容容器 */
+        .step-container {
+            display: none;
+            margin-top: 1.5rem;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 步骤标题 */
+        .section-title {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            color: var(--dark-color);
+            font-weight: 600;
+            font-size: 1.6rem;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: 2px;
+        }
+
+        /* 卡片网格布局 */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 2rem;
+        }
+
+        .card-item {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 2rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .card-item:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--card-hover-shadow);
+            border-color: rgba(67, 97, 238, 0.2);
+        }
+
+        .card-item:hover::before {
+            opacity: 1;
+        }
+
+        .card-item i {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card-item h5 {
+            margin-bottom: 0.75rem;
+            color: var(--dark-color);
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .card-item p {
+            color: var(--gray-600);
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+
+        /* 步骤导航 */
+        .nav-steps {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .step {
+            padding: 0.7rem 1.5rem;
+            background-color: var(--primary-light);
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            color: var(--primary-color);
+            transition: var(--transition);
+            position: relative;
+            font-weight: 500;
+            border: 1px solid rgba(67, 97, 238, 0.1);
+        }
+
+        .step.active {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+        }
+
+        .step.completed {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary-color);
+        }
+
+        .step-arrow {
+            margin: 0 0.5rem;
+            color: var(--gray-400);
+            display: flex;
+            align-items: center;
+        }
+
+        /* 加载状态 */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 0;
+            grid-column: 1 / -1;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            border-width: 0.25em;
+            color: var(--primary-color);
+        }
+
+        .loading-text {
+            color: var(--gray-600);
+            margin-top: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        /* 空状态提示 */
+        .empty-message {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray-600);
+        }
+
+        .empty-message i {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--gray-400);
+        }
+
+        /* 搜索框 */
+        .search-container {
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            padding-left: 3rem;
+            border-radius: 50px;
+            border: 1px solid var(--gray-300);
+            transition: var(--transition);
+            height: 50px;
+            font-size: 1rem;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-600);
+            font-size: 1.2rem;
+        }
+
+        /* 无搜索结果提示 */
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray-600);
+        }
+
+        .no-results i {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--gray-400);
+        }
+
+        /* 返回按钮 */
+        .back-btn {
+            margin-bottom: 2rem;
+            cursor: pointer;
+            color: var(--primary-color);
+            display: inline-flex;
+            align-items: center;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            background-color: var(--primary-light);
+            border: 1px solid rgba(67, 97, 238, 0.1);
+        }
+
+        .back-btn:hover {
+            background-color: rgba(67, 97, 238, 0.2);
+            transform: translateX(-5px);
+            text-decoration: none;
+        }
+
+        .back-btn i {
+            margin-right: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 992px) {
+            .flow-container {
+                padding: 2rem;
+                margin: 0 1.5rem 3rem;
+            }
+
+            .card-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .flow-container {
+                padding: 1.5rem;
+                border-radius: 0;
+                margin: 0 0 3rem;
+            }
+
+            .flow-options {
+                flex-direction: column;
+                align-items: center;
+                gap: 1.5rem;
+            }
+
+            .flow-option {
+                width: 100%;
+                max-width: 320px;
+                padding: 2rem 1.5rem;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-steps {
+                justify-content: flex-start;
+                overflow-x: auto;
+                padding-bottom: 0.5rem;
+                flex-wrap: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .step {
+                white-space: nowrap;
+                margin-bottom: 0;
+                font-size: 0.9rem;
+                padding: 0.6rem 1rem;
+            }
+
+            .section-title {
+                font-size: 1.4rem;
+                margin-bottom: 2rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .flow-header h3 {
+                font-size: 1.5rem;
+            }
+
+            .flow-header p {
+                font-size: 1rem;
+            }
+
+            .flow-option h3 {
+                font-size: 1.2rem;
+            }
+
+            .flow-option p {
+                font-size: 0.95rem;
+            }
+        }
+
+        main {
+            max-width: 1500px;
+            margin: 0 auto; /* 水平居中 */
+            width: 100%; /* 确保宽度占满父容器 */
+            padding: 0 15px; /* 可选：添加内边距避免内容贴边 */
+            box-sizing: border-box; /* 确保内边距不影响总宽度 */
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- 页眉 -->
+<header class="background-container">
+    <a href="http://edi.sdstg.com/" target="_self" rel="noopener">
+        <img id="header-img" src="" alt="ST">
+    </a>
+    <h2 class="h2-container">合同流程选择</h2>
+</header>
+<!-- 主内容区 -->
+<main id="main-content">
+    <div class="flow-container">
+        <!-- 返回首页按钮 -->
+        <div class="back-btn" id="backToHome">
+            <i class="bi bi-arrow-left"></i>返回首页
+        </div>
+
+        <!-- 步骤导航 -->
+        <div class="nav-steps">
+            <div class="step active">1. 选择流程类型</div>
+            <div class="step-arrow"><i class="bi bi-chevron-right"></i></div>
+            <div class="step">2. 选择部门</div>
+            <div class="step-arrow"><i class="bi bi-chevron-right"></i></div>
+            <div class="step">3. 选择合同类型</div>
+            <div class="step-arrow"><i class="bi bi-chevron-right"></i></div>
+            <div class="step">4. 选择合同模板</div>
+        </div>
+
+        <!-- 流程选择 -->
+        <div class="flow-header">
+            <h3>合同流程选择</h3>
+            <p>请根据您的需求选择合适的合同流程</p>
+        </div>
+
+        <div class="flow-options">
+            <div class="flow-option" id="standardFlow">
+                <i class="bi bi-file-earmark-text"></i>
+                <h3>标准合同流程</h3>
+                <p>使用公司预定义的标准合同模板，适用于常规业务场景</p>
+            </div>
+            <div class="flow-option" id="nonStandardFlow">
+                <i class="bi bi-file-earmark-plus"></i>
+                <h3>非标准合同流程</h3>
+                <p>使用自定义或特殊合同模板，适用于特殊业务需求</p>
+            </div>
+        </div>
+
+        <!-- 部门选择 -->
+        <div id="departmentContainer" class="step-container">
+            <div class="back-btn" id="backToFlowType">
+                <i class="bi bi-arrow-left"></i>返回流程选择
+            </div>
+            <h4 class="section-title">请选择部门</h4>
+            <div class="card-grid" id="departmentGrid">
+                <div class="loading-container">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                    <p class="loading-text">正在加载部门数据...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 合同类型选择 -->
+        <div id="textTypeContainer" class="step-container">
+            <div class="back-btn" id="backToDepartment">
+                <i class="bi bi-arrow-left"></i>返回部门选择
+            </div>
+            <h4 class="section-title" id="textTypeTitle">部门标准合同流程</h4>
+            <div class="card-grid" id="textTypeGrid">
+                <!-- 合同类型列表将从后台获取并动态渲染到这里 -->
+            </div>
+        </div>
+
+        <!-- 合同模板选择 -->
+        <div id="repairTypeContainer" class="step-container">
+            <div class="back-btn" id="backToTextType">
+                <i class="bi bi-arrow-left"></i>返回合同类型选择
+            </div>
+            <h4 class="section-title" id="repairTypeTitle">部门合同列表</h4>
+            <!-- 搜索框 -->
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" id="contractSearch" class="form-control"
+                           placeholder="输入合同名称查询..." autocomplete="off">
+                </div>
+            </div>
+            <div class="card-grid" id="repairTypeGrid">
+                <!-- 合同列表将从后台获取并动态渲染到这里 -->
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    document.write('<script src="../vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="./util/util_link.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+</script>
+
+<script>
+    // 全局变量存储当前选择
+    let currentSelection = {
+        flowType: '',
+        department: null,
+        textType: null
+    };
+
+    // 全局变量存储所有合同数据
+    let allTemplates = [];
+
+    // 页面加载完成后执行
+    document.addEventListener('DOMContentLoaded', function () {
+        // 获取DOM元素
+        const standardFlow = document.getElementById('standardFlow');
+        const nonStandardFlow = document.getElementById('nonStandardFlow');
+        const departmentContainer = document.getElementById('departmentContainer');
+        const textTypeContainer = document.getElementById('textTypeContainer');
+        const repairTypeContainer = document.getElementById('repairTypeContainer');
+        const backToHome = document.getElementById('backToHome');
+        const backToFlowType = document.getElementById('backToFlowType');
+        const backToDepartment = document.getElementById('backToDepartment');
+        const backToTextType = document.getElementById('backToTextType');
+        const steps = document.querySelectorAll('.step');
+        const stepArrows = document.querySelectorAll('.step-arrow');
+
+        // 返回首页按钮事件
+        backToHome.addEventListener('click', function () {
+            window.location.href = 'home.html';
+        });
+
+        // 标准流程点击事件
+        standardFlow.addEventListener('click', function () {
+            currentSelection.flowType = 'standard';
+            showStep(departmentContainer);
+            hideFlowOptions();
+            updateSteps(2);
+            loadDepartments();
+        });
+
+        // 非标准流程点击事件
+        nonStandardFlow.addEventListener('click', function () {
+            currentSelection.flowType = 'nonStandard';
+            window.location.href = 'http://edi.sdstg.com/';
+        });
+
+        // 返回按钮事件
+        backToFlowType.addEventListener('click', function () {
+            hideStep(departmentContainer);
+            showFlowOptions();
+            updateSteps(1);
+        });
+
+        backToDepartment.addEventListener('click', function () {
+            hideStep(textTypeContainer);
+            showStep(departmentContainer);
+            updateSteps(2);
+        });
+
+        backToTextType.addEventListener('click', function () {
+            hideStep(repairTypeContainer);
+            showStep(textTypeContainer);
+            updateSteps(3);
+        });
+
+        // 显示/隐藏步骤内容
+        function showStep(stepContainer) {
+            stepContainer.style.display = 'block';
+        }
+
+        function hideStep(stepContainer) {
+            stepContainer.style.display = 'none';
+        }
+
+        function hideFlowOptions() {
+            document.querySelector('.flow-options').style.display = 'none';
+            document.querySelector('.flow-header').style.display = 'none';
+        }
+
+        function showFlowOptions() {
+            document.querySelector('.flow-options').style.display = 'flex';
+            document.querySelector('.flow-header').style.display = 'block';
+        }
+
+        // 更新步骤导航
+        function updateSteps(activeStep) {
+            steps.forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+
+                if (index < activeStep - 1) {
+                    step.classList.add('completed');
+                } else if (index === activeStep - 1) {
+                    step.classList.add('active');
+                }
+            });
+
+            stepArrows.forEach((arrow, index) => {
+                if (index < activeStep - 1) {
+                    arrow.style.visibility = 'visible';
+                } else {
+                    arrow.style.visibility = 'hidden';
+                }
+            });
+        }
+
+        // 从后台加载部门数据
+        async function loadDepartments() {
+            try {
+                showLoading('departmentGrid');
+                const response = await fetchDataFromAPI('745', {});
+
+                if (response.data.status === 0 && response.data.data) {
+                    renderDepartments(response.data.data.departments);
+                } else {
+                    showError('departmentGrid', '加载部门数据失败: ' + (response.data.msg || '未知错误'));
+                }
+            } catch (error) {
+                console.error("加载部门错误: ", error);
+                showError('departmentGrid', '加载部门失败，请刷新重试');
+            }
+        }
+
+        // 渲染部门列表
+        function renderDepartments(departments) {
+            const departmentGrid = document.getElementById('departmentGrid');
+
+            if (!departments || departments.length === 0) {
+                departmentGrid.innerHTML = createEmptyMessage('bi-building-x', '暂无部门数据');
+                return;
+            }
+
+            departmentGrid.innerHTML = '';
+
+            departments.forEach(dept => {
+                const card = document.createElement('div');
+                card.className = 'card-item';
+                card.innerHTML = `
+                    <i class="bi ${dept.icon || 'bi-building'}"></i>
+                    <h5>${dept.name}</h5>
+                    ${dept.description ? `<p>${dept.description}</p>` : ''}
+                `;
+
+                card.addEventListener('click', () => {
+                    currentSelection.department = dept;
+                    loadTextTypes(dept.name);
+                });
+
+                departmentGrid.appendChild(card);
+            });
+        }
+
+        // 从后台加载合同类型数据
+        async function loadTextTypes(departmentName) {
+            try {
+                showLoading('textTypeGrid');
+                const response = await fetchDataFromAPI('746', {departmentName});
+
+                if (response.data.status === 0 && response.data.data) {
+                    renderTextTypes(response.data.data.contract_types, departmentName);
+                    document.getElementById('textTypeTitle').textContent = `${currentSelection.department.name}合同类型`;
+                    hideStep(departmentContainer);
+                    showStep(textTypeContainer);
+                    updateSteps(3);
+                } else {
+                    showError('textTypeGrid', '加载合同类型失败: ' + (response.data.msg || '未知错误'));
+                }
+            } catch (error) {
+                console.error("加载合同类型错误: ", error);
+                showError('textTypeGrid', '加载合同类型失败，请刷新重试');
+            }
+        }
+
+        // 渲染合同类型列表
+        function renderTextTypes(textTypes, departmentName) {
+            const textTypeGrid = document.getElementById('textTypeGrid');
+
+            if (!textTypes || textTypes.length === 0) {
+                textTypeGrid.innerHTML = createEmptyMessage('bi-file-earmark-excel', '暂无合同类型数据');
+                return;
+            }
+
+            textTypeGrid.innerHTML = '';
+
+            textTypes.forEach(type => {
+                const card = document.createElement('div');
+                card.className = 'card-item';
+                card.innerHTML = `
+                    <i class="bi ${type.icon || 'bi-file-earmark-text'}"></i>
+                    <h5>${type.name}</h5>
+                    ${type.description ? `<p>${type.description}</p>` : ''}
+                `;
+
+                card.addEventListener('click', () => {
+                    currentSelection.textType = type;
+                    loadTemplates(type.name, departmentName);
+                });
+
+                textTypeGrid.appendChild(card);
+            });
+        }
+
+        // 从后台加载合同模板数据
+        async function loadTemplates(typeName, departmentName) {
+            try {
+                showLoading(true, 'repairTypeGrid');
+                const response = await fetchDataFromAPI('718', {
+                    typeName: typeName,
+                    departmentName: departmentName
+                });
+
+                if (response.data.status === 0 && response.data.data) {
+                    allTemplates = response.data.data;
+                    renderTemplates(allTemplates);
+                    document.getElementById('repairTypeTitle').textContent = `${currentSelection.textType.name}合同列表`;
+                    hideStep(textTypeContainer);
+                    showStep(repairTypeContainer);
+                    updateSteps(4);
+                    setupSearch();
+                } else {
+                    showError('repairTypeGrid', '加载合同模板失败: ' + (response.data.msg || '未知错误'));
+                }
+            } catch (error) {
+                console.error("加载合同模板错误: ", error);
+                showError('repairTypeGrid', '加载合同模板失败，请刷新重试');
+            }
+        }
+
+        // 设置搜索功能
+        function setupSearch() {
+            const searchInput = document.getElementById('contractSearch');
+            searchInput.value = '';
+            searchInput.addEventListener('input', function () {
+                const searchTerm = this.value.trim().toLowerCase();
+                filterTemplates(searchTerm);
+            });
+        }
+
+        // 筛选合同模板
+        function filterTemplates(searchTerm) {
+            const filteredTemplates = searchTerm
+                ? allTemplates.filter(template =>
+                    template.name.toLowerCase().includes(searchTerm) ||
+                    (template.description && template.description.toLowerCase().includes(searchTerm)))
+                : allTemplates;
+
+            renderTemplates(filteredTemplates);
+        }
+
+        // 渲染合同模板列表
+        function renderTemplates(templates) {
+            const repairTypeGrid = document.getElementById('repairTypeGrid');
+            const searchTerm = document.getElementById('contractSearch').value.trim();
+
+            if (!templates || templates.length === 0) {
+                if (searchTerm) {
+                    repairTypeGrid.innerHTML = createNoResultsMessage(searchTerm);
+                } else {
+                    repairTypeGrid.innerHTML = createEmptyMessage('bi-file-earmark-excel', '暂无合同模板数据');
+                }
+                return;
+            }
+
+            repairTypeGrid.innerHTML = '';
+
+            templates.forEach(template => {
+                const card = document.createElement('div');
+                card.className = 'card-item';
+                card.innerHTML = `
+                    <i class="bi ${template.icon || 'bi-file-earmark-text'}"></i>
+                    <h5>${template.name}</h5>
+                    ${template.description ? `<p>${template.description}</p>` : ''}
+                `;
+
+                card.addEventListener('click', () => {
+                    redirectToGenerator(template.id);
+                });
+
+                repairTypeGrid.appendChild(card);
+            });
+        }
+
+        // 跳转到合同生成页面
+        function redirectToGenerator(templateId) {
+            const url = `contract-generator.html?templateId=${templateId}`;
+            window.location.href = url;
+        }
+
+        // 创建空状态消息
+        function createEmptyMessage(icon, message) {
+            return `
+                <div class="empty-message">
+                    <i class="bi ${icon}"></i>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        // 创建无搜索结果消息
+        function createNoResultsMessage(searchTerm) {
+            return `
+                <div class="no-results">
+                    <i class="bi bi-search"></i>
+                    <h5>未找到匹配的合同</h5>
+                    <p>没有找到包含"${searchTerm}"的合同</p>
+                    <button class="btn btn-outline-primary mt-3" onclick="document.getElementById('contractSearch').value='';filterTemplates('')">
+                        清除搜索条件
+                    </button>
+                </div>
+            `;
+        }
+
+        // 显示加载状态
+        function showLoading(containerId) {
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.innerHTML = `
+                    <div class="loading-container">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                        <p class="loading-text">正在加载数据...</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 显示错误信息
+        function showError(containerId, message) {
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.innerHTML = `
+                    <div class="empty-message">
+                        <i class="bi bi-exclamation-triangle" style="color: var(--danger-color);"></i>
+                        <p style="color: var(--danger-color);">${message}</p>
+                        <button class="btn btn-outline-primary mt-3" onclick="window.location.reload()">
+                            刷新页面
+                        </button>
+                    </div>
+                `;
+            }
+        }
+    });
+</script>
+</body>
+</html>

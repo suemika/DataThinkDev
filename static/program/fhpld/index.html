@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <meta http-equiv="refresh" content="30">
+    <title>石横特钢 | 发货配料单列表</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../vendor/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="../bootstrap-icons-1.11.3/font/bootstrap-icons.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./css/util.css?v=' + randomVersion + '">');
+        document.write('<script src="vendor/util/util_link.js"?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+    </script>
+
+    <style>
+        /* 搜索容器 */
+        #search-container {
+            margin: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #search-box {
+            border: 2px solid #007bff;
+            outline: none;
+            padding: 10px 15px;
+            font-size: 1rem;
+        }
+
+        #search-box::placeholder {
+            color: rgba(128, 128, 128, 0.5);
+        }
+
+        /* 其他输入框和按钮样式 */
+        .form-control {
+            border: 1px solid #ced4da;
+            border-radius: 10px 0 0 10px;
+            padding: 10px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        #reloadBtn {
+            border-radius: 10px 0 0 10px !important;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        #submitBtn {
+            border-radius: 0 10px 10px 0 !important;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 列表项样式 */
+        .list-group-item {
+            padding: 15px;
+            border: 1px solid #ccc;
+            margin: 8px 0;
+            transition: all 0.3s;
+            cursor: pointer;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .list-group-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .list-group {
+            border-radius: 10px;
+        }
+
+        .confirmed {
+            background-color: rgba(212, 237, 218, 0.9);
+            border-left: 4px solid #28a745;
+        }
+
+        .not-confirmed {
+            background-color: rgba(248, 215, 218, 0.9);
+            border-left: 4px solid #dc3545;
+        }
+
+        #showData_area {
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        #department-wrapper {
+            margin: 10px;
+        }
+
+        .input-group {
+            padding: 0;
+        }
+
+        .status-icon {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+
+        .car-number {
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+
+        .bi-truck {
+            color: #007bff;
+            margin-right: 10px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0069d9;
+            border-color: #0062cc;
+        }
+
+        .delivery-number.unconfirmed-number:hover {
+            background-color: rgba(220, 53, 69, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .delivery-number.unconfirmed-number .bi-exclamation-circle {
+            color: #dc3545;
+            font-size: 0.7rem;
+        }
+
+
+        .delivery-number.confirmed-number:hover {
+            background-color: rgba(40, 167, 69, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* 发货通知单号行样式 */
+        .delivery-row {
+            display: flex;
+            align-items: flex-start;
+            margin: 8px 0;
+            gap: 10px;
+        }
+
+        .delivery-label-cell {
+            font-weight: bold;
+            flex-shrink: 0;
+            padding-top: 3px;
+        }
+
+        .delivery-content-cell {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            align-items: center;
+        }
+
+        /* 调整原有样式 */
+        .info-row {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            gap: 10px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            min-width: 120px;
+            flex-shrink: 0;
+        }
+
+        /* 调整发货通知编号样式使其更适合块级显示 */
+        .delivery-number {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px;
+            margin: 2px 0;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .delivery-number.unconfirmed-number {
+            background-color: rgba(220, 53, 69, 0.15);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            color: #dc3545;
+        }
+
+        .delivery-number.confirmed-number {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+<!-- 遮罩层 -->
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-content">
+
+        <div class="diamond-loader">
+            <!-- 静态阴影 -->
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+        </div>
+        <div class="shadow"></div>
+        <p class="mt-3">正在加载，请稍候...</p>
+    </div>
+</div>
+
+<header class="background-container">
+    <img id="header-img" src="" alt="ST">
+    <h2 class="h2-container">钢材发货配料单列表</h2>
+</header>
+<main id="main-content">
+    <div id="container">
+        <div id="search-container" class="row justify-content-center my-3">
+            <div class="input-group" style="max-width: 600px;">
+                <button class="btn btn-primary rounded-start" id="reloadBtn" onclick="location.reload()">
+                    <i class="bi bi-arrow-clockwise"></i>刷新
+                </button>
+                <input type="text" id="search-box" class="form-control" placeholder="请输入车号,可模糊查询"
+                       aria-label="车号">
+                <button type="button" id="submitBtn" class="btn btn-primary" onclick="searchData()">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </div>
+        <div id="department-wrapper">
+            <section>
+                <div class="list-group" id="showData_area">
+                    <!-- 数据将填充到这里 -->
+                </div>
+            </section>
+        </div>
+    </div>
+</main>
+
+<script>
+    let exampleData;
+
+    window.onscroll = function () {
+        toggleBackToTopButton();
+    };
+
+    //获取用户
+    async function fetchWatermark() {
+        try {
+            const response = await axios.post('/imc/customOpt', {
+                req: '476',
+                data: JSON.stringify(token)
+            });
+            const watermarkText = response.data.msg;
+            if (watermarkText) {
+                userName = watermarkText;
+                await fetchData(); // 水印获取成功后再获取数据
+            } else {
+                showErrorMessage();
+                redirectToErrorPage();
+            }
+        } catch (error) {
+            showErrorMessage();
+            redirectToErrorPage();
+        } finally {
+            // Ensure loading overlay is hidden after watermark fetch, regardless of outcome
+            if (util && util.loading && typeof util.loading.hide === 'function') {
+                util.loading.hide();
+            } else {
+                document.getElementById('loading-overlay').style.display = 'none';
+            }
+        }
+    }
+
+    function searchData() {
+        var input = document.getElementById('search-box');
+        var filter = input.value.toLowerCase().replace(/\s+/g, '');
+        const filteredData = exampleData.filter(item => item.车号.toLowerCase().includes(filter));
+
+        const hasMatches = filteredData.length > 0;
+        toggleNoDataMessage(hasMatches);
+        populateMergedData(filteredData);
+    }
+
+    function mergeDeliveries(data) {
+        const merged = {};
+
+        data.forEach(item => {
+            const key = item.车号;
+
+            if (!merged[key]) {
+                merged[key] = {
+                    车号: item.车号,
+                    发货通知单号: [],  // 存储编号
+                    发货通知单状态: [], // 存储每个编号对应的状态
+                    状态: item.状态,  // 整体状态（如果有任何一个未确认，应该显示未确认）
+                    仓库: item.仓库,
+                    区域: item.区域
+                };
+            }
+
+            // 添加编号和对应的状态
+            merged[key].发货通知单号.push(item.发货通知单号);
+            merged[key].发货通知单状态.push(item.状态);
+
+            // 更新整体状态：如果有任何一个未确认，整体状态就为未确认
+            if (item.状态 === '未确认') {
+                merged[key].状态 = '未确认';
+            }
+        });
+
+        return Object.values(merged);
+    }
+
+    function populateMergedData(data) {
+        const mergedData = mergeDeliveries(data);
+        const showDataArea = document.getElementById('showData_area');
+        showDataArea.innerHTML = '';
+
+        mergedData.forEach(item => {
+            const listItem = document.createElement('div');
+            const isConfirmed = item.状态 === '已确认';
+            listItem.className = 'list-group-item ' + (isConfirmed ? 'confirmed' : 'not-confirmed');
+            listItem.onclick = () => editPage(item.车号, item.区域);
+
+            // 处理发货通知单号，根据每个编号的状态单独设置样式
+            let deliveryNumbersHtml = '';
+
+            if (item.发货通知单号 && item.发货通知单号.length > 0) {
+                deliveryNumbersHtml = item.发货通知单号.map((num, index) => {
+                    const isNumConfirmed = item.发货通知单状态[index] === '已确认';
+
+                    if (!isNumConfirmed) {
+                        // 未确认的编号
+                        return `<span class="delivery-number unconfirmed-number" title="未确认的发货通知单">
+                        <i class="bi bi-exclamation-circle me-1"></i>${num}
+                    </span>`;
+                    } else {
+                        // 已确认的编号
+                        return `<span class="delivery-number confirmed-number" title="已确认的发货通知单">
+                        ${num}
+                    </span>`;
+                    }
+                }).join(', ');
+            }
+
+            listItem.innerHTML = `
+                                <div class="car-number">
+                                    <i class="bi bi-truck"></i>
+                                    <strong>${item.车号}</strong>
+                                    <span class="ms-auto">
+                                        <i class="bi ${isConfirmed ? 'bi-check-circle-fill text-success' : 'bi-exclamation-triangle-fill text-danger'} status-icon"></i>
+                                        ${item.状态}
+                                    </span>
+                                </div>
+                                <div class="delivery-row">
+                                    <div class="delivery-label-cell">发货通知单号：</div>
+                                    <div class="delivery-content-cell">${deliveryNumbersHtml}</div>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">仓库:</span>
+                                    <span>${item.仓库}</span>
+                                </div>
+                            `;
+
+            showDataArea.appendChild(listItem);
+        });
+    }
+
+    async function fetchData() {
+        try {
+            const response = await fetchDataFromAPI('651', {});
+
+            if (response?.data?.data) {
+                exampleData = response.data.data;
+                populateMergedData(exampleData);
+            } else {
+                document.querySelector('.background-container').style.display = 'none';
+                document.getElementById('search-container').style.display = 'none';
+                toggleNoDataMessage(false);
+            }
+        } catch (error) {
+            showMsg('更新过程中遇到错误，请重试！', true);
+            console.error('请求失败:', error);
+        }
+
+        document.getElementById('errorAlert').classList.add('d-none');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Show loading overlay immediately when DOM is ready
+        document.getElementById('loading-overlay').style.display = 'flex';
+
+        // Wait for util_link.js to load before attempting to use util.loading
+        // A simple setTimeout is used here for demonstration,
+        // but a more robust solution would be to use a callback or promise
+        // after util_link.js has finished loading.
+        setTimeout(() => {
+            if (typeof util !== 'undefined' && util.loading && typeof util.loading.show === 'function') {
+                util.loading.show(); // Call util.loading.show if it's available
+            } else {
+                console.warn("util.loading not found. Ensure util_link.js loads correctly.");
+            }
+
+            token = getNameFromUrl('token');
+            if (token) {
+                fetchWatermark(); // The .finally() in fetchWatermark will hide the loader
+            } else {
+                showErrorMessage();
+                redirectToErrorPage();
+                // Ensure loader is hidden even if token is missing
+                if (util && util.loading && typeof util.loading.hide === 'function') {
+                    util.loading.hide();
+                } else {
+                    document.getElementById('loading-overlay').style.display = 'none';
+                }
+            }
+        }, 100); // Small delay to ensure util_link.js is parsed
+    });
+
+    function showErrorMessage() {
+        document.querySelector('.background-container').style.display = 'none';
+        document.getElementById('search-container').style.display = 'none';
+        const mainContent = document.getElementById('main-content');
+        mainContent.style.display = 'none';
+        const feedbackContainer = document.getElementById('feedbackContainer');
+        if (!feedbackContainer) {
+            document.getElementById('feedbackContainer').style.display = 'none';
+        }
+    }
+
+    function editPage(carNumber, area) {
+        const personID = userName;
+        if (!personID) {
+            alert("身份信息已经失效，请重新打开页面！");
+            return;
+        }
+
+        const areaMapping = {
+            "东区": 1,
+            "西区": 2,
+            "新区": 3
+        };
+        const randomVersion = Math.random();
+
+        const quyu = areaMapping[area] || 0;
+        carNumber = encodeURIComponent(carNumber)
+        $(location).attr("href", `editPage.html?v=${randomVersion}&carNumber=${carNumber}&personID=${personID}&quyu=${quyu}`);
+    }
+</script>
+</body>
+</html>

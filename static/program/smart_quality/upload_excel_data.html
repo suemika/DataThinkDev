@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel文件上传</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../vendor/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="../bootstrap-icons-1.11.3/font/bootstrap-icons.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="util/util.css?v=' + randomVersion + '">');
+        document.write('<script src="../vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/util/util_link.js"?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../js/popper.js?v=' + randomVersion + '"><\/script>');
+    </script>
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --success-color: #1cc88a;
+            --info-color: #36b9cc;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+            --light-bg: #f8f9fc;
+            --card-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+
+        .upload-container {
+            max-width: 700px;
+            margin: 2rem auto;
+            padding: 3rem;
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid #e3e6f0;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .page-header h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 2.2rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .page-header h2 i {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--primary-color), #224abe);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #4a4f5c;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .form-select, .form-control {
+            padding: 0.75rem 1rem;
+            border: 2px solid #e3e6f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-select:focus, .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.15);
+        }
+
+        .template-card {
+            background: linear-gradient(135deg, #f8f9fe 0%, #f1f4ff 100%);
+            border: 2px dashed #d1d3e2;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .template-card:hover {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, #f1f4ff 0%, #e6e9ff 100%);
+            transform: translateY(-2px);
+        }
+
+        .template-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .template-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .template-desc {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .file-upload-area {
+            background: linear-gradient(135deg, #f9fbfd 0%, #f0f4f8 100%);
+            border: 2px dashed #d1d3e2;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            margin: 1.5rem 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, #f1f4ff 0%, #e6e9ff 100%);
+        }
+
+        .file-upload-area i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .file-upload-area p {
+            color: #6c757d;
+            margin: 0;
+        }
+
+        .file-upload-area.has-file {
+            border-color: var(--success-color);
+            background: linear-gradient(135deg, #e8f5e9 0%, #d4edda 100%);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .file-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #224abe);
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 2.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(78, 115, 223, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            background: linear-gradient(135deg, #a0a5b8, #858a9d);
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-outline-secondary {
+            border: 2px solid #858796;
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            border: none;
+            border-radius: 10px;
+            padding: 1rem 1.5rem;
+            margin-top: 1rem;
+            font-weight: 500;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            color: #0c5460;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            color: #155724;
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            color: #856404;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #fdeaea, #f9d6d6);
+            color: #721c24;
+        }
+
+        .selected-file {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: #e8f5e9;
+            border-radius: 8px;
+            border-left: 4px solid var(--success-color);
+        }
+
+        .selected-file i {
+            color: var(--success-color);
+            font-size: 1.2rem;
+        }
+
+        .selected-file span {
+            font-size: 0.9rem;
+            color: #155724;
+        }
+
+        .mb-4 {
+            margin-bottom: 1.5rem !important;
+        }
+
+        .mb-3 {
+            margin-bottom: 1.2rem !important;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .upload-container {
+                padding: 2rem 1.5rem;
+                margin: 1rem;
+            }
+
+            .page-header h2 {
+                font-size: 1.8rem;
+            }
+
+            .btn-primary, .btn-outline-secondary {
+                padding: 0.6rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="poppins-bold">
+
+<main class="container_main" id="mainContent">
+    <div class="upload-container">
+        <div class="page-header">
+            <h2>
+                <i class="bi bi-cloud-upload"></i>
+                Excel文件上传
+            </h2>
+        </div>
+
+        <div id="error-container"></div>
+
+        <div class="mb-4">
+            <label for="module_select" class="form-label">
+                <i class="bi bi-layers me-1"></i>
+                选择上传模块
+            </label>
+            <select class="form-select" id="module_select">
+                <option selected disabled>请选择要上传的模块类型</option>
+                <option value="1">品种信息</option>
+            </select>
+        </div>
+
+        <div class="template-card">
+            <div class="template-info">
+                <div class="template-title">
+                    <i class="bi bi-file-earmark-excel me-2"></i>
+                    下载模板文件
+                </div>
+                <p class="template-desc">请先下载模板文件，按照模板格式填写数据后上传</p>
+                <div>
+                    <a href="excel/品种.xlsx" class="btn btn-outline-secondary" download>
+                        <i class="bi bi-download me-2"></i>
+                        下载品种模板
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="file-upload-area" id="fileDropArea">
+            <i class="bi bi-cloud-arrow-up"></i>
+            <p class="mb-2">点击选择文件或将文件拖到此处</p>
+
+            <div class="file-input-wrapper">
+                <label for="excel_file" class="btn btn-outline-primary">
+                    <i class="bi bi-folder2-open me-2"></i>
+                    选择文件
+                </label>
+                <input type="file" class="file-input" id="excel_file" accept=".xlsx,.xls">
+            </div>
+        </div>
+
+        <div id="selectedFileContainer" style="display: none;" class="selected-file">
+            <i class="bi bi-file-earmark-excel-fill"></i>
+            <span id="selectedFileName"></span>
+        </div>
+
+        <button type="button" class="btn btn-primary" id="upload-button">
+            <i class="bi bi-cloud-upload me-2"></i>
+            上传Excel文件
+        </button>
+
+        <div id="uploading-container" style="display: none;" class="alert alert-info" role="alert">
+            <i class="bi bi-hourglass-split me-2"></i>
+            文件上传中，请稍候...
+        </div>
+
+        <div id="waiting-container" style="display: none;" class="alert alert-warning" role="alert">
+            <i class="bi bi-clock-history me-2"></i>
+            数据量较多，正在处理中，请稍等...
+        </div>
+
+        <div id="success-container" style="display: none;" class="alert alert-success" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            恭喜！文件上传成功！
+        </div>
+    </div>
+</main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const fileInput = document.getElementById('excel_file');
+        const uploadButton = document.getElementById('upload-button');
+        const fileDropArea = document.getElementById('fileDropArea');
+        const selectedFileContainer = document.getElementById('selectedFileContainer');
+        const selectedFileName = document.getElementById('selectedFileName');
+        const fileInputLabel = fileDropArea.querySelector('label[for="excel_file"]');
+
+        // 修复：阻止事件冒泡，避免重复触发
+        fileInputLabel.addEventListener('click', function (e) {
+            e.stopPropagation(); // 阻止点击事件冒泡到父元素
+        });
+
+        // 文件选择事件
+        fileInput.addEventListener('change', function (e) {
+            e.stopPropagation(); // 阻止事件冒泡
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                displaySelectedFile(file);
+            }
+        });
+
+        // 修复：不再监听整个上传区域的点击事件
+        // 只通过标签的for属性关联文件输入框
+
+        // 拖放功能
+        fileDropArea.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            fileDropArea.style.borderColor = 'var(--primary-color)';
+            fileDropArea.style.transform = 'translateY(-2px)';
+        });
+
+        fileDropArea.addEventListener('dragleave', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            fileDropArea.style.borderColor = '#d1d3e2';
+            fileDropArea.style.transform = 'translateY(0)';
+        });
+
+        fileDropArea.addEventListener('drop', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            fileDropArea.style.borderColor = '#d1d3e2';
+            fileDropArea.style.transform = 'translateY(0)';
+
+            if (e.dataTransfer.files.length) {
+                const files = e.dataTransfer.files;
+                // 只取第一个文件
+                if (files[0]) {
+                    // 创建DataTransfer对象来设置文件
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(files[0]);
+                    fileInput.files = dataTransfer.files;
+
+                    // 触发change事件
+                    const event = new Event('change', {bubbles: true});
+                    fileInput.dispatchEvent(event);
+                }
+            }
+        });
+
+        // 显示选中的文件
+        function displaySelectedFile(file) {
+            selectedFileName.textContent = `已选择文件: ${file.name} (${formatFileSize(file.size)})`;
+            selectedFileContainer.style.display = 'flex';
+            fileDropArea.classList.add('has-file');
+        }
+
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        uploadButton.onclick = uploadExcelFile;
+    });
+
+    function uploadExcelFile() {
+        clearMessages();
+        displayUploadingMessage();
+
+        const fileInput = document.getElementById('excel_file');
+        const moduleSelect = document.getElementById('module_select');
+
+        if (moduleSelect.value === '请选择要上传的模块类型') {
+            displayError("请选择上传模块");
+            clearUploadingMessage();
+            return;
+        }
+
+        if (!fileInput.files || fileInput.files.length === 0) {
+            displayError("请选择一个Excel文件");
+            clearUploadingMessage();
+            return;
+        }
+
+        const file = fileInput.files[0];
+
+        if (!/\.xlsx$/.test(file.name) && !/\.xls$/.test(file.name)) {
+            displayError("请上传有效的 Excel 文件 (.xlsx 或 .xls)");
+            clearUploadingMessage();
+            return;
+        }
+
+        // 检查文件大小（限制10MB）
+        if (file.size > 10 * 1024 * 1024) {
+            displayError("文件大小不能超过10MB");
+            clearUploadingMessage();
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+            try {
+                const base64String = btoa(String.fromCharCode(...new Uint8Array(event.target.result)));
+
+                // 显示等待消息
+                document.getElementById('waiting-container').style.display = 'block';
+
+                const formData = new FormData();
+                formData.append('req', '794');
+                const dataObject = {
+                    base: base64String,
+                    module: moduleSelect.value
+                };
+
+                formData.append('data', JSON.stringify(dataObject));
+
+                const uploadButton = document.getElementById('upload-button');
+                uploadButton.disabled = true;
+                uploadButton.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>上传中...';
+
+                axios.post('/imc/customOpt', formData, {})
+                    .then(response => {
+                        if (response.status !== 200) {
+                            displayError(response.data.error || "上传失败");
+                        } else {
+                            displaySuccess();
+                            // 清空文件选择
+                            clearFileSelection();
+                            // 5秒后清除成功消息
+                            setTimeout(clearMessages, 5000);
+                        }
+                    })
+                    .catch(error => {
+                        if (error.response) {
+                            displayError("上传失败: " + (error.response.data.error || error.response.statusText));
+                        } else if (error.request) {
+                            displayError("网络错误，请检查网络连接");
+                        } else {
+                            displayError("上传文件时发生错误：" + error.message);
+                        }
+                    })
+                    .finally(() => {
+                        clearUploadingMessage();
+                        clearWaitingMessage();
+                        const uploadButton = document.getElementById('upload-button');
+                        uploadButton.disabled = false;
+                        uploadButton.innerHTML = '<i class="bi bi-cloud-upload me-2"></i>上传Excel文件';
+                    });
+            } catch (error) {
+                displayError("处理文件时发生错误：" + error.message);
+                clearUploadingMessage();
+                clearWaitingMessage();
+            }
+        };
+
+        reader.onerror = function () {
+            displayError("读取文件时发生错误");
+            clearUploadingMessage();
+            clearWaitingMessage();
+        };
+
+        reader.readAsArrayBuffer(file);
+    }
+
+    function clearFileSelection() {
+        const fileInput = document.getElementById('excel_file');
+        const selectedFileContainer = document.getElementById('selectedFileContainer');
+        const fileDropArea = document.getElementById('fileDropArea');
+
+        fileInput.value = '';
+        selectedFileContainer.style.display = 'none';
+        fileDropArea.classList.remove('has-file');
+    }
+
+    function clearMessages() {
+        clearSuccessMessage();
+        clearUploadingMessage();
+        clearErrorMessage();
+        clearWaitingMessage();
+    }
+
+    function clearUploadingMessage() {
+        document.getElementById('uploading-container').style.display = 'none';
+    }
+
+    function clearWaitingMessage() {
+        document.getElementById('waiting-container').style.display = 'none';
+    }
+
+    function clearSuccessMessage() {
+        document.getElementById('success-container').style.display = 'none';
+    }
+
+    function clearErrorMessage() {
+        document.getElementById('error-container').innerHTML = "";
+    }
+
+    function displayUploadingMessage() {
+        document.getElementById('uploading-container').style.display = 'block';
+    }
+
+    function displaySuccess() {
+        document.getElementById('success-container').style.display = 'block';
+        // 清空模块选择
+        document.getElementById('module_select').selectedIndex = 0;
+    }
+
+    function displayError(errorMessage) {
+        document.getElementById('error-container').innerHTML =
+            '<div class="alert alert-danger" role="alert">' +
+            '<i class="bi bi-exclamation-triangle me-2"></i>' +
+            errorMessage +
+            '</div>';
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>合同文件上传</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="../vendor/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="../vendor/bootstrap5/css/bootstrap.min.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="../bootstrap-icons-1.11.3/font/bootstrap-icons.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./util/util.css?v=' + randomVersion + '">');
+
+    </script>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4cc9f0;
+            --danger-color: #f72585;
+            --background: linear-gradient(135deg, #f4f9ff 0%, #e0e9ff 100%);
+        }
+
+        .form-container {
+            width: 90%;
+            margin: 0 auto;
+            padding: 30px;
+            background: var(--background);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(67, 97, 238, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .form-container:hover {
+            box-shadow: 0 15px 35px rgba(67, 97, 238, 0.15);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-label .required {
+            color: var(--danger-color);
+            margin-left: 4px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .input-group-text {
+            background-color: rgba(67, 97, 238, 0.1);
+            border-color: rgba(67, 97, 238, 0.2);
+            color: var(--primary-color);
+            min-width: 45px;
+            justify-content: center;
+        }
+
+        .form-control, .form-select {
+            border-left: 0;
+            padding: 12px 15px;
+            height: auto;
+            border-color: rgba(67, 97, 238, 0.2);
+            transition: all 0.3s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+        }
+
+        .btn-upload {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            width: 100%;
+            padding: 14px;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: all 0.3s;
+            border-radius: 8px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-upload:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
+        }
+
+        .btn-upload:active {
+            transform: translateY(1px);
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 15px;
+            border: 1px solid rgba(67, 97, 238, 0.2);
+            border-radius: 8px;
+            background-color: rgba(67, 97, 238, 0.05);
+            cursor: pointer;
+            transition: all 0.3s;
+            height: 50px;
+        }
+
+        .file-input-label:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+            border-color: rgba(67, 97, 238, 0.3);
+        }
+
+        .file-input-label i {
+            color: var(--primary-color);
+        }
+
+        .file-name {
+            margin-left: 10px;
+            color: #6c757d;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex-grow: 1;
+        }
+
+        .form-text {
+            margin-top: 6px;
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        .alert {
+            border-radius: 8px;
+            padding: 15px 20px;
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .is-invalid {
+            border-color: var(--danger-color) !important;
+        }
+
+        .is-invalid + .error-message {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                width: 95%;
+                padding: 25px;
+            }
+        }
+
+          main {
+            max-width: 1500px;
+            margin: 0 auto; /* 水平居中 */
+            width: 100%; /* 确保宽度占满父容器 */
+            padding: 0 15px; /* 可选：添加内边距避免内容贴边 */
+            box-sizing: border-box; /* 确保内边距不影响总宽度 */
+        }
+
+    </style>
+</head>
+<body class="poppins-bold">
+
+<!-- 遮罩层 -->
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-content">
+
+        <div class="diamond-loader">
+            <!-- 静态阴影 -->
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+            <div class="diamond"></div>
+        </div>
+        <div class="shadow"></div>
+        <p class="mt-3">正在加载，请稍候...</p>
+    </div>
+</div>
+
+<header class="background-container">
+    <a href="http://edi.sdstg.com/" target="_self" rel="noopener">
+        <img id="header-img" src="" alt="ST" class="header-img">
+    </a>
+    <h2 class="h2-container">合同文件上传</h2>
+</header>
+<main id="main-content">
+    <div class="form-container">
+        <div id="error-container" class="mb-3"></div>
+
+        <div class="input-group">
+            <label for="contract_name" class="form-label">
+                <i class="bi bi-card-heading me-2"></i>合同名称(如果是覆盖，请使用统一名称)<span
+                    class="required">*</span>
+            </label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-pencil"></i></span>
+                <input type="text" class="form-control" id="contract_name" placeholder="请输入合同名称" required>
+            </div>
+            <div class="error-message" id="contract_name_error">请输入合同名称</div>
+        </div>
+
+        <div class="input-group">
+            <label for="department" class="form-label">
+                <i class="bi bi-building me-2"></i>所属部门<span class="required">*</span>
+            </label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-people"></i></span>
+                <select class="form-select" id="department" required>
+                    <option value="" selected disabled>请选择所属部门</option>
+                    <!-- 部门选项将通过JavaScript动态加载 -->
+                </select>
+            </div>
+            <div class="error-message" id="department_error">请选择所属部门</div>
+        </div>
+
+        <div class="input-group">
+            <label for="contract_type" class="form-label">
+                <i class="bi bi-tag me-2"></i>合同类型<span class="required">*</span>
+            </label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-bookmark"></i></span>
+                <select class="form-select" id="contract_type" required>
+                    <option value="" selected disabled>请先选择所属部门</option>
+                    <!-- 合同类型选项将通过JavaScript动态加载 -->
+                </select>
+            </div>
+            <div class="error-message" id="contract_type_error">请选择合同类型</div>
+        </div>
+
+        <div class="input-group">
+            <label for="description" class="form-label">
+                <i class="bi bi-card-text me-2"></i>合同描述
+            </label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-text-paragraph"></i></span>
+                <textarea class="form-control" id="description" rows="3" placeholder="请输入合同简要描述"></textarea>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">
+                <i class="bi bi-file-word me-2"></i>合同文件<span class="required">*</span>
+            </label>
+            <div class="file-input-label" id="file-input-label">
+                <span><i class="bi bi-cloud-arrow-up me-2"></i>选择文件</span>
+                <span id="file-name" class="file-name">未选择文件</span>
+            </div>
+            <input type="file" class="form-control d-none" id="docx_file" accept=".docx" required>
+            <div class="error-message" id="docx_file_error">请选择合同文件</div>
+            <div class="form-text">仅支持.docx格式的Word文档，文件大小不超过10MB</div>
+        </div>
+
+        <button type="button" class="btn btn-primary btn-upload" id="upload-button">
+            <i class="bi bi-upload me-2"></i>上传合同文件
+        </button>
+
+        <div id="uploading-container" style="display: none;" class="alert alert-info mt-4" role="alert">
+            <i class="bi bi-arrow-repeat me-2 fa-spin"></i>上传中，请等待...
+        </div>
+        <div id="success-container" style="display: none;" class="alert alert-success mt-4" role="alert">
+            <i class="bi bi-check-circle me-2"></i>上传成功！
+        </div>
+        <div id="waiting-container" style="display: none;" class="alert alert-warning mt-4" role="alert">
+            <i class="bi bi-hourglass me-2"></i>数据量较多，请稍等...
+        </div>
+    </div>
+</main>
+<script>
+    document.write('<script src="../vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="./util/util_link.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+    document.write('<script src="../js/popper.js?v=' + randomVersion + '"><\/script>');
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        util.loading.show();
+
+        // 缓存所有DOM元素
+        const dom = {
+            // 表单元素
+            contractName: document.getElementById('contract_name'),
+            department: document.getElementById('department'),
+            contractType: document.getElementById('contract_type'),
+            description: document.getElementById('description'),
+            docxFile: document.getElementById('docx_file'),
+            fileName: document.getElementById('file-name'),
+            fileInputLabel: document.getElementById('file-input-label'),
+
+            // 按钮
+            uploadButton: document.getElementById('upload-button'),
+
+            // 消息容器
+            errorContainer: document.getElementById('error-container'),
+            uploadingContainer: document.getElementById('uploading-container'),
+            successContainer: document.getElementById('success-container'),
+            waitingContainer: document.getElementById('waiting-container'),
+
+            // 错误提示元素
+            contractNameError: document.getElementById('contract_name_error'),
+            departmentError: document.getElementById('department_error'),
+            contractTypeError: document.getElementById('contract_type_error'),
+            docxFileError: document.getElementById('docx_file_error')
+        };
+
+        // 从后端获取部门数据
+        async function fetchDepartments() {
+            try {
+                // 这里应该是实际获取部门数据的API调用
+                const response = await fetchDataFromAPI('752', {});
+
+                // 模拟数据 - 实际使用时替换为API调用
+                if (response.data.status === 0) {
+                    const mockDepartments = response.data.data;
+                    // 填充部门下拉框
+                    mockDepartments.forEach(dept => {
+                        const option = document.createElement('option');
+                        option.value = dept.id;
+                        option.textContent = dept.name;
+                        dom.department.appendChild(option);
+                    });
+
+                    // 添加部门变更事件监听
+                    dom.department.addEventListener('change', updateContractTypes);
+                }
+
+            } catch (error) {
+                console.error('获取部门数据失败:', error);
+                displayError("获取部门数据失败，请刷新页面重试");
+            }
+        }
+
+        // 从后端获取合同类型数据
+        async function updateContractTypes() {
+            const departmentId = dom.department.value;
+            const contractTypeSelect = dom.contractType;
+
+            // 清空现有选项
+            contractTypeSelect.innerHTML = '';
+
+            // 添加默认提示选项
+            const defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            defaultOption.textContent = "请选择合同类型";
+            defaultOption.selected = true;
+            defaultOption.disabled = true;
+            contractTypeSelect.appendChild(defaultOption);
+
+            if (departmentId) {
+                try {
+                    // 显示加载状态
+                    const loadingOption = document.createElement('option');
+                    loadingOption.textContent = "加载中...";
+                    loadingOption.disabled = true;
+                    contractTypeSelect.appendChild(loadingOption);
+
+                    // 获取该部门对应的合同类型
+                    const response = await fetchDataFromAPI('751', {departmentId});
+
+                    // 移除加载状态选项
+                    contractTypeSelect.removeChild(loadingOption);
+
+                    if (response.data.status === 0 && response.data.data && response.data.data.length > 0) {
+                        const types = response.data.data;
+
+                        // 填充合同类型下拉框
+                        types.forEach(type => {
+                            const option = document.createElement('option');
+                            option.value = type.id;
+                            option.textContent = type.name;
+                            option.selected = true;
+                            contractTypeSelect.appendChild(option);
+                        });
+                    } else {
+                        // 如果没有数据，添加提示选项
+                        const noDataOption = document.createElement('option');
+                        noDataOption.textContent = "该部门暂无合同类型";
+                        noDataOption.disabled = true;
+                        contractTypeSelect.appendChild(noDataOption);
+                    }
+
+                    // 验证合同类型字段
+                    validateSelectField(contractTypeSelect, dom.contractTypeError);
+
+                } catch (error) {
+                    console.error('获取合同类型失败:', error);
+
+                    // 添加错误提示选项
+                    contractTypeSelect.innerHTML = '';
+                    const errorOption = document.createElement('option');
+                    errorOption.textContent = "加载失败，请重试";
+                    errorOption.disabled = true;
+                    contractTypeSelect.appendChild(errorOption);
+
+                    displayError("获取合同类型失败，请稍后重试");
+                }
+            }
+        }
+
+        // 初始化页面时加载数据
+        fetchDepartments();
+
+        // 事件监听器
+        dom.uploadButton.addEventListener('click', uploadDocxFile);
+        dom.docxFile.addEventListener('change', updateFileName);
+        dom.fileInputLabel.addEventListener('click', () => dom.docxFile.click());
+
+        // 为必填字段添加实时验证
+        dom.contractName.addEventListener('input', () => validateField(dom.contractName, dom.contractNameError));
+        dom.department.addEventListener('change', () => validateSelectField(dom.department, dom.departmentError));
+        dom.contractType.addEventListener('change', () => validateSelectField(dom.contractType, dom.contractTypeError));
+        dom.docxFile.addEventListener('change', validateFile);
+
+
+        util.loading.hide();
+
+        // 通用验证函数
+        function validateField(field, errorElement) {
+            const isValid = field.value.trim() !== '';
+            toggleErrorState(field, errorElement, isValid);
+            return isValid;
+        }
+
+        function validateSelectField(field, errorElement) {
+            const isValid = field.value !== '';
+            toggleErrorState(field, errorElement, isValid);
+            return isValid;
+        }
+
+        function validateFile() {
+            const file = dom.docxFile.files[0];
+            let isValid = false;
+
+            if (file) {
+                // 验证文件类型
+                if (!/\.docx$/.test(file.name)) {
+                    displayError("请上传有效的Word文档（.docx）");
+                }
+                // 验证文件大小
+                else if (file.size > 10 * 1024 * 1024) {
+                    displayError("文件大小不能超过10MB");
+                } else {
+                    isValid = true;
+                }
+            }
+
+            toggleErrorState(dom.docxFile, dom.docxFileError, isValid);
+            return isValid;
+        }
+
+        function toggleErrorState(field, errorElement, isValid) {
+            if (isValid) {
+                field.classList.remove('is-invalid');
+                errorElement.style.display = 'none';
+            } else {
+                field.classList.add('is-invalid');
+                errorElement.style.display = 'block';
+            }
+        }
+
+        function updateFileName() {
+            const file = dom.docxFile.files[0];
+            dom.fileName.textContent = file ? file.name : '未选择文件';
+            validateFile();
+        }
+
+        async function uploadDocxFile() {
+            console.log('uploadDocxFile 开始');
+            clearMessages();
+            displayUploadingMessage();
+
+            // 验证所有必填字段
+            const isFormValid = [
+                validateField(dom.contractName, dom.contractNameError),
+                validateSelectField(dom.department, dom.departmentError),
+                validateSelectField(dom.contractType, dom.contractTypeError),
+                validateFile()
+            ].every(Boolean);
+
+            if (!isFormValid) {
+                displayError("请填写所有必填字段");
+                clearUploadingMessage();
+                return;
+            }
+
+            const file = dom.docxFile.files[0];
+            const formData = {
+                contractName: dom.contractName.value,
+                department: dom.department.value,
+                departmentName: dom.department.options[dom.department.selectedIndex].text,
+                contractType: dom.contractType.value,
+                contractTypeName: dom.contractType.options[dom.contractType.selectedIndex].text,
+                description: dom.description.value
+            };
+
+            const reader = new FileReader();
+
+            reader.onload = async function (event) {
+                try {
+                    // 转换为 Base64
+                    const dataUrl = event.target.result;
+                    const base64 = dataUrl.split(',')[1];  // 取逗号后面的纯 Base64 部分
+                    formData.base = base64;
+                    // 更新按钮状态
+                    dom.uploadButton.disabled = true;
+                    dom.uploadButton.innerHTML = '<i class="bi bi-arrow-repeat me-2 fa-spin"></i>上传中...';
+
+                    // 发送请求
+                    console.log('调用 fetchDataFromAPI'); // ✔️ 只打印一次
+                    const response = await fetchDataFromAPI('750', formData);
+                    console.log('fetch 完成', response);
+                    if (response.data.status === 0) {
+                        displaySuccess();
+                        setTimeout(() => {
+                            clearMessages();
+                            resetForm();
+                        }, 3000);
+                    } else {
+                        const msg = response.data.msg;
+                        displayError(msg);
+                        await fetchDataFromAPI('755', {
+                            workId: 750,
+                            sourceAddress: window.location.pathname + ' contract_management -> upload_docx_data.html -> 532',
+                            error: msg
+                        });
+                    }
+                } catch (error) {
+                    await fetchDataFromAPI('755', {
+                        workId: 750,
+                        sourceAddress: window.location.pathname + ' contract_management -> upload_docx_data.html -> 539',
+                        error: error.message
+                    });
+                    console.error('上传时捕获到错误', error);
+                    displayError("上传文件时发生错误：" + error.message);
+                } finally {
+                    clearUploadingMessage();
+                    dom.uploadButton.disabled = false;
+                    dom.uploadButton.innerHTML = '<i class="bi bi-upload me-2"></i>上传合同文件';
+                }
+            };
+
+            reader.onerror = function () {
+                displayError("读取文件时发生错误。");
+                clearUploadingMessage();
+            };
+
+            // 使用 readAsArrayBuffer 方法
+            reader.readAsDataURL(file); // 以二进制 ArrayBuffer 的方式读取文件
+        }
+
+        function resetForm() {
+            // 重置表单值
+            dom.contractName.value = '';
+            dom.department.value = '';
+            dom.contractType.value = '';
+            dom.description.value = '';
+            dom.docxFile.value = '';
+            dom.fileName.textContent = '未选择文件';
+
+            // 清除验证状态
+            dom.contractName.classList.remove('is-invalid');
+            dom.department.classList.remove('is-invalid');
+            dom.contractType.classList.remove('is-invalid');
+            dom.docxFile.classList.remove('is-invalid');
+            dom.docxFileError.style.display = 'none';
+        }
+
+        function clearMessages() {
+            clearSuccessMessage();
+            clearUploadingMessage();
+            clearErrorMessage();
+        }
+
+        function clearUploadingMessage() {
+            dom.uploadingContainer.style.display = 'none';
+        }
+
+        function clearSuccessMessage() {
+            dom.successContainer.style.display = 'none';
+        }
+
+        function clearErrorMessage() {
+            dom.errorContainer.innerHTML = "";
+        }
+
+        function displayUploadingMessage() {
+            dom.uploadingContainer.style.display = 'block';
+        }
+
+        function displaySuccess() {
+            dom.successContainer.style.display = 'block';
+        }
+
+        function displayError(errorMessage) {
+            dom.errorContainer.innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    ${errorMessage}
+                </div>
+            `;
+        }
+    });
+</script>
+</body>
+</html>

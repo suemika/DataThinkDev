@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大学生职业生涯</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="/logo.png?v=' + randomVersion + '" type="image/png">');
+        document.write('<link rel="stylesheet" href="vendor/bootstrap5/css/bootstrap.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./css/util.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./css/phone_lists.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./css/professional-development-query.css?v=' + randomVersion + '">');
+        document.write('<script src="vendor/easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="js/util.js?v=' + randomVersion + '"><\/script>');
+    </script>
+</head>
+
+<body>
+<header class="background-container">
+    <a href="http://edi.sdstg.com/" target="_self" rel="noopener">
+        <img id="header-img" src="" alt="ST">
+    </a>
+    <h2 class="h2-container">石横特钢集团有限公司大学生职业生涯</h2>
+</header>
+
+<main>
+    <div id="search-container" class="mb-4">
+        <form id="search-form" onsubmit="return false;">
+            <div class="input-group mb-3">
+                <input type="text" id="search-box" class="form-control" placeholder="请输入工资编号进行查询..."
+                       oninput="updateResults()"/>
+                <button type="button" class="btn btn-primary" id="query-button" onclick="redirectToResults()">查询</button>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <select id="major-select" class="form-select" onchange="updateResults()">
+                        <option value="">所有专业</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <select id="degree-select" class="form-select" onchange="updateResults()">
+                        <option value="">最高学历</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <select id="university-select" class="form-select" onchange="updateResults()">
+                        <option value="">毕业院校</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="result-container" class="mt-2" style="display: none;">
+                <ul id="result-list-all" class="list-group"></ul>
+            </div>
+        </form>
+    </div>
+</main>
+
+<script>
+    let pValue; // 接收到的参数
+    let pNumber; // 工资编号
+
+    document.addEventListener("DOMContentLoaded", fetchData);
+
+    async function fetchData() {
+        const urlParams = new URLSearchParams(window.location.search);
+        pValue = urlParams.get('p');
+
+        if (!pValue) {
+            console.error("未找到参数 p，显示错误信息");
+            return redirectToErrorPage();
+        }
+
+        try {
+            const response = await fetchDataFromAPI('556', pValue);
+            if (response.data.status === 0) {
+                const response = await fetchDataFromAPI('561', {});
+                if (response.data) {
+                    exampleData = response.data.data;
+                    populateSelectOptions();
+                } else {
+                    console.log("无数据");
+                }
+            } else {
+                console.error('Error fetching watermark text:', response.data.msg);
+                redirectToErrorPage();
+            }
+        } catch (error) {
+            console.error('Error fetching watermark:', error);
+            redirectToErrorPage();
+        }
+    }
+
+    async function fetchDataFromAPI(req, data) {
+        const response = await axios.post('/imc/customOpt', { req, data: JSON.stringify(data) });
+        return response.data;
+    }
+
+    function populateSelectOptions() {
+        const majorSelect = document.getElementById('major-select');
+        const universitySelect = document.getElementById('university-select');
+        const degreeSelect = document.getElementById('degree-select');
+
+        const uniqueMajors = new Set();
+        const uniqueDegrees = new Set();
+        const uniqueUniversities = new Set();
+
+        exampleData.forEach(item => {
+            uniqueDegrees.add(item['学历']);
+            uniqueMajors.add(item['所学专业']);
+            uniqueUniversities.add(item['毕业院校']);
+        });
+
+        uniqueMajors.forEach(major => majorSelect.appendChild(createOption(major)));
+        uniqueUniversities.forEach(university => universitySelect.appendChild(createOption(university)));
+        uniqueDegrees.forEach(degree => degreeSelect.appendChild(createOption(degree)));
+    }
+
+    function createOption(text) {
+        const option = document.createElement('option');
+        option.value = text;
+        option.textContent = text;
+        return option;
+    }
+
+    function redirectToResults() {
+        if (pNumber) {
+            window.open(`professional-development-employee.html?p=${pValue}&salaryId=${pNumber}`, '_blank');
+        } else {
+            alert('请先选择人员！');
+        }
+    }
+
+    async function updateResults() {
+        const inputData = document.getElementById('search-box').value.toLowerCase();
+        const selectedMajor = document.getElementById('major-select').value;
+        const selectedDegree = document.getElementById('degree-select').value;
+        const selectedUniversity = document.getElementById('university-select').value;
+        const resultList = document.getElementById('result-list-all');
+        const resultContainer = document.getElementById('result-container');
+
+        resultList.innerHTML = '';
+        resultContainer.style.display = 'none';
+
+        const filteredData = exampleData.filter(item =>
+            (item["工资编号"].toString().toLowerCase().includes(inputData) ||
+             item["姓名"].toLowerCase().includes(inputData)) &&
+            (!selectedMajor || item["所学专业"] === selectedMajor) &&
+            (!selectedDegree || item["学历"] === selectedDegree) &&
+            (!selectedUniversity || item["毕业院校"] === selectedUniversity)
+        );
+
+        filteredData.forEach(item => {
+            const li = createListItem(item);
+            resultList.appendChild(li);
+        });
+        resultContainer.style.display = filteredData.length > 0 ? 'block' : 'none';
+    }
+
+    function createListItem(item) {
+        const li = document.createElement('li');
+        li.className = 'list-group-item-all';
+        li.textContent = `工资编号：${item["工资编号"]}， 姓名：${item["姓名"]}， 状态：${item["员工状态"]}`;
+
+        li.onclick = function () {
+            document.getElementById('search-box').value = `${item["工资编号"]} - ${item["姓名"]} - ${item["员工状态"]}`;
+            pNumber = item["工资编号"];
+            updateResults(); // 更新结果
+        };
+
+        return li;
+    }
+</script>
+</body>
+</html>
