@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>页面错误 - 系统提示</title>
+    <script>
+        const randomVersion = Math.random();
+        document.write('<link rel="icon" href="logo/logo.png?v=' + randomVersion + '"  type="image/png">');
+        document.write('<link rel="stylesheet" href="../bootstrap5/css/bootstrap.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="bootstrap-icons-1.11.3/font/bootstrap-icons.css?v=' + randomVersion + '">');
+        document.write('<link rel="stylesheet" href="./css/util.css?v=' + randomVersion + '">');
+        document.write('<script src="../bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../easyui/js-easyui/axios.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="../program/js/popper.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="js/util.js?v=' + randomVersion + '"><\/script>');
+    </script>
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .error-card {
+            max-width: 600px;
+            width: 90%;
+            border: none;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            animation: slideInUp 0.6s ease-out;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.98);
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .error-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 3rem 2rem;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .error-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .error-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        .error-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .error-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        .error-body {
+            padding: 2.5rem;
+        }
+
+        .error-code {
+            background: #f8f9fa;
+            border-radius: 2rem;
+            padding: 0.5rem 1.5rem;
+            display: inline-block;
+            color: #6c757d;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e9ecef;
+        }
+
+        .error-message {
+            color: #495057;
+            font-size: 1.2rem;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 1rem;
+            border-left: 4px solid #dc3545;
+        }
+
+        .btn-group-custom {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .btn-custom {
+            padding: 0.75rem 2rem;
+            border-radius: 3rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary-custom:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            color: white;
+        }
+
+        .btn-outline-custom {
+            background: white;
+            color: #6c757d;
+            border: 2px solid #e9ecef;
+        }
+
+        .btn-outline-custom:hover {
+            background: #f8f9fa;
+            color: #495057;
+            border-color: #dee2e6;
+        }
+
+        .error-footer {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+            color: #6c757d;
+        }
+
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .contact-link {
+            color: #6c757d;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .contact-link:hover {
+            color: #667eea;
+        }
+
+        .countdown-badge {
+            background: #e9ecef;
+            color: #495057;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .loading-spinner {
+            width: 1.2rem;
+            height: 1.2rem;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spinner 0.8s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spinner {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 576px) {
+            .error-header {
+                padding: 2rem 1rem;
+            }
+
+            .error-icon {
+                font-size: 4rem;
+            }
+
+            .error-title {
+                font-size: 2rem;
+            }
+
+            .error-body {
+                padding: 1.5rem;
+            }
+
+            .error-message {
+                font-size: 1rem;
+            }
+
+            .btn-custom {
+                padding: 0.6rem 1.5rem;
+                font-size: 0.9rem;
+            }
+
+            .contact-info {
+                gap: 1rem;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+<header class="background-container">
+</header>
+
+    <div class="error-card card">
+        <div class="error-header">
+            <div class="error-icon">
+                <i class="bi bi-emoji-frown"></i>
+            </div>
+            <h1 class="error-title">页面加载失败</h1>
+            <p class="error-subtitle">很抱歉，我们无法加载您请求的页面</p>
+        </div>
+
+        <div class="error-body">
+            <div class="d-flex justify-content-center">
+                <span class="error-code" id="errorCode">
+                    <i class="bi bi-code-square me-2"></i>
+                    ERR_PAGE_LOAD_FAILED
+                </span>
+            </div>
+
+            <div class="error-message" id="errorMessage">
+                <i class="bi bi-info-circle-fill me-2 text-danger"></i>
+                可能是网络连接问题或页面配置错误<br>
+                请稍后重试或联系管理员
+            </div>
+
+            <div class="btn-group-custom">
+                <a href="http://edi.sdstg.com/" class="btn btn-custom btn-outline-custom">
+                    <i class="bi bi-house-door"></i>
+                    返回首页
+                </a>
+            </div>
+
+            <div class="text-center">
+                <div class="countdown-badge">
+                    <i class="bi bi-clock-history"></i>
+                    <span id="countdown">10</span>秒后自动返回首页
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 获取URL参数
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                code: params.get('code') || 'ERR_PAGE_LOAD_FAILED',
+                message: params.get('message') || '页面加载失败，请稍后重试',
+                returnUrl: params.get('returnUrl') || '/'
+            };
+        }
+
+        // 更新错误信息
+        function updateErrorInfo() {
+            const { code, message, returnUrl } = getUrlParams();
+
+            const errorCodeEl = document.getElementById('errorCode');
+            const errorMessageEl = document.getElementById('errorMessage');
+
+            if (errorCodeEl) {
+                errorCodeEl.innerHTML = `<i class="bi bi-code-square me-2"></i>${code}`;
+            }
+
+            if (errorMessageEl) {
+                errorMessageEl.innerHTML = `<i class="bi bi-info-circle-fill me-2 text-danger"></i>${message.replace(/\n/g, '<br>')}`;
+            }
+
+            // 保存返回URL
+            if (returnUrl) {
+                sessionStorage.setItem('returnUrl', returnUrl);
+            }
+        }
+
+        // 显示Toast提示
+        function showToast(message, type = 'danger') {
+            const toastContainer = document.createElement('div');
+            toastContainer.style.position = 'fixed';
+            toastContainer.style.top = '20px';
+            toastContainer.style.right = '20px';
+            toastContainer.style.zIndex = '9999';
+
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type} border-0`;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+
+            toastContainer.appendChild(toast);
+            document.body.appendChild(toastContainer);
+
+            const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
+            bsToast.show();
+
+            toast.addEventListener('hidden.bs.toast', () => {
+                toastContainer.remove();
+            });
+        }
+
+
+        // 倒计时自动返回首页
+        function startCountdown(seconds = 10) {
+            const countdownEl = document.getElementById('countdown');
+            let remaining = seconds;
+
+            const timer = setInterval(() => {
+                remaining--;
+                if (countdownEl) {
+                    countdownEl.textContent = remaining;
+                }
+
+                if (remaining <= 0) {
+                    clearInterval(timer);
+                    window.location.href = 'http://edi.sdstg.com/';
+                }
+            }, 1000);
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateErrorInfo();
+
+            // 如果不是从错误页面刷新的，开始倒计时
+            if (!sessionStorage.getItem('errorPageRefreshed')) {
+                startCountdown(10);
+                sessionStorage.setItem('errorPageRefreshed', 'true');
+            }
+
+            // 清理刷新标记
+            window.addEventListener('beforeunload', function() {
+                sessionStorage.removeItem('errorPageRefreshed');
+            });
+
+            // 添加返回首页按钮的点击统计
+            const homeButton = document.querySelector('a[href="/"]');
+            if (homeButton) {
+                homeButton.addEventListener('click', function(e) {
+                    console.log('用户点击返回首页');
+                    // 这里可以添加统计代码
+                });
+            }
+        });
+    </script>
+</body>
+</html>

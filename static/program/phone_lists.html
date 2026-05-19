@@ -15,6 +15,7 @@
             document.write('<link rel="stylesheet" href="./css/phone_lists.css?v='+v+'">');
             document.write('<script src="js/phone_lists.js?v='+v+'"><\/script>');
             document.write('<script src="js/util.js?v='+v+'"><\/script>');
+            document.write('<script src="js/link_redirect_url.js?v='+v+'"><\/script>');
             document.write('<script src="vendor/elementui/js/jquery-3.7.0.min.js?v='+v+'"><\/script>');
             document.write('<script src="vendor/bootstrap5/js/bootstrap.bundle.min.js?v='+v+'"><\/script>');
             document.write('<script src="vendor/easyui/js-easyui/axios.min.js?v='+v+'"><\/script>');
@@ -78,6 +79,12 @@
         </div>
     </div>
 </main>
+
+<!-- 错误提示（redirectToErrorPage 使用，必须在 main 外面避免被 showErrorMessage 隐藏） -->
+<div id="error-message" style="display: none;">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    非法访问，<span id="countdown-timer">20</span> 秒后跳转到首页
+</div>
 
 </body>
 </html>

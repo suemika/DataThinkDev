@@ -359,6 +359,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         await fetchWatermark();
 
     } else {
+        util.loading.hide();
         showErrorMessage();
         redirectToErrorPage();
     }
