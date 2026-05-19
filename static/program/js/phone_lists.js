@@ -4,7 +4,6 @@ let data;
 let token = '';
 
 // 数据获取
-// 数据获取
 function fetchData() {
     const tableContainer = document.getElementById('table-container');
     const departmentWrapper = document.getElementById('department-wrapper');
@@ -130,7 +129,7 @@ async function fetchWatermark() {
 
 function showErrorMessage() {
     document.querySelector('.background-container').style.display = 'none';
-    document.getElementById('search-container').style.display = 'none';
+    document.querySelector('.search-card').style.display = 'none';
     document.getElementById('table-container').style.display = 'none';
     document.getElementById('department-wrapper').style.display = 'none';
     const mainContent = document.getElementById('main-content');
@@ -257,12 +256,6 @@ function setBackgroundWatermarkOnElement(element, text) {
     element.style.backgroundImage = svgImage;
 }
 
-function handleKeyDown(event) {
-    if (event.key === "Enter") {
-        filterTable();
-    }
-}
-
 function filterTable() {
     var input = document.getElementById('search-box');
     var filter = input.value.toLowerCase().replace(/\s+/g, '');
@@ -285,8 +278,9 @@ function filterTable() {
 
         Array.from(rows).slice(2).forEach(row => {
             row.style.display = '';
+            // 只清除高亮标记，保留电话链接等 HTML
             Array.from(row.cells).forEach(cell => {
-                cell.innerHTML = cell.textContent;
+                cell.innerHTML = cell.innerHTML.replace(/<span class="highlight">(.*?)<\/span>/gi, '$1');
             });
         });
 
@@ -319,11 +313,7 @@ function filterTable() {
                 }
 
                 Array.from(row.cells).forEach(cell => {
-                    if (!isPinyinSearch) {
-                        highlightText(cell, filter);
-                    } else {
-                        highlightText(cell, filter);
-                    }
+                    highlightText(cell, filter);
                 });
             } else {
                 row.style.display = 'none';
@@ -343,7 +333,9 @@ function highlightCell(cell) {
 
 function highlightText(cell, filter) {
     var text = cell.innerText;
-    var regex = new RegExp(`(${filter})`, 'gi');
+    // 转义正则特殊字符
+    var escapedFilter = filter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    var regex = new RegExp(`(${escapedFilter})`, 'gi');
 
     if (regex.test(text)) {
         var newText = text.replace(regex, '<span class="highlight">$1</span>');
@@ -365,11 +357,21 @@ async function saveQueryData(filter) {
     }
 }
 
+let resizeTimer;
 window.addEventListener('resize', function () {
-    fetchData();
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+        if (data) generateTable(data);
+    }, 300);
 });
 
 document.addEventListener('DOMContentLoaded', async function () {
+    // 绑定搜索事件
+    document.getElementById('submitBtn').addEventListener('click', filterTable);
+    document.getElementById('search-box').addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') filterTable();
+    });
+
     util.loading.show();
     token = getNameFromUrl('token');
     if (token) {
