@@ -23,9 +23,14 @@ $(document).ready(function () {
                 $("#heroOilTime").text(timeStr);
                 $btn.text("✅").removeClass("btn-outline-secondary").addClass("btn-outline-success");
 
-                // 将新价格追加到走势图
-                if (typeof addPriceToTrend === "function") {
-                    addPriceToTrend(timeStr, p);
+                // 用后端返回的完整走势数据替换本地数据（保证跨页面刷新连贯）
+                if (inner.data && inner.data.trend) {
+                    trendData.dates = inner.data.trend.dates;
+                    trendData.price92 = inner.data.trend.price92;
+                    trendData.price95 = inner.data.trend.price95;
+                    if (typeof syncTrendChart === "function") {
+                        syncTrendChart(trendData);
+                    }
                 }
             } else {
                 $btn.text("⚠️").removeClass("btn-outline-secondary").addClass("btn-outline-danger");
@@ -251,36 +256,25 @@ function calculateGenericCost(consumption, price, distance) {
 
 // ===== 近3个月油价走势图 =====
 var trendChart = null;
+// 走势数据由后端 API 返回，初始为空，fetchOilPrice 成功后填充
 var trendData = {
-    dates: [
-        "3/1", "3/8", "3/15", "3/22", "3/29",
-        "4/5", "4/12", "4/19", "4/26",
-        "5/3", "5/10", "5/17", "5/18"
-    ],
-    price92: [7.89, 7.89, 7.72, 7.72, 7.55, 7.45, 7.45, 7.67, 7.89, 8.13, 8.13, 8.68, 8.68],
-    price95: [8.52, 8.52, 8.35, 8.35, 8.18, 8.08, 8.08, 8.30, 8.52, 8.76, 8.76, 9.31, 9.31]
+    dates: [],
+    price92: [],
+    price95: []
 };
 
-// 将新价格追加到走势图（由 fetchOilPrice 成功后调用）
-window.addPriceToTrend = function(timeStr, prices) {
+// 用后端返回的完整走势数据同步图表（由 fetchOilPrice 成功后调用）
+window.syncTrendChart = function(trend) {
     if (!trendChart) return;
-    // 从 timeStr 提取日期部分，如 "2026-05-22" → "5/22"
-    var dateMatch = timeStr.match(/(\d+)-(\d+)-(\d+)/);
-    var dateLabel = dateMatch ? (parseInt(dateMatch[2]) + "/" + parseInt(dateMatch[3])) : timeStr;
-    // 去重：同一天不重复添加
-    if (trendData.dates[trendData.dates.length - 1] === dateLabel) return;
-    trendData.dates.push(dateLabel);
-    trendData.price92.push(prices["92"]);
-    trendData.price95.push(prices["95"]);
-    // 更新 markLine 到最新 92# 价格
+    var last92 = trend.price92.length > 0 ? trend.price92[trend.price92.length - 1] : 0;
     trendChart.setOption({
-        xAxis: { data: trendData.dates },
+        xAxis: { data: trend.dates },
         series: [
             {
-                data: trendData.price92,
-                markLine: { data: [{ yAxis: prices["92"], name: "92# 当前" }] }
+                data: trend.price92,
+                markLine: { data: [{ yAxis: last92, name: "92# 当前" }] }
             },
-            { data: trendData.price95 }
+            { data: trend.price95 }
         ]
     });
 };
