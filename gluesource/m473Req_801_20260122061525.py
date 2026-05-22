@@ -5,7 +5,10 @@ from urllib.request import urlopen, Request
 
 
 # ===== 历史走势数据持久化 =====
-HISTORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "oil_price_history.json")
+# 保存在 static/program/js/ 下，和前端 JS 同一目录
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_PROJECT_ROOT = os.path.dirname(_HERE)  # gluesource/ 的上一级即项目根目录
+HISTORY_FILE = os.path.join(_PROJECT_ROOT, "static", "program", "js", "oil_price_history.json")
 
 # 初始种子数据（和前端之前写死的一致，保证切换后图表不断档）
 SEED_DATA = {
