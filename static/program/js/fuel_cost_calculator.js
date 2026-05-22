@@ -22,6 +22,11 @@ $(document).ready(function () {
                 $tip.text("泰安油价 更新于 " + timeStr).show();
                 $("#heroOilTime").text(timeStr);
                 $btn.text("✅").removeClass("btn-outline-secondary").addClass("btn-outline-success");
+
+                // 将新价格追加到走势图
+                if (typeof addPriceToTrend === "function") {
+                    addPriceToTrend(timeStr, p);
+                }
             } else {
                 $btn.text("⚠️").removeClass("btn-outline-secondary").addClass("btn-outline-danger");
                 console.error("油价获取失败:", d.msg || inner.msg || d);
@@ -245,21 +250,45 @@ function calculateGenericCost(consumption, price, distance) {
 }
 
 // ===== 近3个月油价走势图 =====
-$(function() {
-    // 山东泰安 92#/95# 近3个月调价记录（约每10个工作日调整）
-    var trendData = {
-        dates: [
-            "3/1", "3/8", "3/15", "3/22", "3/29",
-            "4/5", "4/12", "4/19", "4/26",
-            "5/3", "5/10", "5/17", "5/18"
-        ],
-        price92: [7.89, 7.89, 7.72, 7.72, 7.55, 7.45, 7.45, 7.67, 7.89, 8.13, 8.13, 8.68, 8.68],
-        price95: [8.52, 8.52, 8.35, 8.35, 8.18, 8.08, 8.08, 8.30, 8.52, 8.76, 8.76, 9.31, 9.31]
-    };
+var trendChart = null;
+var trendData = {
+    dates: [
+        "3/1", "3/8", "3/15", "3/22", "3/29",
+        "4/5", "4/12", "4/19", "4/26",
+        "5/3", "5/10", "5/17", "5/18"
+    ],
+    price92: [7.89, 7.89, 7.72, 7.72, 7.55, 7.45, 7.45, 7.67, 7.89, 8.13, 8.13, 8.68, 8.68],
+    price95: [8.52, 8.52, 8.35, 8.35, 8.18, 8.08, 8.08, 8.30, 8.52, 8.76, 8.76, 9.31, 9.31]
+};
 
+// 将新价格追加到走势图（由 fetchOilPrice 成功后调用）
+window.addPriceToTrend = function(timeStr, prices) {
+    if (!trendChart) return;
+    // 从 timeStr 提取日期部分，如 "2026-05-22" → "5/22"
+    var dateMatch = timeStr.match(/(\d+)-(\d+)-(\d+)/);
+    var dateLabel = dateMatch ? (parseInt(dateMatch[2]) + "/" + parseInt(dateMatch[3])) : timeStr;
+    // 去重：同一天不重复添加
+    if (trendData.dates[trendData.dates.length - 1] === dateLabel) return;
+    trendData.dates.push(dateLabel);
+    trendData.price92.push(prices["92"]);
+    trendData.price95.push(prices["95"]);
+    // 更新 markLine 到最新 92# 价格
+    trendChart.setOption({
+        xAxis: { data: trendData.dates },
+        series: [
+            {
+                data: trendData.price92,
+                markLine: { data: [{ yAxis: prices["92"], name: "92# 当前" }] }
+            },
+            { data: trendData.price95 }
+        ]
+    });
+};
+
+$(function() {
     var trendDom = document.getElementById("trendChart");
     if (!trendDom) return;
-    var trendChart = echarts.init(trendDom);
+    trendChart = echarts.init(trendDom);
 
     var option = {
         title: {
