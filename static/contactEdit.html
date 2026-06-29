@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>合同编辑</title>
+     <script type="text/javascript" src="jquery-easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="jquery-easyui/jquery.easyui.min.js"></script>
+
+	<script type="text/javascript" src="jquery-easyui/locale/easyui-lang-zh_CN.js"></script>
+    <link rel="stylesheet" type="text/css" href="jquery-easyui/themes/bootstrap/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="jquery-easyui/themes/icon.css" />
+    <link rel="stylesheet" type="text/css" href="jquery-easyui/themes/bootstrap/validatebox.css" />
+    	<script type="text/javascript">
+	//获得页面传过来的参数
+	function GetQueryString(name)
+	{
+		 var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+		 var r = window.location.search.substr(1).match(reg);
+		 if(r!=null)return  unescape(r[2]); return null;
+	}
+	</script>
+</head>
+<body>
+    <div class="easyui-panel" title="合同编辑（红色标记为必填项）" style="width:100%;max-width:650px;padding:15px 15px;text-align:center;">
+
+            <font color="red" size="4">合&nbsp;同&nbsp;登&nbsp;记</font>
+            <div class="easyui-panel" style="width:600px;height:700px;padding:10px 5px;margin-bottom:20px;">
+            <div style="margin-bottom:20px">
+
+                 <input class="easyui-textbox" id="htbh" style="width:260px;" data-options="buttonAlign:'left',buttonText:'合同编号',readonly:true"> &nbsp;
+                 公司名称:<select class="easyui-combobox easyui-validatebox" id="gsmc" style="width:220px;margin-bottom:20px;" data-options="required:true, limitToList:true">
+                    <option value="石横特钢集团有限公司">石横特钢集团有限公司</option>
+                    <option value="肥城石横特钢机械制造有限公司">肥城石横特钢机械制造有限公司</option>
+                    <option value="肥城石横焦化有限公司">肥城石横焦化有限公司</option>
+                    <option value="肥城市桃都新能源有限公司">肥城市桃都新能源有限公司</option>
+                    <option value="肥城桃乡物流有限公司">肥城桃乡物流有限公司</option>
+                    <option value="山东阿斯德科技有限公司">山东阿斯德科技有限公司</option>
+
+                </select>
+                </div>
+                <div style="margin-bottom:20px">
+                    <select class="easyui-combobox easyui-validatebox" id="year" style="width:60px" readonly data-options="required:true, limitToList:true">
+                    <option value="2021">2021</option>
+                    <option value="2022">2022</option>
+                    <option value="2023">2023</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                </select>&nbsp;年
+                <select class="easyui-combobox easyui-validatebox" id="month" style="width:50px" readonly data-options="required:true, limitToList:true">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                </select>&nbsp月
+                &nbsp;&nbsp;<select class="easyui-combobox" id="sfgz" style="width:80px" data-options="readonly:true, limitToList:true">
+                    <option value="已盖章">已盖章</option>
+                    <option value="未盖章" selected="selected">未盖章</option>
+                </select>&nbsp;&nbsp;
+                <input class="easyui-numberbox" id="gzfs" style="width:100px;" value ="6" data-options="buttonAlign:'left',buttonText:'盖章份数',required:true">&nbsp;&nbsp;
+				合同分类:
+				<select class="easyui-combobox" id="htfl" data-options="limitToList:true" style="width:80px">
+					<option value=""></option>
+                    <option value="XM">日常技改项目</option>
+                    <option value="WX">日常维修</option>
+                    <option value="ZY">专业维修</option>
+                    <option value="XX">大项修</option>
+                </select>
+            </div>
+
+                <div style="margin-bottom:20px">
+                 合同类别:<select class="easyui-combobox easyui-validatebox" id="htlb" style="width:150px" data-options="required:true, limitToList:true">
+                </select>
+                    &nbsp;&nbsp;&nbsp;<input class="easyui-textbox" id="jszxyj" style="width:150px;" data-options="buttonAlign:'left',buttonText:'结算执行依据',required:false">
+					&nbsp;&nbsp;&nbsp;<input class="easyui-textbox" id="ztbsqbh" style="width:170px;" data-options="buttonAlign:'left',buttonText:'招投标申请编号',required:false">
+                    </div>
+                <div style="margin-bottom:20px">
+                    <input class="easyui-textbox"  id="htnr"    style="width:560px;height:60px" data-options="buttonAlign:'left',buttonText:'合同内容',required:true,multiline:true">&nbsp;
+                </div>
+                <div style="margin-bottom:20px">
+                    <input class="easyui-numberbox" precision="4" id="qdje" style="width:150px;" data-options="buttonAlign:'left',buttonText:'签订金额',required:true">万元
+                    &nbsp;<input class="easyui-textbox" id="qdr" style="width:130px;" data-options="buttonAlign:'left',buttonText:'签订人',required:true">
+                    &nbsp;实际完工日期:<input class="easyui-datebox" id="sjwgrq" style="width:110px">
+
+                </div>
+                <div style="margin-bottom:20px">
+                   对方单位:<select class="easyui-combobox" id="dfdwmc" style="width:190px"  data-options="required:true">
+                </select>
+                    &nbsp;<input class="easyui-textbox" id="dfdz" style="width:290px;" data-options="buttonAlign:'left',buttonText:'对方地址',required:true">
+                </div>
+                <div style="margin-bottom:20px">
+                    <input class="easyui-textbox" id="dfqdr" style="width:150px;" data-options="buttonAlign:'left',buttonText:'对方签订人',required:true">
+                    &nbsp;<input class="easyui-textbox" id="dflxfs" style="width:200px;display: none" data-options="buttonAlign:'left',buttonText:'对方联系方式',required:false">
+                    &nbsp;签订日期:<input class="easyui-datebox" id="qdrq" style="width:120px" data-options="required:true">
+
+                </div>
+                <div style="margin-bottom:20px">
+                    开工日期:<input class="easyui-datebox" id="kgrq" style="width:110px" data-options="required:true">
+                  &nbsp;竣工日期:<input class="easyui-datebox" id="jgrq" style="width:110px" data-options="required:true">
+                    &nbsp;上交合同日期:<input class="easyui-datebox" id="sjhtrq" style="width:110px">
+                </div>
+                <div style="margin-bottom:20px">
+                   项目来源:<select class="easyui-combobox" id="xmly" data-options="limitToList:true" style="width:80px">
+                    <option value=""></option>
+                    <option value="开工令">开工令</option>
+                    <option value="检修计划">检修计划</option>
+                    <option value="委外单">委外单</option>
+                    <option value="报告">报告</option>
+                    <option value="其它">其它</option>
+                </select>
+                     &nbsp;<input class="easyui-textbox" id="xmmc" style="width:300px;" data-options="buttonAlign:'left',buttonText:'项目名称',required:false">
+                </div>
+                 <div style="margin-bottom:20px">
+                   开工令号:<select class="easyui-combobox" data-options="limitToList:true" id="kgl" style="width:160px">
+
+                </select>
+                     &nbsp;<input class="easyui-textbox" id="jhbh" style="width:300px;" data-options="buttonAlign:'left',buttonText:'计划编号',required:false">
+               </div>
+                 <div style="margin-bottom:20px">
+                    <input class="easyui-textbox" id="remark" style="width:550px;" data-options="buttonAlign:'left',buttonText:'备注',required:false">
+                </div>
+                <div style="margin-bottom:20px">
+                  <input class="easyui-numberbox" id="zbq"  style="width:150px;" data-options="buttonAlign:'left',buttonText:'质保期',required:true">月
+                   &nbsp; <input class="easyui-numberbox" precision="2" id="zbjbl" style="width:150px;" data-options="buttonAlign:'left',buttonText:'质保金比例',required:true">%
+                    &nbsp; <input class="easyui-numberbox" precision="4" id="zbjje" style="width:150px;" data-options="buttonAlign:'left',buttonText:'质保金金额',required:false,readonly:true">万元
+                </div>
+                 <div style="margin-bottom:20px">
+                      质保期到期时间:<input class="easyui-datebox" id="zbqdqsj" style="width:120px" data-options="readonly:true">
+                      &nbsp;<input class="easyui-numberbox" precision="2" id="rll" style="width:150px;" data-options="buttonAlign:'left',buttonText:'让利率',required:false">%
+                      &nbsp;<input class="easyui-textbox" id="lryhm" style="width:150px;" data-options="buttonAlign:'left',buttonText:'录入用户名',required:false,readonly:true">&nbsp;
+                </div>
+				 
+				 <div id = 'fujian' style="margin-bottom:20px">
+                     <a id="htfj"></a>
+                     <a id="htfj_hetong"></a>
+                     <a id="htfj_qtjs"></a>
+                     <a id="htfj_bcht1"></a>
+                     <a id="htfj_bcht2"></a>
+                     <a id="htfj_bcht3"></a>
+                     <form id ="fjform" action="uploadFile" method=post enctype=multipart/form-data>
+                        </p><input type=file name=file />
+                            <input type=hidden name=htid id="htid" />
+							<input type=hidden name=fjtype id="fjtype" />
+							<input type=hidden name=ttype id="ttype" />
+							<label for="fjtype_test">类别</label>
+							<select class="form-control" id="select_type" data-options="limitToList:true">
+							  <option>主合同电子版及扫描件</option>
+							  <option>评议标报告</option>
+							  <option>其它结算报告</option>							  
+							  <option>补充合同(1)电子版及扫描件</option>
+							  <option>补充合同(2)电子版及扫描件</option>
+							  <option>补充合同(3)电子版及扫描件</option>
+							</select>
+							<!-- <input type=button onclick='submitFJForm_hetong()' value=上传合同 />
+                            <input type=button onclick='submitFJForm()' value=上传附件 /> -->
+                            <input type=button onclick='submitFJForm()' value=上传 />
+							
+                        </form>
+                 </div>
+		
+				 
+                </div>
+
+
+
+        <div style="text-align:center;padding:5px 0">
+            <a href="javascript:void(0)" id="tijiao" class="easyui-linkbutton" onclick="submitForm()" style="width:80px">提交</a>
+            <!--<a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm()" style="width:80px">清除</a>-->
+            <a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript :window.location.href='/index?p=173Req';" style="width:80px">合同查询</a>
+        </div>
+    </div>
+    <script>
+        function show(){
+        var d = new Date();
+        // alert(d.getFullYear());
+        // alert(d.getMonth());
+         $("#year").combobox("setValue", d.getFullYear());
+         $("#month").combobox("setValue", d.getMonth() + 1);
+
+        }
+        function addMoth(d,m){
+            var ds=d.split('-'),_d=ds[2]-0;
+            var nextM=new Date( ds[0],ds[1]-1+m+1, 0 );
+            var max=nextM.getDate();
+            d=new Date( ds[0],ds[1]-1+m,_d>max? max:_d );
+            return d.toLocaleDateString().match(/\d+/g).join('-')
+        }
+		
+		function submitFJForm(){
+            var ft=$('#select_type').val();
+			if(ft=='主合同电子版及扫描件')
+			{
+				submitForm();
+				$('#fjtype').val('hetong');
+				$("#fjform").submit();
+			}			
+			if(ft=='评议标报告')
+			{
+				submitForm();
+				$('#fjtype').val('pybbg');
+				$("#fjform").submit();
+			}
+			if(ft=='其它结算报告')
+			{
+				submitForm();
+				$('#fjtype').val('qtjsbg');
+				$("#fjform").submit();
+			}
+			
+			if(ft=='补充合同(1)电子版及扫描件')
+			{
+				submitForm();
+				$('#fjtype').val('bcht1');
+				$("#fjform").submit();
+			}
+			if(ft=='补充合同(2)电子版及扫描件')
+			{
+				submitForm();
+				$('#fjtype').val('bcht2');
+				$("#fjform").submit();
+			}
+			if(ft=='补充合同(3)电子版及扫描件')
+			{
+				submitForm();
+				$('#fjtype').val('bcht3');
+				$("#fjform").submit();
+			}
+        }
+
+        <!-- function submitFJForm(){ -->
+            <!-- submitForm(); -->
+			<!-- $('#fjtype').val('fujian'); -->
+            <!-- $("#fjform").submit(); -->
+        <!-- } -->
+		
+		<!-- function submitFJForm_hetong(){ -->
+            <!-- submitForm(); -->
+			<!-- $('#fjtype').val('hetong'); -->
+			<!-- $("#fjform").submit(); -->
+        <!-- } -->
+
+        function del(id){
+            $.ajax({
+                type:'post',
+                url:'delfj',
+                async: false,
+                data:{
+                    fjid:id
+                },
+                cache:false,
+                dataType:'json',
+                    success:function(data){
+                        if(data = '删除成功')
+                            initPage(0);
+                    },
+                error:function(){
+                    slideMsg('<font color=red>失败! 系统错误</font>');
+                }
+            });
+        }
+
+
+        function initPage(htid){
+		
+            id = GetQueryString("p");
+			type = GetQueryString("type");
+			req = '173Req'
+            if(id=='0')
+                id = htid;
+
+            if(id=='0')
+                $("#fujian").hide();
+				<!-- $("#fujian_hetong").hide(); -->
+            else{
+				if(type == 'wwht'){
+					var htbh=$("#htbh").val();
+					var year = parseInt(htbh.split('-')[4])
+					if (parseInt(id)<966){
+						req = '5227Req'
+					}
+				}
+				$("#fujian").show();
+			}
+                 
+				 <!-- $("#fujian_hetong").show(); -->
+
+
+             $('#htid').val(id);
+             $('#ttype').val(type);
+
+
+               $('#kgl').combobox({
+                 url: 'queryDict',
+                 valueField:'标准开工令号',
+                 textField:'名称',
+                 queryParams:{
+                     code:'project',
+                     q:''
+                 },
+                 editable: true,
+                 onChange: function(newValue,oldValue){
+                     queryParams = {code:'project',q:newValue};
+                     $('#kgl').combobox('options').queryParams=queryParams;
+                     $('#kgl').combobox('reload');
+	              }
+             });
+
+
+//             var parm2 = 'code=contrType&q=';
+//             $.ajax({
+//		        type: "POST",
+//		        url: 'queryDict',
+//                async: false,
+//		        data: parm2,
+//		        success: function(result) {
+//		            $('#htlb').combobox({
+//		                data: result,
+//		                valueField: '代码',
+//		                textField: '合同类别',
+//		                editable: true
+//		            });
+//		        },
+//		        error: function() {
+//		            $.messager.alert('错误', '新增失败！', "error");
+//		        }
+//		    });
+
+
+            $('#htlb').combobox({
+                 url: 'queryDict',
+                 valueField:'代码',
+                 textField:'合同类别',
+                 queryParams:{
+                     code:'contrType',
+                     q:''
+                 }
+            });
+
+
+             $('#dfdwmc').combobox({
+                 url: 'queryDict',
+                 valueField:'客户名称',
+                 textField:'客户名称',
+                 queryParams:{
+                     code:'customer',
+                     q:''
+                 },
+                 editable: true,
+                 onChange: function(newValue,oldValue){
+                     queryParams = {code:'customer',q:newValue};
+                     $('#dfdwmc').combobox('options').queryParams=queryParams;
+                     $('#dfdwmc').combobox('reload');
+	              },
+                 onSelect:function(record){
+                    var dfdwmc=$('#dfdwmc').combobox('getValue');
+                     if(dfdwmc=='')
+                        return;
+                     filterRules ='[{"field":"客户名称","op":"contains","value":"'+dfdwmc+'"}]';
+                  $.ajax({
+						type:'post',
+						url:'queryData',
+						data:{
+                            req:'167Req',
+                            page:'1',
+                            rows:'10',
+                            sort:'ID',
+                            order:'asc',
+                            filterRules:filterRules,
+                            pid:''
+
+						},
+						cache:false,
+						dataType:'json',
+							success:function(data){
+                                $("#dfdz").textbox("setValue",data.rows[0].地址);
+							},
+						error:function(){
+							slideMsg('<font color=red>失败! 系统错误</font>');
+						}
+					});
+                 }
+
+             });
+
+
+           if(id!=0 && id!='')
+           {
+               filterRules ='[{"field":"id","op":"equal","value":"'+id+'"}]';
+                  $.ajax({
+						type:'post',
+						url:'queryData',
+						data:{
+                            req:req,
+                            page:'1',
+                            rows:'10',
+                            sort:'签订日期',
+                            order:'desc',
+                            filterRules:filterRules,
+                            pid:''
+
+						},
+						cache:false,
+						dataType:'json',
+							success:function(data){
+								//debugger
+								if(req == '173Req'){
+								$("#htbh").textbox("setValue", data.rows[0].编号);
+								$("#gsmc").combobox("setValue", data.rows[0].公司名称);
+								$("#year").combobox("setValue", data.rows[0].编号年);
+								$("#month").combobox("setValue", data.rows[0].编号月);
+								$("#sfgz").combobox("setValue", data.rows[0].是否已盖章);
+								$("#gzfs").textbox("setValue", data.rows[0].盖章份数);
+								$("#htlb").combobox("setValue", data.rows[0].合同类别代码);
+								$("#htfl").combobox("setValue", data.rows[0].合同分类代码?data.rows[0].合同分类代码:'');
+								$("#jszxyj").textbox("setValue", data.rows[0].结算执行依据);
+								$("#ztbsqbh").textbox("setValue", data.rows[0].招投标申请编号);
+								$("#htnr").textbox("setValue", data.rows[0].合同内容);
+								$("#qdje").textbox("setValue", data.rows[0].金额);
+								$("#qdr").textbox("setValue", data.rows[0].签订人);
+								$("#dfdwmc").combobox("setValue", data.rows[0].对方单位);
+								$("#dfdz").textbox("setValue", data.rows[0].对方地址);
+								$("#dfqdr").textbox("setValue", data.rows[0].对方签订人);
+								$("#dflxfs").textbox("setValue", data.rows[0].对方联系方式);
+								$("#qdrq").datebox("setValue", data.rows[0].签订日期);
+								$("#kgrq").datebox("setValue", data.rows[0].开工日期);
+								$("#sjwgrq").datebox("setValue", data.rows[0].实际完工日期);
+								$("#jgrq").datebox("setValue", data.rows[0].竣工日期);
+								$("#sjhtrq").datebox("setValue", data.rows[0].上交合同日期);
+								$("#xmly").combobox("setValue", data.rows[0].项目来源);
+								// 解决设备平台生成的合同在189平台看不到项目名称的问题
+								$("#xmmc").textbox("setValue", data.rows[0].项目名称?data.rows[0].项目名称:data.rows[0].名称);
+								$("#kgl").combobox("setValue", data.rows[0].标准开工令号);
+								$("#jhbh").textbox("setValue", data.rows[0].委外单号);
+								$("#remark").textbox("setValue", data.rows[0].备注);
+								$("#zbq").textbox("setValue", data.rows[0].质保期);
+								$("#zbjbl").textbox("setValue", data.rows[0].质保金比例);
+								$("#zbjje").textbox("setValue", data.rows[0].质保金金额);
+								$("#zbqdqsj").datebox("setValue", data.rows[0].质保金到期时间);
+								$("#rll").textbox("setValue", data.rows[0].让利率);
+								$("#lryhm").textbox("setValue", data.rows[0].录入用户名);
+								$("#htfj").html(data.rows[0].附件操作);
+								$("#htfj_hetong").html(data.rows[0].合同ht操作);
+								$("#htfj_qtjs").html(data.rows[0].qtjsbg操作);
+								$("#htfj_bcht1").html(data.rows[0].bcht1操作);
+								$("#htfj_bcht2").html(data.rows[0].bcht2操作);
+								$("#htfj_bcht3").html(data.rows[0].bcht3操作);
+
+//                                 var htbh=$("#htbh").val();
+//                                 if(htbh!='' || htbh!=null)
+//                                 {
+//                                        $('#gsmc').combobox('disable');
+//                                        $('#year').combobox('disable');
+//                                        $('#month').combobox('disable');
+//                                        $('#htlb').combobox('disable');
+//                                        $('#gzfs').combobox('disable');
+//
+//                                 }
+								}
+								else if (req = '5227Req'){
+									$("#htbh").textbox("setValue", data.rows[0].合同编号);
+                                $("#gsmc").combobox("setValue", data.rows[0].公司名称);
+                                $("#year").combobox("setValue", data.rows[0].编号年);
+                                $("#month").combobox("setValue", data.rows[0].编号月);
+                                
+                                $("#jsyj").textbox("setValue", data.rows[0].结算执行依据);
+								 $("#gclb").textbox("setValue", data.rows[0].工程类别);
+                                //gczzj
+                                $("#gczzj").textbox("setValue", data.rows[0].工程总造价);
+                                $("#gcnr").textbox("setValue", data.rows[0].工程内容);
+                               //xmfzr
+							   $("#xmfzr").textbox("setValue", data.rows[0].项目负责人);
+							   //sgdwfzr
+							    $("#sgdwfzr").textbox("setValue", data.rows[0].施工单位负责人);
+                                $("#qdr").textbox("setValue", data.rows[0].签订人);
+                                $("#dfdwmc").combobox("setValue", data.rows[0].对方单位);
+							
+								 $("#gsmc").combobox("setValue", "石横特钢集团有限公司");
+                                $("#dfdz").textbox("setValue", data.rows[0].对方地址);
+                                $("#gcmc").textbox("setValue", data.rows[0].工程名称);
+                                $("#dfqdr").textbox("setValue", data.rows[0].对方签订人);
+                                $("#dflxfs").textbox("setValue", data.rows[0].对方联系方式);
+                                $("#qdrq").datebox("setValue", data.rows[0].签订日期);
+                                $("#kgrq").datebox("setValue", data.rows[0].开工日期);
+                                $("#jgrq").datebox("setValue", data.rows[0].竣工日期);
+                                $("#sjhtrq").datebox("setValue", data.rows[0].上交合同日期);
+                                $("#xmly").combobox("setValue", data.rows[0].项目来源);
+								$("#htlb").combobox("setValue", data.rows[0].合同类别);
+                                //$("#xmmc").textbox("setValue", data.rows[0].项目名称);
+                                $("#kgl").combobox("setValue", data.rows[0].标准开工令号);
+								$("#special").combobox("setValue", data.rows[0].专业?data.rows[0].专业:'');
+                                $("#jhbh").textbox("setValue", data.rows[0].委外申请单单号);
+                                $("#remark").textbox("setValue", data.rows[0].备注);
+                                $("#zbq").textbox("setValue", data.rows[0].质保期);
+                                $("#zbjbl").textbox("setValue", data.rows[0].质保金比例);
+                                $("#zbjje").textbox("setValue", data.rows[0].质保金金额);
+                                $("#zbqdqsj").datebox("setValue", data.rows[0].质保金到期时间);
+                                $("#rll").textbox("setValue", data.rows[0].让利率);
+                                $("#lryhm").textbox("setValue", data.rows[0].录入用户名);
+								//ysbz
+								 $("#ysbz").textbox("setValue", data.rows[0].验收标准);
+                                $("#htfj").html(data.rows[0].附件操作);
+								 $("#sftq").combobox("setValue", data.rows[0].是否拖期);
+								
+								$("#sjwgrq").html(data.rows[0].实际完工日期);
+								$("#wwcyy").html(data.rows[0].未完成原因);
+								}
+								
+
+                                
+
+							},
+						error:function(){
+							slideMsg('<font color=red>失败! 系统错误</font>');
+						}
+					});
+           }
+
+        }
+
+
+
+         $(document).ready(function () {
+
+             show();
+             initPage(0);
+
+         });
+
+        function submitForm(){
+			var type = GetQueryString("type");
+            var ID = $("#htid").val();
+            var htbh=$("#htbh").val();
+            var gsmc=$('#gsmc').combobox('getValue');
+            var year=$('#year').combobox('getValue');
+            var month=$('#month').combobox('getValue');
+            var sfgz=$('#sfgz').combobox('getValue');
+            var gzfs=$("#gzfs").val();
+            var htlb=$('#htlb').combobox('getValue');
+            var jszxyj=$("#jszxyj").val();
+			var ztbsqbh=$("#ztbsqbh").val();
+            var htnr=$("#htnr").val();
+            var qdje=$("#qdje").val();
+            var qdr=$("#qdr").val();
+            var dfdwmc=$('#dfdwmc').combobox('getValue');
+            var dfdz=$("#dfdz").val();
+            var dfqdr=$("#dfqdr").val();
+            var dflxfs=$("#dflxfs").val();
+            var qdrq=$("#qdrq").datebox("getValue");
+            var kgrq=$("#kgrq").datebox("getValue");
+            var sjwgrq=$("#sjwgrq").datebox("getValue");
+            var jgrq=$("#jgrq").datebox("getValue");
+            var sjhtrq=$("#sjhtrq").datebox("getValue");
+            var xmly=$('#xmly').combobox('getValue');
+            var xmmc=$("#xmmc").val();
+            var kgl=$('#kgl').combobox('getValue');
+            var jhbh=$("#jhbh").val();
+            var remark=$("#remark").val();
+            var zbq=$("#zbq").val();
+            var zbjbl=$("#zbjbl").val();
+            var zbjje=$("#zbjje").val();
+			// 合同分类
+			var htfl=$('#htfl').combobox('getValue');
+            //var zbqdqsj=$("#zbqdqsj").datebox("getValue");
+
+            var rll=$("#rll").val();
+
+
+            var lryhm=$("#lryhm").val();
+
+            if(gsmc=='' || gsmc==null)
+            {
+                alert('公司名称不能为空！');
+                return;
+            }
+              if(year=='' || year==null)
+            {
+                alert('年份不能为空！');
+                return;
+            }
+              if(month=='' || month==null)
+            {
+                alert('月份不能为空！');
+                return;
+            }
+               if(htlb=='' || htlb==null)
+            {
+                alert('合同类别不能为空！');
+                return;
+            }
+			   if(htfl=='' || htfl==null)
+            {
+                alert('合同分类不能为空！');
+                return;
+            }
+               if(gzfs=='' || gzfs==null)
+            {
+                alert('盖章份数不能为空！');
+                return;
+            }
+               if(kgrq=='' || kgrq==null)
+            {
+                alert('开工日期不能为空！');
+                return;
+            }
+               if(jgrq=='' || jgrq==null)
+            {
+                alert('竣工日期不能为空！');
+                return;
+            }
+			if((htfl == 'XM' || htfl == 'XX') && (kgl == null || kgl == ''))
+			{
+				alert('开工令号不能为空！');
+                return;
+			}
+            var arrA=kgrq.split("-");
+            var dateA=new Date(arrA[0],arrA[1],arrA[2]);
+            var dateAT=dateA.getTime();
+            var arrB=jgrq.split("-");
+            var dateB=new Date(arrB[0],arrB[1],arrB[2]);
+            var dateBT=dateB.getTime();
+            if(dateAT>dateBT)
+            {
+                alert('开工日期不能大于竣工日期！');
+                return;
+            }
+			if(xmly=='' || xmly==null){
+				alert('项目来源不能为空！');
+				return;
+			}
+               if(htnr=='' || htnr==null)
+            {
+                alert('合同内容不能为空！');
+                return;
+            }
+               if(qdje=='' || qdje==null)
+            {
+                alert('签订金额不能为空！');
+                return;
+            }
+               if(qdr=='' || qdr==null)
+            {
+                alert('签订人不能为空！');
+                return;
+            }
+               if(dfdwmc=='' || dfdwmc==null)
+            {
+                alert('对方单位不能为空！');
+                return;
+            }
+               if(dfdz=='' || dfdz==null)
+            {
+                alert('对方地址不能为空！');
+                return;
+            }
+               if(dfqdr=='' || dfqdr==null)
+            {
+                alert('对方签订人不能为空！');
+                return;
+            }
+                  if(qdrq=='' || qdrq==null)
+            {
+                alert('签订日期不能为空！');
+                return;
+            }
+                   if(zbq=='' || zbq==null)
+            {
+                alert('质保期不能为空！');
+                return;
+            }
+                   if(zbjbl=='' || zbjbl==null)
+            {
+                alert('质保金比例不能为空！');
+                return;
+            }
+                  if((jhbh=='' || jhbh==null)&&(xmmc=='' || xmmc==null))
+            {
+                alert('如果计划编号为空，项目名称不能为空！');
+                return;
+
+            }
+			      if((xmmc=='' || xmmc==null))
+            {
+                alert('项目名称不能为空！');
+                return;
+
+            }
+			      if((dflxfs=='' || dflxfs==null))
+            {
+                alert('对方联系方式不能为空！');
+                return;
+
+            }
+            var zbqdqsj=addMoth(jgrq,parseInt(zbq));
+
+                   if(zbqdqsj=='' || zbqdqsj==null)
+            {
+                alert('质保期到期时间不能为空！');
+                return;
+            }
+
+
+
+            var filterRules='{';
+            filterRules +='"ID":"'+ID+'",';
+            filterRules +='"type":"'+type+'",';
+			if(htbh!='')
+				filterRules +='"合同编号":"'+htbh+'",';
+		    if(gsmc!='')
+				filterRules +='"公司名称":"'+gsmc+'",';
+            if(year!='')
+				filterRules +='"年":"'+year+'",';
+            if(month!='')
+				filterRules +='"月":"'+month+'",';
+		    if(sfgz!='')
+				filterRules +='"是否盖章":"'+sfgz+'",';
+            if(gzfs!='')
+				filterRules +='"盖章份数":"'+gzfs+'",';
+            if(htlb!='')
+				filterRules +='"合同类别":"'+htlb+'",';
+			if(htfl!='')
+				filterRules +='"合同分类":"'+htfl+'",';
+		    if(jszxyj!='')
+				filterRules +='"结算执行依据":"'+jszxyj+'",';
+			if(ztbsqbh!='')
+				filterRules +='"招投标申请编号":"'+ztbsqbh+'",';
+            if(htnr!='')
+				filterRules +='"合同内容":"'+htnr+'",';
+            if(qdje!='')
+				filterRules +='"签订金额":"'+qdje+'",';
+		    if(qdr!='')
+				filterRules +='"签订人":"'+qdr+'",';
+		    if(dfdwmc!='')
+				filterRules +='"对方单位":"'+dfdwmc+'",';
+            if(dfdz!='')
+				filterRules +='"对方地址":"'+dfdz+'",';
+            if(dfqdr!='')
+				filterRules +='"对方签订人":"'+dfqdr+'",';
+             if(dflxfs!='')
+				filterRules +='"对方联系方式":"'+dflxfs+'",';
+		    if(qdrq!='')
+				filterRules +='"签订日期":"'+qdrq+'",';
+            if(kgrq!='')
+				filterRules +='"开工日期":"'+kgrq+'",';
+			if(sjwgrq!='')
+				filterRules +='"实际完工日期":"'+sjwgrq+'",';
+            if(jgrq!='')
+				filterRules +='"竣工日期":"'+jgrq+'",';
+		    if(sjhtrq!='')
+				filterRules +='"上交合同日期":"'+sjhtrq+'",';
+
+            if(xmly!='')
+				filterRules +='"项目来源":"'+xmly+'",';
+		    if(xmmc!='')
+				filterRules +='"项目名称":"'+xmmc+'",';
+            if(kgl!='')
+				filterRules +='"开工令号":"'+kgl+'",';
+            if(jhbh!='')
+				filterRules +='"计划编号":"'+jhbh+'",';
+		    if(remark!='')
+				filterRules +='"备注":"'+remark+'",';
+            if(zbq!='')
+				filterRules +='"质保期":"'+zbq+'",';
+            if(zbjbl!='')
+				filterRules +='"质保金比例":"'+zbjbl+'",';
+		    if(zbjje!='')
+				filterRules +='"质保金金额":"'+zbjje+'",';
+            if(zbqdqsj!='')
+				filterRules +='"质保期到期时间":"'+zbqdqsj+'",';
+            if(rll!='')
+				filterRules +='"让利率":"'+rll+'",';
+            if(lryhm!='')
+				filterRules +='"录入用户名":"'+lryhm+'",';
+			filterRules +='}';
+			var resultFilter = '{}';
+            if(filterRules!='{}')
+            	resultFilter = filterRules.substring(0,filterRules.length-2)+'}';
+			$("#tijiao").linkbutton('disable')
+			
+            //$('#ff').form('submit');
+            $.ajax({
+						type:'post',
+						url:'updateContract',
+						data:{
+
+							data:resultFilter
+
+						},
+						cache:false,
+						dataType:'json',
+							success:function(data) {
+                                var msg = eval('(' + data + ')');
+                                initPage(msg.result);
+								$("#tijiao").linkbutton('enable')
+							},
+						error:function(){
+							slideMsg('<font color=red>失败! 系统错误</font>');
+							$("#tijiao").linkbutton('enable')
+						}
+					});
+        }
+        function clearForm(){
+            $('#ff').form('clear');
+        }
+    </script>
+</body>
+</html>

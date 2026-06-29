@@ -1,0 +1,915 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta charset="UTF-8">
+    <title>Web快速开发平台-石横特钢</title>
+    <script type="text/javascript" src="../../easyui/jquery-easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="../../easyui/jquery-easyui/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="../../easyui/jquery-easyui/datagrid-cellediting.js"></script>
+	<script type="text/javascript" src="../../easyui/jquery-easyui/datagrid-filter.js"></script>
+	<script type="text/javascript" src="../../easyui/jquery-easyui/locale/easyui-lang-zh_CN.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../easyui/jquery-easyui/themes/bootstrap/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="../../easyui/jquery-easyui/themes/icon.css" />
+	<script type="text/javascript" src="../../easyui/js-easyui/webuploader/webuploader.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../easyui/js-easyui/webuploader/webuploader.css" />
+
+    <script type="text/javascript" src="../../easyui/jquery-easyui/json2.js"></script>
+
+
+	<script type="text/javascript">
+
+	function GetQueryString(name)
+	{
+		 var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+		 var r = window.location.search.substr(1).match(reg);
+		 if(r!=null)return  unescape(r[2]); return null;
+	}
+
+	</script>
+
+	<script type="text/javascript">
+
+		var selectedRowIndex=-1;//主表当前选中行
+		var selectedSubRowIndex=-1;//从表当前选中行
+		var pid = -1;//默认不加载从表数据
+		var filterEnable=-1;//主表是否启用过滤器
+		var editorEnable=-1;//主表是否启用编辑
+		var oFilter;//主表过滤条件
+		
+		var subGrid;
+		var gridEditRowIndex;
+		var gridEditField;
+		var req;
+
+		var subGridHOrW;//子表高度或宽度
+
+		function insert_flg(str,flg,sn){
+			var newstr="";
+			for(var i=0;i<str.length;i+=sn){
+				var tmp = str.substring(i, i + sn);
+				if(i < sn)
+					newstr+=tmp+flg;
+				else
+					newstr += tmp;
+			}
+			return newstr;
+		}
+
+
+
+
+
+		function slideMsg(msg){
+            $.messager.show({
+                title:'提示',
+                msg:msg,
+                timeout:3000,
+                showType:'slide'
+            });
+        }
+
+		function exportExcel(req,divID){
+			var obj = $(divID).datagrid('options');
+			//alert(JSON.stringify(queryParams.pid));
+			//alert('pageNumber:'+obj.pageNumber+' pageSize:'+obj.pageSize+' req:'+req+' sortName:'+obj.sortName+' sortOrder:'+obj.sortOrder+' filterRules'+JSON.stringify(obj.filterRules));
+			if(divID=='#grid')
+				window.location.href='/exportExcel?req='+req+'&sortName='+obj.sortName+'&sortOrder='+obj.sortOrder+'&filterRules='+JSON.stringify(obj.filterRules)+'&v='+Date.now();
+			else
+				window.location.href='/exportExcel?req='+req+'&sortName='+obj.sortName+'&sortOrder='+obj.sortOrder+'&pid='+pid+'&filterRules='+JSON.stringify(obj.filterRules)+'&v='+Date.now();
+		}
+
+		//结束当前选中行编辑状态
+		function endEdit(divID){	
+			if(divID!='#grid')
+				$(divID).datagrid('endEdit',selectedSubRowIndex);
+			else
+				$(divID).datagrid('endEdit',selectedRowIndex);
+		}
+
+		//自定义按钮不需选中行数据
+		function customBtnWithoutLine(actionID,divID){
+			endEdit(divID);
+
+			var selRows = $(divID).datagrid('getChecked');
+
+			$.ajax({
+				type:'post',
+				url:'/imc/customOpt',
+				data:{
+					req:actionID,
+					data:JSON.stringify(selRows)
+				},
+				cache:false,
+				dataType:'json',
+					success:function(msg){
+
+						//var data = eval('(' + JSON.stringify(msg) + ')');
+						$(divID).datagrid('reload');
+						$(divID).datagrid('clearSelections');
+						slideMsg('<font color=blue>'+msg.result+'</font>');
+					},
+				error:function(){
+					slideMsg('系统错误,请尝试重新登录系统。');
+				}
+			});
+		}
+		
+		//自定义按钮
+		function customBtn(actionID,divID){
+			endEdit(divID);	
+			
+			var selRows = $(divID).datagrid('getChecked');  
+			
+			if(selRows.length==0){
+				slideMsg('<font color=red>未选中行数据</font>');
+				return;
+			};
+			$.ajax({  
+				type:'post',  
+				url:'/imc/customOpt',
+				data:{
+					req:actionID,
+					data:JSON.stringify(selRows)
+				},  
+				cache:false,  
+				dataType:'json',  
+					success:function(msg){
+						//var data = eval('(' + msg + ')');
+						$(divID).datagrid('reload');
+						$(divID).datagrid('clearSelections');
+						slideMsg('<font color=blue>'+msg.result+'</font>');
+					},  
+				error:function(){
+					slideMsg('系统错误,请尝试重新登录系统。');
+				}  
+			}); 
+		}
+		
+		//禁用过滤器
+		function disableFilter(divID){		
+			//移除过滤规则
+			$(divID).datagrid('removeFilterRule');
+			//关闭过滤行
+			$(divID).datagrid('disableFilter');
+			//重新加载数据
+			$(divID).datagrid('reload');
+		}
+		
+		//启用过滤器
+		function enableFilter(divID,filter){	
+			$(divID).datagrid('enableFilter',filter);
+		}
+		
+		//撤销
+		function reject(divID){			
+			endEdit(divID);	
+				
+			var changeCount = $(divID).datagrid('getChanges').length;
+			
+			if(changeCount==0){
+				slideMsg('<font color=red>表格中无数据变化</font>');
+				return;
+			}
+			else{
+			    $(divID).datagrid('rejectChanges');
+				slideMsg('<font color=red>撤销 '+changeCount+' 条记录变化</font>');
+			}	
+        }
+		
+		//新增一行
+		function append(divID){
+			if(divID!='#grid'){	
+				if(selectedRowIndex==-1){
+					slideMsg('<font color=red>未选中主表行数据</font>');
+					return;
+				}
+				var row = $('#grid').datagrid('getData').rows[selectedRowIndex];
+				$(divID).datagrid('appendRow',{IDD:0,pid:row.ID});
+			}
+			else
+				$(divID).datagrid('appendRow',{IDD:0});
+		}
+
+		function commitChanges(actionID,divID){
+			endEdit(divID);
+			var changeRows = $(divID).datagrid('getChanges');
+			if(changeRows.length==0){
+				slideMsg('<font color=red>表格中无数据变化</font>');
+				return;
+			}
+			$.ajax({
+				type:'post',
+				url:'customOpt',
+				data:{
+					req:actionID,
+					data:JSON.stringify(changeRows)
+				},
+				cache:false,
+				dataType:'json',
+					success:function(msg){
+						//var data = eval('(' + msg + ')');
+						$(divID).datagrid('reload');
+						slideMsg('<font color=blue>'+msg.result+'</font>');
+					},
+				error:function(){
+					slideMsg('系统错误,请尝试重新登录系统。');
+				}
+			});
+
+		}
+		
+		//页面跳转
+		function pagejump(actionID,divID){
+			console.log(actionID);
+			console.log(divID);
+		}
+		
+		//提交
+        function accept(subGridID,req){
+			//结束当前选中行编辑状态
+			endEdit(subGridID);				
+			var rows = $(subGridID).datagrid('getChanges');
+			
+			if(rows.length==0){
+				slideMsg('<font color=red>表格中无数据变化</font>');
+				return;
+			}
+			
+			for(var i=0;i<rows.length;i++)
+			if(rows[i].IDD!=0)
+					$.ajax({  
+						type:'post',  
+						url:'/imc/update',
+						data:{
+							req:req,
+							data:JSON.stringify(rows[i])
+						},  
+						cache:false,  
+						dataType:'json',  
+							success:function(data){
+								slideMsg('<font color=blue>'+data.result+'</font>');
+								//slideMsg('<font color=blue>恭喜! 记录更新成功</font>');
+								$(subGridID).datagrid('reload');								
+							},  
+						error:function(){
+							slideMsg('<font color=red>失败! 系统错误</font>');
+						}  
+					});
+				else
+					$.ajax({  
+						type:'post',  
+						url:'/imc/insert',
+						data:{
+							req:req,
+							data:JSON.stringify(rows[i])
+						},  
+						cache:false,  
+						dataType:'json',  
+							success:function(data){
+								slideMsg('<font color=blue>'+data.result+'</font>');
+								//slideMsg('<font color=blue>恭喜! 记录新增成功</font>');
+								$(subGridID).datagrid('reload');
+							},  
+						error:function(){
+							slideMsg('<font color=red>失败! 系统错误</font>');
+						}  
+					});					
+        }
+		
+		//加载子表方法
+		function subGridAjax(subReq,subGridID){
+			var index = subGridID.replace("#Grid","");
+			$.ajax({  
+				type:'post',  
+				url:'/imc/queryOptions',
+				data:{
+					req:subReq
+				},  
+				cache:false,  
+				dataType:'json',  
+					success:function(options){
+
+
+						//标题置空,显示在Tabs上
+						options.title='';
+						//行样式设置
+						if(options.rowStyler!=''){
+							var rowStyler = eval('(' + options.rowStyler.replace(/#function/g,'function').replace(/#/g,'') + ')');	
+							options.rowStyler=rowStyler;
+						}
+					
+						var queryParams = eval('(' + options.queryParams + ')');	
+						options.queryParams=queryParams;
+						
+						
+						var subEditor;//行编辑器变量
+						
+						//冻结列
+						if(options.frozenColumns0!='' || options.frozenColumns1!=''){
+							if(options.frozenColumns0==''){//单层表头
+							options.frozenColumns= [];
+							subEditor= JSON.stringify(options.frozenColumns1).replace(/:"#{/g,':{').replace(/}#"/g,'}').replace(/:"#function/g,':function');
+						
+							options.frozenColumns[0]=eval('(' + subEditor + ')');
+							}
+							else{//双层表头
+								options.frozenColumns= [[],[]];
+								//设置第一层
+								subEditor= JSON.stringify(options.frozenColumns0).replace(/:"#{/g,':{').replace(/}#"/g,'}').replace(/:"#function/g,':function');
+								options.frozenColumns[0]=eval('(' + subEditor + ')');
+								//设置第二层
+								subEditor= JSON.stringify(options.frozenColumns1).replace(/:"#{/g,':{').replace(/}#"/g,'}').replace(/:"#function/g,':function');
+								options.frozenColumns[1]=eval('(' + subEditor + ')');
+							}	
+						}
+						
+						//非冻结列
+						if(options.columns0==''){//单层表头
+							options.columns= [];
+							subEditor= JSON.stringify(options.columns1).replace(/:"#{/g,':{').replace(/}#"/g,'}').replace(/:"#function/g,':function');
+							
+							options.columns[0]=eval('(' + subEditor + ')');
+						}
+						else{//双层表头
+							options.columns= [[],[]];
+							//设置第一层
+							subEditor= JSON.stringify(options.columns0).replace(/:"#{/g,':{').replace(/}#"/g,'}').replace(/:"#function/g,':function');
+							options.columns[0]=eval('(' + subEditor + ')');
+							//设置第二层
+							subEditor= JSON.stringify(options.columns1).replace(/:"#{/g,':{').replace(/}#"/g,'}').replace(/:"#function/g,':function');
+							options.columns[1]=eval('(' + subEditor + ')');
+						}
+
+						//设置工具栏
+						var str = options.customToolbar.replace(/#grid/g,subGridID);
+						if(str != ''){
+							var obj = eval('(' + str + ')');
+							options.toolbar = obj;
+							//$(subGridID).datagrid({
+								//toolbar : obj
+							//});
+						}
+						
+						//加载表格options
+						$(subGridID).datagrid(options);
+
+						$(subGridID).datagrid('getPager').pagination({
+							buttons:[{
+								id:'subGridEditor'+index,
+								iconCls:'icon-edit',
+								text:'启用编辑',
+								handler:function(){	
+									subGrid[index].subEditorEnable=subGrid[index].subEditorEnable*-1;
+									if(subGrid[index].subEditorEnable==1){
+										$('#subGridEditor'+index).linkbutton({ disabled: false,iconCls:'icon-remove',text:'关闭编辑' });
+										$(subGridID).datagrid('enableCellEditing');
+									}
+									else{
+										$('#subGridEditor'+index).linkbutton({ disabled: false,iconCls:'icon-edit',text:'启用编辑' });
+										$(subGridID).datagrid('disableCellEditing');
+									}
+								}
+							},
+							{
+								id:'subGridSave'+index,
+								iconCls:'icon-save',
+								text:'提交',
+								handler:function(){
+									accept(subGridID,subReq)
+								}
+							},{
+								id:'subGridCancel'+index,
+								iconCls:'icon-undo',
+								text:'撤销',
+								handler:function(){
+									reject(subGridID);                        
+								}
+							},{
+								id:'subGridAdd'+index,
+								iconCls:'icon-add',
+								text:'新增一行',
+								handler:function(){
+									append(subGridID);
+								}
+							}, {
+								id:'subGridFilter'+index,
+								iconCls:'icon-search',
+								text:'启用过滤',
+								handler:function(){	
+									subGrid[index].subFilterEnable=subGrid[index].subFilterEnable*-1;
+									if(subGrid[index].subFilterEnable==1){
+										$('#subGridFilter'+index).linkbutton({ disabled: false,iconCls:'icon-remove',text:'关闭过滤' });
+										enableFilter(subGridID);
+									}
+									else{
+										$('#subGridFilter'+index).linkbutton({ disabled: false,iconCls:'icon-search',text:'启用过滤' });
+										disableFilter(subGridID);
+									}
+								}
+							},{
+								id:'subGridExport'+index,
+								iconCls:'icon-excel',
+								text:'导出',
+								handler:function(){
+									exportExcel(subReq,subGridID);
+								}
+							},{
+								id:'gridNewLine'+index,
+								iconCls:'icon-a5',
+								text:'插入换行符',
+								handler:function(){
+									//alert(gridEditRowIndex);
+									//alert(gridEditField);
+									var ed = $(subGridID).datagrid('getEditor', {index:gridEditRowIndex,field:gridEditField});
+									var cellvalue = $(ed.target).textbox('getValue');
+
+
+									var cursorIndex = 0;
+								   var obj = $(ed.target).next()[0].children[0]; //easyui生成的控件,输入的信息都是在这上面
+								   if (document.selection) {//IE浏览器
+									   obj.focus ();
+									   var range= document.selection.createRange();
+									   range.moveStart ('character', -obj.value.length);
+									   cursorIndex= range.text.length;
+								   }else if (obj.selectionStart || obj.selectionStart==0) {//非IE浏览器
+									   cursorIndex= obj.selectionStart;
+								   }
+
+									var newText = insert_flg(cellvalue,'<br>',cursorIndex);
+									$(ed.target).textbox('setValue', newText);
+								}
+							},{
+								id:'gridFullScreen'+index,
+								iconCls:'icon-fs',
+								text:'全屏显示',
+								handler:function() {
+									var lbtext = $('#gridFullScreen'+index).linkbutton("options").text;
+									var centerheight = $('#cc').layout('panel', 'center').panel('options').height;
+									var southheight = $('#cc').layout('panel', 'south').panel('options').height;
+									if (lbtext == "全屏显示") {
+										$('#cc').layout('panel', 'south').panel('resize', {height: centerheight+southheight+10});
+										$('#cc').layout('resize');
+										$('#gridFullScreen'+index).linkbutton({ iconCls:'icon-exitfs',text:'退出全屏' });
+									}
+									else
+									{
+										$('#cc').layout('panel', 'south').panel('resize', {height: subGridHOrW});
+										$('#cc').layout('resize');
+										$('#gridFullScreen'+index).linkbutton({ iconCls:'icon-fs',text:'全屏显示' });
+									}
+
+								}
+							}]
+						});
+
+					if(options.exportable==false)
+						$('#subGridExport'+index).remove();
+					if(options.insertable==false)
+						$('#gridNewLine'+index).remove();
+					if(options.editable==false){
+						$('#subGridEditor'+index).remove();
+						$('#subGridSave'+index).remove();
+						$('#subGridCancel'+index).remove();
+						$('#subGridAdd'+index).remove();
+					}
+					
+					//获取子表过滤条件
+					var filter = JSON.stringify(options.filter).replace(/op":"/g,'op":').replace(/]"/g,']');
+					subFilter = eval('(' + filter + ')');					
+
+					subGrid[index].subFilter = subFilter;
+					
+					},  
+				error:function(){
+					slideMsg('系统错误,请尝试重新登录系统。');
+				}  
+			}); 
+		}
+		
+        $(document).ready(function () {
+
+			//req = getParam();
+			req = GetQueryString("p");
+
+
+			$list = $('#thelist');
+
+			var uploader = WebUploader.create({
+                // 选完文件后，是否自动上传。
+                auto : true,
+                // swf文件路径
+                swf : 'js/webuploader/Uploader.swf',
+                // 文件接收服务端。
+                server : 'importExcel',//url
+                // 选择文件的按钮。可选。
+                // 内部根据当前运行是创建，可能是input元素，也可能是flash.
+                pick : '#picker',
+                // 只允许选择图片文件。
+                formData : {
+                    req :req
+                }
+            });
+
+
+            // 文件上传过程中创建进度条实时显示。
+            uploader.on( 'uploadProgress', function( file, percentage ) {
+                var $li = $( '#'+file.id ),
+                    $percent = $li.find('.progress .progress-bar');
+
+                // 避免重复创建
+                if ( !$percent.length ) {
+                    $percent = $('<div class="progress progress-striped active">' +
+                      '<div class="progress-bar" role="progressbar" style="width: 0%">' +
+                      '</div>' +
+                    '</div>').appendTo( $li ).find('.progress-bar');
+                }
+
+                $li.find('p.state').text('上传中');
+
+                $percent.css( 'width', percentage * 100 + '%' );
+            });
+
+
+            uploader.on( 'uploadSuccess', function( file ) {
+                $( '#'+file.id ).find('p.state').text('数据导入成功！');
+				$('#win').window('close');
+				slideMsg('数据导入成功!');
+				$('#grid').datagrid('reload');
+
+            });
+
+            uploader.on( 'uploadError', function( file ) {
+                $( '#'+file.id ).find('p.state').text('上传出错');
+            });
+
+            uploader.on( 'uploadComplete', function( file ) {
+                $( '#'+file.id ).find('.progress').fadeOut();
+            });
+
+
+			$('#grid').datagrid({
+                nowrap: false,
+                striped: true,
+                remoteSort: true,
+                fit: true,
+                loadMsg: '正在查询,请稍候.....',
+				remoteFilter: true,
+				idField:'ID',
+				checkOnSelect:true,
+				fitColumns:false,
+                pagination: true,
+                rownumbers: true,
+				multiSort:true,
+				onClickCell: function(rowIndex, field, value) {
+					gridEditField = field;
+				},
+				onBeginEdit:function(index,row){
+					gridEditRowIndex = index;
+				},
+				onClickRow:function(index,row){
+					selectedRowIndex=index;
+					//为子表加载数据做准备,获得pid
+					var row = $('#grid').datagrid('getData').rows[selectedRowIndex];
+					pid = row.ID;
+					for(var i=0;i<subGrid.length;i++){
+						$(subGrid[i].subGridID).datagrid('reload');
+					}
+				},
+				onBeforeLoad: function (param) {
+					param.pid = '';//主表查询参数pid=''，后台判断去除此条件	
+				}
+            });
+			
+			$.ajax({  
+				type:'post',  
+				url:'/imc/queryOptions',
+				data:{
+					req:req
+				},  
+				cache:false,  
+				dataType:'json',  
+					success:function(options){
+
+						if(options=='error')
+						{
+							window.top.location="/loginPage";
+							return;
+						}
+
+						//行样式设置
+						if(options.rowStyler!='' ){
+							var rowStyler = eval('(' + options.rowStyler.replace(/#function/g,'function').replace(/#/g,'') + ')');
+							options.rowStyler=rowStyler;
+						}
+
+						var queryParams = eval('(' + options.queryParams + ')');
+						options.queryParams=queryParams;
+						var editor;//行编辑器变量
+
+						//冻结列
+						if(options.frozenColumns0!='' || options.frozenColumns1!='' ){
+							if(options.frozenColumns0==''){//单层表头
+							options.frozenColumns= [];
+							editor= JSON.stringify(options.frozenColumns1).replace(/:"#{/g,':{').replace(/}#"/g,'}').replace(/:"#function/g,':function');
+
+							options.frozenColumns[0]=eval('(' + editor + ')');
+							}
+							else{//双层表头
+								options.frozenColumns= [[],[]];
+								//设置第一层
+								editor= JSON.stringify(options.frozenColumns0).replace(/:"#{/g,':{').replace(/}#"/g,'}').replace(/:"#function/g,':function');
+								options.frozenColumns[0]=eval('(' + editor + ')');
+								//设置第二层
+								editor= JSON.stringify(options.frozenColumns1).replace(/:"#{/g,':{').replace(/}#"/g,'}').replace(/:"#function/g,':function');
+								options.frozenColumns[1]=eval('(' + editor + ')');
+							}
+						}
+
+						//非冻结列
+						if(options.columns0=='' || options.columns0==undefined){//单层表头
+							options.columns= [];
+							editor= JSON.stringify(options.columns1).replace(/:"#{/g,':{').replace(/}#"/g,'}').replace(/:"#function/g,':function');
+
+							options.columns[0]=eval('(' + editor + ')');
+						}
+						else{//双层表头
+							options.columns= [[],[]];
+							//设置第一层
+							editor= JSON.stringify(options.columns0).replace(/:"#{/g,':{').replace(/}#"/g,'}').replace(/:"#function/g,':function');
+							options.columns[0]=eval('(' + editor + ')');
+							//设置第二层
+							editor= JSON.stringify(options.columns1).replace(/:"#{/g,':{').replace(/}#"/g,'}').replace(/:"#function/g,':function');
+							options.columns[1]=eval('(' + editor + ')');
+						}
+
+						//获取并设置主表工具栏
+						//var str = "[{text:'添加',iconCls:'icon-add',height:50,handler:function(){customBtn('delxxx','#grid');}}]";
+						var str = options.customToolbar;
+						if(str != ''){
+							var obj = eval('(' + str + ')');
+							options.toolbar = obj;
+							//$('#grid').datagrid({
+								//toolbar : obj
+							//});
+						}
+
+						$('#grid').datagrid(options);
+
+						//设置主表分页工具栏
+						$('#grid').datagrid('getPager').pagination({
+							buttons:[{
+								id:'gridEditor',
+								iconCls:'icon-edit',
+								text:'启用编辑',
+								handler:function(){
+									editorEnable=editorEnable*-1;
+									if(editorEnable==1){
+										$('#gridEditor').linkbutton({ disabled: false,iconCls:'icon-remove',text:'关闭编辑' });
+										$('#grid').datagrid('enableCellEditing');
+									}
+									else{
+										endEdit('#grid');
+										$('#gridEditor').linkbutton({ disabled: false,iconCls:'icon-edit',text:'启用编辑' });
+										$('#grid').datagrid('disableCellEditing');
+									}
+								}
+							},
+							{
+								id:'gridSave',
+								iconCls:'icon-save',
+								text:'提交',
+								handler:function(){
+									accept('#grid',req);
+								}
+							},{
+								id:'gridCancel',
+								iconCls:'icon-undo',
+								text:'撤销',
+								handler:function(){
+									reject('#grid');
+								}
+							},{
+								id:'gridAdd',
+								iconCls:'icon-add',
+								text:'新增一行',
+								handler:function(){
+									append('#grid');
+								}
+							}, {
+								id:'gridFilter',
+								iconCls:'icon-search',
+								text:'启用过滤',
+								handler:function(){
+									filterEnable=filterEnable*-1;
+									if(filterEnable==1){
+										$('#gridFilter').linkbutton({ disabled: false,iconCls:'icon-remove',text:'关闭过滤' });
+										enableFilter('#grid',oFilter);
+									}
+									else{
+										$('#gridFilter').linkbutton({ disabled: false,iconCls:'icon-search',text:'启用过滤' });
+										disableFilter('#grid');
+									}
+								}
+							},{
+								id:'gridExport',
+								iconCls:'icon-excel',
+								text:'导出',
+								handler:function(){
+									exportExcel(req,'#grid');
+								}
+							},{
+								id:'gridNewLine',
+								iconCls:'icon-a5',
+								text:'插入换行符',
+								handler:function(){
+									//alert(gridEditRowIndex);
+									//alert(gridEditField);
+									var ed = $('#grid').datagrid('getEditor', {index:gridEditRowIndex,field:gridEditField});
+									var cellvalue = $(ed.target).textbox('getValue');
+
+
+									var cursorIndex = 0;
+								   var obj = $(ed.target).next()[0].children[0]; //easyui生成的控件,输入的信息都是在这上面
+								   if (document.selection) {//IE浏览器
+									   obj.focus ();
+									   var range= document.selection.createRange();
+									   range.moveStart ('character', -obj.value.length);
+									   cursorIndex= range.text.length;
+								   }else if (obj.selectionStart || obj.selectionStart==0) {//非IE浏览器
+									   cursorIndex= obj.selectionStart;
+								   }
+
+									var newText = insert_flg(cellvalue,'<br>',cursorIndex);
+									$(ed.target).textbox('setValue', newText);
+								}
+							},{
+								id:'gridFullScreen',
+								iconCls:'icon-fs',
+								text:'全屏显示',
+								handler:function() {
+									var lbtext = $('#gridFullScreen').linkbutton("options").text;
+									if (lbtext == "全屏显示") {
+										$('#cc').layout('panel', 'south').panel('resize', {height: 10});
+										$('#cc').layout('resize');
+										$('#gridFullScreen').linkbutton({ iconCls:'icon-exitfs',text:'退出全屏' });
+									}
+									else
+									{
+										$('#cc').layout('panel', 'south').panel('resize', {height: subGridHOrW});
+										$('#cc').layout('resize');
+										$('#gridFullScreen').linkbutton({ iconCls:'icon-fs',text:'全屏显示' });
+									}
+
+								}
+							},{
+								id:'gridImportExcel',
+								iconCls:'icon-fs',
+								text:'导入',
+								handler:function() {
+									$('#win').window('open');
+								}
+							}]
+						});
+
+					if(options.exportable==false)
+						$('#gridExport').remove();
+					if(options.insertable==false)
+						$('#gridNewLine').remove();
+					if(options.importable==false)
+						$('#gridImportExcel').remove();
+					if(options.editable==false){
+						$('#gridEditor').remove();
+						$('#gridSave').remove();
+						$('#gridCancel').remove();
+						$('#gridAdd').remove();
+					}
+
+
+					//加载过滤条件
+					//var filter = "[{field:'sysname',type:'datebox','op':['equal','notequal','less','greater','beginwith']},{field:'funname',type:'numberbox',op:['equal','notequal','less','greater']}]";
+					var filter = JSON.stringify(options.filter).replace(/op":"/g,'op":').replace(/]"/g,']');
+					oFilter = eval('(' + filter + ')');
+
+
+
+					//从表选项
+					subGrid = options.subGrid;
+					//无从表返回
+					if(subGrid=='')
+					{
+						$('#gridFullScreen').remove();//无子表则不显示全屏按钮
+						return;
+					}
+
+
+					for(var i=0;i<subGrid.length;i++){
+						var title = subGrid[i].title;
+						var gridNo = subGrid[i].gridNo;
+						var subGridRegion = subGrid[i].subGridRegion;
+						var subGridHeightOrWidth = subGrid[i].subGridHeightOrWidth;
+						var subIconCls = subGrid[i].subIconCls;
+						var tableID = 'Grid'+i;
+						var subGridID = '#'+tableID;
+						subGrid[i].subGridID = subGridID;
+
+						if(subGridRegion=="south" || subGridRegion=="north"){
+							$('#cc').layout('panel', subGridRegion).panel('options').height=subGridHeightOrWidth;
+							subGridHOrW=subGridHeightOrWidth;
+						}
+						if(subGridRegion=="west" || subGridRegion=="east"){
+							$('#cc').layout('panel', subGridRegion).panel('options').width=subGridHeightOrWidth;
+							subGridHOrW=subGridHeightOrWidth;
+						}
+						
+						$('#'+subGridRegion+'Tabs').tabs('add',{
+							title:title,
+							iconCls:subIconCls,
+							border:true,
+							content:'<table id="'+tableID+'" ></table>'
+						});
+					
+			
+					$(subGridID).datagrid({
+							nowrap: false,
+							striped: true,
+							remoteSort: true,
+							emptyMsg:'无数据',
+							fit: true,
+							loadMsg: '正在查询,请稍候.....',
+							rownumbers: true,
+							pagination: true,
+							multiSort:true,
+							remoteFilter: true,
+							onClickCell: function(rowIndex, field, value) {
+								gridEditField = field;
+							},
+							onBeginEdit:function(index,row){
+								gridEditRowIndex = index;
+							},
+							onClickRow:function(index,row){
+								selectedSubRowIndex=index;
+							},
+							onBeforeLoad: function (param) {
+								param.pid = pid;
+							}
+						});
+						
+						subGridAjax(gridNo,subGridID);
+						}
+						
+						//重新渲染页面
+						$.parser.parse();
+					},  
+				error:function(){
+					slideMsg('系统错误,请尝试重新登录系统。');
+				}  
+			}); 		
+			
+        });
+		
+		
+		
+	</script>
+</head>
+
+
+
+<body id="cc" class="easyui-layout" ondragstart="return false" oncontextmenu="return true"  onselectstart="return true">
+    <div region="center" border="false" collapsible="true">
+        <table id="grid" ></table>
+    </div>
+	<div region="north" border="false" collapsible="true" split="true" style="height:0px;">
+        <div id="northTabs" class="easyui-tabs" fit="true"></div>
+    </div>
+	<div region="south" border="false" collapsible="true" split="true" style="height:0px;">
+		<div id="southTabs" class="easyui-tabs" fit="true"></div>
+    </div>
+	<div region="west" border="false" collapsible="true" split="true" style="width:0px;">
+        <div id="westTabs" class="easyui-tabs" fit="true"></div>
+    </div>
+	<div region="east" border="false" collapsible="true" split="true" style="width:0px;">
+        <div id="eastTabs" class="easyui-tabs" fit="true"></div>
+    </div>
+
+
+<div id="win" class="easyui-window" title="数据导入" style="width:320px;height:240px" data-options="iconCls:'icon-save',modal:true,closed:true">
+
+    <div id="thelist" class="uploader-list">
+
+	</div>
+    <div class="btns">
+        <div id="picker">选择文件</div>
+    </div>
+
+</div>
+
+
+</body>
+<style>
+ .l-btn-left{
+    margin-top: 0px!important;
+  }
+</style>
+
+</html>
+    

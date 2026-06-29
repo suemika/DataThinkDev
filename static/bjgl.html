@@ -1,0 +1,1384 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>备件上下线管理系统</title>
+		<link rel="stylesheet" href="elementui/css/element-plus@2.3.8.css" />
+		<script src="elementui/js/vue@3.3.4.js"></script>
+		<script src="elementui/js/element-plus@2.3.8.js"></script>
+		<script src="elementui/js/axios@1.4.0.js"></script>
+	</head>
+	<body>
+		<div id="app" >
+			<!-- 顶部 -->
+
+<!--			<el-header style="background-color: #409eff; color: #fff; text-align: center; line-height: 60px;font-size: 24px;" >-->
+<!--				<h4 style="font-size:24px;font-weight:800;" v-text = "msg"></h4>-->
+<!--				</el-header>-->
+			<!--有消息时才会让这个功能显示，v-if-->
+<!--			<div class="bs-sysMsg" v-show="systemMsg.length > 0" >-->
+<!--			    <i class="el-alert__icon el-icon-warning" ></i>-->
+<!--			    <div class="msg__content" >-->
+<!--			        <el-carousel height="20px" direction="vertical" indicator-position="none" :autoplay="true" >-->
+<!--			            <el-carousel-item v-for="item in systemMsg" :key="item.code">	-->
+<!--											<span class="btn danger" @click="clickWarnText(item.code)" v-text="item.title"></span>-->
+<!--			              &lt;!&ndash;  <a href="javascript:void(0)" class="item">{{item.title}}</a> &ndash;&gt;-->
+<!--							&lt;!&ndash; <button class="btn danger" @click="clickWarnText(item.code)" >{{item.title}}</button> &ndash;&gt;-->
+<!--			            </el-carousel-item>-->
+<!--			        </el-carousel>-->
+<!--			    </div>-->
+<!--			</div>-->
+			<el-container style="height: calc(100vh - 60px);"><!-- 设置容器高度，减去顶部高度 -->
+			
+				<!-- 左侧树形菜单 -->
+				<el-aside width="400px" style="background-color: white;">
+					<div>
+						<el-row>
+							<el-col :span="20">
+								<el-input v-model="keyword" placeholder="请输入设备码" />
+							</el-col>
+							<el-col :span="4" @click="filteredTreeData" @keyup.enter.native="filteredTreeData">
+								<el-button type="primary">搜索</el-button>
+							</el-col>
+						</el-row>
+					</div>
+					<div>
+						<el-tree
+								:data="treeData"
+								:props="treeProps"
+								ref="deviceTree"
+								:load="loadNodeFunc"
+								lazy
+								@node-click="handleNodeClick"
+								highlight-current
+								node-key="code">
+						</el-tree>
+					</div>
+				</el-aside>
+
+				<!-- 右侧正文内容 -->
+				<el-main style="margin-top:-45px">
+					<div>
+						<el-row justify="center">
+							<!-- <span style="font-size:24px;font-weight:800;" v-cloak>备件下线管理</span> -->
+						
+							<h4 style="font-size:24px;font-weight:800;" v-text = "msg1"></h4>
+
+						</el-row>
+						<el-row style="">
+							<div style="display: flex;justify-items: center;align-items: center;">
+								<div>
+									<el-button type="warning"  @click="getWarningInfo"  ><p v-text="msg14"></p></el-button>
+
+								     <!-- 预警寿命弹窗-->
+									 <el-dialog v-model="dialogVisibleWarning" title="预警备件" width="80%" >
+										<el-row style="" :gutter="40">
+											<el-col :span=6 style="margin-top:10px">
+												<el-row>
+													<el-col :span="6">
+														备件编码：
+													</el-col>
+													<el-col :span="18">
+														<el-input v-model="deviceCode" placeholder="请输入备件编码" />
+													</el-col>
+												</el-row>
+
+											</el-col>
+											<el-col :span=6 style="margin-top:10px">
+												<el-row>
+													<el-col :span="6">
+														物料编码：
+													</el-col>
+													<el-col :span="18">
+														<el-input v-model="warningMaterialCode" placeholder="请输入物料编码" />
+													</el-col>
+												</el-row>
+
+											</el-col>
+											<el-col :span=6 style="margin-top:10px">
+												<el-row>
+													<el-col :span="6">
+														物料名称：
+													</el-col>
+													<el-col :span="18">
+														<el-input v-model="warningMaterialName" placeholder="请输入物料名称" />
+													</el-col>
+												</el-row>
+
+											</el-col>
+
+											<el-col :span=6 style="margin-top:10px">
+												<el-row>
+													<el-col :span="6">
+														<el-button type="primary" @click="getWarningInfo">查询</el-button>
+													</el-col>
+													<el-col :span="6">
+														<el-button type="info" @click="restWarningInfo">重置</el-button>
+													</el-col>
+												</el-row>
+
+
+											</el-col>
+										</el-row>
+										<el-row>
+											<el-table :data="warningTableData"  style="width: 100%; height: 30%" highlight-current-row @row-click="" border>
+												<el-table-column prop="备件编码" label="备件编码" width="180" show-overflow-tooltip>
+												</el-table-column>
+												<el-table-column prop="备件名称" label="备件名称" width="180" show-overflow-tooltip>
+												</el-table-column>
+												<el-table-column prop="物料编码" label="物料编码" show-overflow-tooltip>
+												</el-table-column>
+												<el-table-column prop="物料名称" label="物料名称" show-overflow-tooltip>
+												</el-table-column>
+												<el-table-column prop="规格型号" label="物料型号" show-overflow-tooltip>
+												</el-table-column>
+												<el-table-column prop="数量" label="数量" show-overflow-tooltip>
+												</el-table-column>
+												</el-table-column>
+												<el-table-column prop="上线时间" label="上线时间" show-overflow-tooltip>
+												</el-table-column>
+												<el-table-column prop="物料状态" label="状态" show-overflow-tooltip>
+												</el-table-column>
+												<el-table-column prop="寿命" label="寿命(月)" show-overflow-tooltip>
+												</el-table-column>
+												<el-table-column prop="剩余寿命" label="剩余寿命(月)" show-overflow-tooltip>
+													<template  v-slot="scope">
+														<!-- 渲染单元格数据 -->
+														<span :style="getCellStyle(scope.row['剩余寿命'])">{{ scope.row['剩余寿命'] }}</span>
+													  </template>
+												</el-table-column>
+												<el-table-column prop="提前预警月数" label="提前预警月数" show-overflow-tooltip>
+												</el-table-column>
+												<el-table-column prop="备注" label="备注" show-overflow-tooltip>
+												</el-table-column>
+											</el-table>
+										</el-row>
+										<el-row type="flex" justify="end">
+											<el-pagination
+											  @size-change="(e)=>handleSizeChange(e, 'warning')"
+											  @current-change="(e)=>handleCurrentChange(e, 'warning')"
+											  :current-page="warningTableCurrentPage"
+											  :page-sizes="[5, 10, 20, 50]"
+											  :page-size="warningTablePrePage"
+											  layout="total, sizes, prev, pager, next"
+											  :hide-on-single-page="warningSinglePage"
+											  :total="warningTableTotal">
+											</el-pagination>
+										</el-row>
+									 </el-dialog>
+									 <!-- 预警寿命弹窗-->
+
+
+
+								</div>
+								<div style="width: 10px;">
+								</div>
+								<div>
+									<el-button type="primary" v-show = "this.currentCode.length == 12 || this.currentCode.length == 9" @click="setWarnLife" ><p v-text="msg4"></p></el-button>
+								
+								     <!-- 预警寿命弹窗-->
+									 <el-dialog v-model="dialogVisibleLife" title="备件预警寿命设置" width="30%" >
+										 <div style="display: flex;justify-items:left;align-items: center">
+									 		<div style="width: 150px">
+									 			<p v-text="msg13"></p>
+									 		</div>
+									 		<div>
+									 			<el-input-number v-model="lifeNum" min="1"/>
+									 		</div>
+									 	</div>
+									 	<div style="display: flex;justify-items:left;align-items: center">
+									 		<div style="width: 150px">
+									 			<p v-text="msg5"></p>
+									 		</div>
+									 		<div>
+									 			<el-input-number v-model="earlyWarningNum" min="1" max="6"/>
+									 		</div>
+									 	</div>
+									 	<template #footer>
+									 		<span class="dialog-footer">
+									 			<el-button @click="dialogVisibleLife = false">取消</el-button>
+									 			<el-button type="primary" @click="lifeSumit">
+									 				确定
+									 			</el-button>
+									 		</span>
+									 	</template>
+									 </el-dialog>
+									 <!-- 预警寿命弹窗-->
+								
+								
+								
+								</div>
+								<div style="width: 10px;">
+								</div>
+								<div>
+								</div>
+								<div>
+									<el-button type="primary" v-show = "this.currentCode.length == 12 || this.currentCode.length == 9" @click="offLineOpt"><p v-text="msg3"></p></el-button>
+								
+								   <!--下线数量设置弹窗  -->
+								   <el-dialog v-model="dialogVisible" title="备件下线管理" width="30%" >
+								   	<div style="display: flex;justify-items:left;align-items: center">
+								   		<div style="width: 150px">
+								   			<p v-text="msg6"></p>
+								   		</div>
+								   		<div>
+								   			<el-input-number v-model="offNum" :min="1" :max="offMaxNum"/>
+								   		</div>
+								   	</div>
+								    <div style="display: flex;justify-items:left;align-items: center">
+										<div style="width: 150px">
+											<p v-text="msg10"></p>
+										</div>
+										
+										<div>
+											<el-date-picker
+											  v-model="currentDateTime"
+											  type="datetime"
+											  placeholder="选择下线日期时间"
+											  :default-time="currentDateTime">
+											</el-date-picker>
+										</div>
+								   	</div>
+									<div style="display: flex;justify-items:left;align-items: center">
+								   		<div style="width: 150px">
+								   			<p v-text="msg12"></p>
+								   		</div>
+
+								   		<div>
+											<el-select v-model="offLineReason" placeholder="请选择下线原因">
+												<el-option
+												  v-for="item in offLineReasonList"
+												  :key="item.value"
+												  :label="item.label"
+												  :value="item.value">
+												</el-option>
+											</el-select>
+								   		</div>
+								   	</div>
+									<div style="display: flex;justify-items:left;align-items: center">
+								   		<div style="width: 150px">
+								   			<p v-text="msg11"></p>
+								   		</div>
+
+								   		<div>
+											<el-input type="textarea" style="width: 300px" :rows="3" v-model="offLineRemark" placeholder="请输入内容"></el-input>
+								   		</div>
+								   	</div>
+
+								   	<template #footer>
+								   		<span class="dialog-footer">
+								   			<el-button @click="dialogVisible = false">取消</el-button>
+								   			<el-button type="primary" @click="outLineSumit">
+								   				确定
+								   			</el-button>
+								   		</span>
+								   	</template>
+								   </el-dialog>
+								   <!--下线数量设置弹窗  -->
+								   
+								   <!--上线数量设置弹窗  -->
+								   <el-dialog v-model="dialogVisibleOnLine" title="备件上线管理" width="30%" >
+								   	<div style="display: flex;justify-items:left;align-items: center">
+								   		<div style="width: 150px">
+								   			<p v-text="msg8"></p>
+								   		</div>
+										
+								   		<div>
+								   			<el-input-number v-model="onNum" :min="1" :max="onMaxNum"/>
+								   		</div>
+								   	</div>
+									<div style="display: flex;justify-items:left;align-items: center">
+									 		<div style="width: 150px">
+									 			<p v-text="msg13"></p>
+									 		</div>
+									 		<div>
+									 			<el-input-number v-model="lifeNum" min="1"/>
+									 		</div>
+									 	</div>
+									 	<div style="display: flex;justify-items:left;align-items: center">
+									 		<div style="width: 150px">
+									 			<p v-text="msg5"></p>
+									 		</div>
+									 		<div>
+									 			<el-input-number v-model="earlyWarningNum" min="1" max="6"/>
+									 		</div>
+									 	</div>
+									<div style="display: flex;justify-items:left;align-items: center">
+								   		<div style="width: 150px">
+								   			<p v-text="msg9"></p>
+								   		</div>
+
+								   		<div>
+								   			<el-date-picker
+											  v-model="currentDateTime"
+											  type="datetime"
+											  placeholder="选择上线日期时间"
+											  :default-time="currentDateTime">
+											</el-date-picker>
+								   		</div>
+								   	</div>
+									<div style="display: flex;justify-items:left;align-items: center">
+								   		<div style="width: 150px">
+								   			<p v-text="msg11"></p>
+								   		</div>
+										
+								   		<div>
+											<el-input type="textarea" style="width: 300px" :rows="3" v-model="onLineRemark" placeholder="请输入内容"></el-input>
+								   		</div>
+								   	</div>
+								   	<template #footer>
+								   		<span class="dialog-footer">
+								   			<el-button @click="dialogVisibleOnLine = false">取消</el-button>
+								   			<el-button type="primary" @click="onLineSubmit">
+								   				确定
+								   			</el-button>
+								   		</span>
+								   	</template>
+								   </el-dialog>
+								   <!--上线数量设置弹窗  -->
+
+
+								</div>
+							</div>
+						</el-row>
+						<el-row style="" :gutter="40">
+							<el-col :span=6 style="margin-top:10px">
+								<el-row>
+									<el-col :span="6">
+										物料编码：
+									</el-col>
+									<el-col :span="18">
+										<el-input v-model="materialCode" placeholder="请输入物料编码" />
+									</el-col>
+								</el-row>
+
+							</el-col>
+							<el-col :span=6 style="margin-top:10px">
+								<el-row>
+									<el-col :span="6">
+										物料名称：
+									</el-col>
+									<el-col :span="18">
+										<el-input v-model="materialName" placeholder="请输入物料名称" />
+									</el-col>
+								</el-row>
+
+							</el-col>
+							<el-col :span=6 style="margin-top:10px">
+								<el-row>
+									<el-col :span="6">
+										物料状态：
+									</el-col>
+									<el-col :span="18">
+										<el-select v-model="materialStatus" slot="prepend" placeholder="请选择物料状态" multiple >
+										  <el-option label="新增" value="新增" ></el-option>
+										  <el-option label="已修复" value="已修复"></el-option>
+										</el-select>
+									</el-col>
+								</el-row>
+
+							</el-col>
+							<el-col :span=6 style="margin-top:10px">
+								<el-row>
+									<el-col :span="6">
+										<el-button type="primary" @click="getMaterialsInfo(currentCode)">查询</el-button>
+									</el-col>
+									<el-col :span="6">
+										<el-button type="info" @click="restMaterial(currentCode)">重置</el-button>
+									</el-col>
+								</el-row>
+
+
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-table :data="onLineTableData"  style="width: 100%; height: 30%" highlight-current-row @row-click="offLineOpthandleCurrentChange" border>
+								<el-table-column prop="备件编码" label="备件编码" width="180" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="备件名称" label="备件名称" width="180" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="物料编码" label="物料编码" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="物料名称" label="物料名称" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="规格型号" label="物料型号" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="数量" label="数量" show-overflow-tooltip>
+								</el-table-column>
+								</el-table-column>
+								<el-table-column prop="上线时间" label="上线时间" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="物料状态" label="状态" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="寿命" label="寿命(月)" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="剩余寿命" label="剩余寿命(月)" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="提前预警月数" label="提前预警月数" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="备注" label="备注" show-overflow-tooltip>
+								</el-table-column>
+							</el-table>
+						</el-row>
+						<el-row type="flex" justify="end">
+							<el-pagination
+							  @size-change="(e)=>handleSizeChange(e, 'onLine')"
+							  @current-change="(e)=>handleCurrentChange(e, 'onLine')"
+							  :current-page="onLineTableCurrentPage"
+							  :page-sizes="[5, 10, 20, 50]"
+							  :page-size="onLineTablePrePage"
+							  layout="total, sizes, prev, pager, next"
+							  :hide-on-single-page="onLineSinglePage"
+							  :total="onLineTableTotal">
+							</el-pagination>
+						</el-row>
+					</div>
+
+					<div>
+						<el-row justify="center" style="" >
+							<!-- <span style="font-size:24px;font-weight:800" v-cloak>备件上线管理</span> -->
+							<h4 style="font-size:24px;font-weight:800;" v-text = "msg2"></h4>
+						</el-row>
+						<el-row style="" :gutter="40">
+							<el-col :span=24>
+								<el-button type="primary" v-show = "this.currentCode.length == 12 || this.currentCode.length == 9" @click="onLineOpt"><p v-text="msg7"></p></el-button>
+							</el-col>
+							<el-col :span=6 style="margin-top:10px">
+								<el-row>
+									<el-col :span="6">
+										物料编码：
+									</el-col>
+									<el-col :span="18">
+										<el-input v-model="inventoryCode" placeholder="请输入物料编码" />
+									</el-col>
+								</el-row>
+
+							</el-col>
+							<el-col :span=6 style="margin-top:10px">
+								<el-row>
+									<el-col :span="6">
+										物料名称：
+									</el-col>
+									<el-col :span="18">
+										<el-input v-model="inventoryName" placeholder="请输入物料名称" />
+									</el-col>
+								</el-row>
+
+							</el-col>
+							<el-col :span=6 style="margin-top:10px">
+								<el-row>
+									<el-col :span="6">
+										物料状态：
+									</el-col>
+									<el-col :span="18">
+										<el-select v-model="inventoryStatus" slot="prepend" placeholder="请选择物料状态" multiple >
+										  <el-option label="新增" value="新增" ></el-option>
+										  <el-option label="已修复" value="已修复"></el-option>
+										</el-select>
+									</el-col>
+								</el-row>
+
+							</el-col>
+							<el-col :span=6 style="margin-top:10px">
+								<el-row>
+									<el-col :span="6">
+										<el-button type="primary" @click="getInventoryInformation(currentCode)">查询</el-button>
+									</el-col>
+									<el-col :span="6">
+										<el-button type="info" @click="restInventory(currentCode)">重置</el-button>
+									</el-col>
+								</el-row>
+
+
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-table :data="inventoryTableData"  style="width: 100%; height: 30%" highlight-current-row  @current-change="handleSelectionChange" border>
+								<el-table-column prop="分厂名称" label="分厂名称">
+								</el-table-column>
+								<el-table-column prop="车间名称" label="车间名称">
+								</el-table-column>
+								<el-table-column prop="成本中心名称" label="成本中心名称">
+								</el-table-column>
+								<el-table-column prop="物料编码" label="物料编码">
+								</el-table-column>
+								<el-table-column prop="物料名称" label="物料名称">
+								</el-table-column>
+								<el-table-column prop="规格型号" label="物料型号" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="数量" label="可用数量">
+								</el-table-column>
+								<el-table-column prop="物料状态" label="物料状态">
+								</el-table-column>
+							</el-table>
+						</el-row>
+						<el-row type="flex" justify="end">
+							<el-pagination
+							  @size-change="(e)=>handleSizeChange(e, 'offLine')"
+							  @current-change="(e)=>handleCurrentChange(e, 'offLine')"
+							  :current-page="offLineTableCurrentPage"
+							  :page-sizes="[5, 10, 20, 50]"
+							  :page-size="offLineTablePrePage"
+							  layout="total, sizes, prev, pager, next"
+							  :hide-on-single-page="offLineSinglePage"
+							  :total="offLineTableTotal">
+							</el-pagination>
+						</el-row>
+					</div>
+				</el-main>
+
+			</el-container>
+		</div>
+	</body>
+</html>
+	<script>
+
+		const app = Vue.createApp({
+			data() {
+				return {
+					// 设备树输入框内容
+					msg:'备件上下线管理系统',
+					msg1:'备件在线管理',
+					msg2:'备件上线管理',
+					msg3:'下线',
+					msg4:'设置备件预警寿命',
+					msg5:'提前预警月数',
+					msg6:'下线数量：',
+					msg7:'上线',
+					msg8:'上线数量',
+					msg9:'上线日期时间',
+					msg10:'下线日期时间',
+					msg11:'备注',
+					msg12:'下线原因',
+					msg13:'备件寿命周期',
+					msg14:'查看预警备件',
+					currentDateTime:'',
+					keyword: '',
+					treeData: [],
+					// 记录最近一个被点击的节点
+					currentCode:'',
+					currentName:'',
+					treeProps: {
+						children: 'children',
+						label: 'name',
+						id: 'code',
+						isLeaf: 'leaf'
+					},
+					// 库存信息
+					inventoryTableData: [],
+					// 库存信息table被勾选的数据
+					inventoryTableSelectedData: {},
+					// 在线物料信息
+					onLineTableData:[],
+					// 在线备件table被勾选的数据
+					onLineTableSelectedData: {},
+					// 下线备件数据
+					outLineTableSelectedData: {},
+					// 下线数量
+					offNum: 1,
+					offMaxNum: 0,
+					// 上线数量
+					onNum: 1,
+					onMaxNum: 0,
+					//下线对话框显示
+					// 下线数量输入dialog
+					dialogVisible:false,
+					// 设置寿命周期的dialog
+					dialogVisibleLife:false,
+					// 设置上线数量的dialog
+					dialogVisibleOnLine:false,
+					// 查看预警备件的dialog
+					dialogVisibleWarning:false,
+					// 备件寿命周期
+					lifeNum:'',
+					// 备件提前预警月数
+					earlyWarningNum: 1,
+					// 上线备注
+					onLineRemark:'',
+					// 下线备注
+					offLineRemark: '',
+					// 下线原因
+					offLineReason: '',
+					// 下线原因数据源
+					offLineReasonList: [
+						{value: '达到维保、更换周期', label: '达到维保、更换周期'},
+						{value: '操作失误导致备件损坏', label: '操作失误导致备件损坏'},
+						{value: '安装质量缺陷', label: '安装质量缺陷'},
+						{value: '设计缺陷', label: '设计缺陷'},
+						{value: '备件质量缺陷', label: '备件质量缺陷'},
+						{value: '点检、维护不到位', label: '点检、维护不到位'},
+						{value: '其它原因', label: '其它原因'}
+					],
+					//预警消息
+					systemMsg: [
+					            {code:'33',title:'【警告】: 轧钢厂 型材 上料区设备 转盘 330101M01辊子装配 剩余寿命不足1个月'},
+					            {code:'33',title:'【警告】: 轧钢厂 型材 上料区设备 转盘 440101M01辊子装配 剩余寿命不足1个月'},
+					            {code:'33',title:'【警告】: 轧钢厂 型材 上料区设备 转盘 550101M01辊子装配 剩余寿命不足1个月'}
+					        ],
+					// 备件在线表格当前第几页
+					onLineTableCurrentPage: 1,
+					// 备件在线表格一页显示几行
+					onLineTablePrePage: 5,
+					// 备件在线表格一共几页数据
+					onLineTableTotal: 0,
+					// 备件在线表格分页是否显示
+					onLineSinglePage:false,
+					// 备件下线表格当前第几页
+					offLineTableCurrentPage: 1,
+					// 备件下线表格一页显示几行
+					offLineTablePrePage: 5,
+					// 备件下线表格一共几页数据
+					offLineTableTotal: 0,
+					// 备件下线表格分页是否显示
+					offLineSinglePage:false,
+					// 上线表格区域-物料编码
+					inventoryCode:'',
+					// 上线表格区域-物料名称
+					inventoryName:'',
+					// 上线表格区域-物料状态
+					inventoryStatus:'',
+					// 在线表格区域-物料编码
+					materialCode:'',
+					// 在线表格区域-物料名称
+					materialName:'',
+					// 在线表格区域-物料状态
+					materialStatus:'',
+					// 预警备件表格数据
+					warningTableData:[],
+					// 预警备件表格-备件编码查询条件
+					deviceCode:'',
+					// 预警备件表格-物料编码查询条件
+					warningMaterialCode:'',
+					// 预警备件表格-物料名称查询条件
+					warningMaterialName:'',
+					//预警备件表格-表格当前第几页
+					warningTableCurrentPage: 1,
+					//预警备件表格-表格一页显示几行
+					warningTablePrePage: 5,
+					//预警备件表格-备件下线表格一共几页数据
+					warningTableTotal: 0,
+					//预警备件表格-备件下线表格分页是否显示
+					warningSinglePage:false
+
+
+
+				};
+			},
+			computed: {
+
+			},
+			methods: {
+
+				//警告提示
+			  waringText(message) {
+			          this.$notify({
+			            title: '警告',
+			            message: message,
+			            type: 'warning',
+						duration: 3000
+			          });
+			        },
+				//成功提示
+				successText(message) {
+				        this.$notify({
+				          title: '成功',
+				          message: message,
+				          type: 'success',
+						  duration: 1000
+				        });
+				      },
+				//点击预警寿命警告文字触发
+				clickWarnText(code){
+					//33为型材330101M01
+					var targetNodeKey=code
+					var s=this.filteredTreeData
+					//判断是否存在指定节点
+					if( this.$refs.deviceTree.getNode(targetNodeKey)){
+						//若存在指定节点，则设置当前节点为指定节点（用于高亮显示当前节点）
+						this.$refs.deviceTree.setCurrentKey(targetNodeKey)
+						//展开指定节点
+						this.$refs.deviceTree.store.nodesMap[targetNodeKey].expanded = true;
+						// this.$refs.deviceTree.store.nodesMap["3301"].expanded = true;
+					}else {
+						//若不存在指定节点，则设置当前节点为null（清除当前节点的高亮效果）
+						//this.$refs.deviceTree.setCurrentKey()
+
+						}
+				},
+				// 设置预警寿命按钮点击
+				setWarnLife(){
+					//是否选中数据
+					var that = this
+					this.dialogVisibleLife=true
+					// 获取备件当前预警寿命
+					axios.post('/imc/customOpt', {
+								req: '232',
+								data: JSON.stringify({
+									"currentCode": this.currentCode,
+									"func": "warnLifeSelect",
+								})
+							})
+							.then(function(response) {
+								that.lifeNum=response.data.data.returnData['lifeNum']
+								that.earlyWarningNum=response.data.data.returnData['earlyWarningNum']
+							})
+							.catch(function(error) {
+							});
+				},
+				// 设置预警寿命按确定提交
+				lifeSumit(){
+					this.dialogVisibleLife = false;
+					var that = this
+
+					if(typeof this.lifeNum === 'undefined'||this.lifeNum<=0){
+						this.waringText('预警寿命设置错误')
+
+					}else{
+
+						axios.post('/imc/customOpt', {
+									req: '232',
+									data: JSON.stringify({
+										"currentCode": this.currentCode,
+										"func": "warnLifeSet",
+										"lifeNum":this.lifeNum,
+										"earlyWarningNum":this.earlyWarningNum,
+										"currentName":this.currentName
+									})
+								})
+								.then(function(response) {
+									var retrunData = response.data.data['status']
+									that.getMaterialsInfo(that.currentCode)
+									that.successText('备件预警寿命设置成功')
+								})
+								.catch(function(error) {
+								});
+
+					}
+				},
+				// 备件下线按钮
+				offLineOpt(){
+					//是否选中数据JSON.stringify(this.onLineTableSelectedData)!='{}')
+					if(JSON.stringify(this.onLineTableSelectedData)=='{}'){
+						this.waringText('请选择备件')
+					}else{
+					// this.offMaxNum>0 or
+						this.setDateTime(null)
+					    this.dialogVisible=true
+					}
+				},
+				//在线备件下线单行选中触发事件
+				offLineOpthandleCurrentChange(row){
+					const data = JSON.parse(JSON.stringify(row))
+					this.onLineTableSelectedData=data
+					this.outLineTableSelectedData=data
+					if(row){
+					this.offMaxNum=data['数量']
+					}
+				},
+				//下线弹窗确定提交
+				outLineSumit() {
+					this.dialogVisible = false;
+					var num=this.offNum
+					this.outLineTableSelectedData['数量']=num
+					this.setDateTime(this.currentDateTime)
+					var date1 = this.getMyDate()['date1']
+					var date2 = this.getMyDate()['date2']
+					var that = this
+					if(this.isDateInRange(this.currentDateTime, date1, date2,)){
+
+						axios.post('/imc/customOpt', {
+								req: '232',
+								data: JSON.stringify({
+									"currentCode": this.currentCode,
+									"currentDateTime": this.currentDateTime,
+									"offLineRemark":this.offLineRemark,
+									"offLineReason":this.offLineReason,
+									"func": "offLineOpt",
+									"offData": this.outLineTableSelectedData,
+									"offMaxNum":this.offMaxNum
+								})
+							})
+							.then(function(response) {
+								var retrunData = response.data.data['status']
+								that.getMaterialsInfo(that.currentCode)
+								that.successText('备件下线成功')
+								that.offLineRemark = ''
+							})
+							.catch(function(error) {
+							});
+					}else{
+						that.waringText('下线时间范围：'+date1+'~'+date2)
+					}
+
+				},
+
+				// 库存信息table复选框被勾选时触发
+				handleSelectionChange(row){
+
+					const data = JSON.parse(JSON.stringify(row))
+					this.inventoryTableSelectedData=data
+					if(row){
+					this.onMaxNum=data['数量']
+					}
+				},
+				onLineOpt(){
+					
+					//是否选中数据JSON.stringify(this.onLineTableSelectedData)!='{}')
+					if(JSON.stringify(this.inventoryTableSelectedData)=='{}'){
+						this.waringText('请选择备件')
+					}else{
+					// this.offMaxNum>0 or
+						// 创建一个 Date 对象，它将包含当前的日期和时间
+						this.setDateTime(null)
+
+						
+					    this.dialogVisibleOnLine=true
+					}
+				},
+				setDateTime(dateTime){
+			  	
+			  		let currentDate = ''
+			  		if((dateTime && dateTime instanceof Date)){
+						currentDate = dateTime
+					}
+			  		if(!dateTime){
+			  			currentDate = new Date()
+					}
+			  		if((dateTime && typeof dateTime === 'string')){
+			  			return
+					}
+					// 获取当前的年份、月份、日期、小时、分钟和秒
+					const year = currentDate.getFullYear();
+					const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // 月份从 0 到 11，所以需要加 1
+					const day = String(currentDate.getDate()).padStart(2, '0');
+					const hours = String(currentDate.getHours()).padStart(2, '0');
+					const minutes = String(currentDate.getMinutes()).padStart(2, '0');
+					const seconds = String(currentDate.getSeconds()).padStart(2, '0');
+					this.currentDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+
+				},
+				onLineSubmit(){
+					this.dialogVisibleOnLine = false;
+					var num=this.onNum
+					this.inventoryTableSelectedData['数量']=num
+					this.setDateTime(this.currentDateTime)
+					var that = this
+					axios.post('/imc/customOpt', {
+								req: '232',
+								data: JSON.stringify({
+									"currentCode": this.currentCode,
+									"currentName": this.currentName,
+									"onLineDateTime": this.currentDateTime,
+									"onLineRemark": this.onLineRemark,
+									"lifeNum": this.lifeNum,
+									"earlyWarningNum": this.earlyWarningNum,
+									"func": "onLineOpt",
+									"inventoryInfoList": this.inventoryTableSelectedData
+								})
+							})
+							.then(function(response) {
+								that.getInventoryInformation(that.currentCode)
+								that.getMaterialsInfo(that.currentCode)
+								that.successText('备件上线成功')
+								that.onLineRemark = ''
+								
+							})
+							.catch(function(error) {
+								
+							});
+				},
+				
+				// 点击左侧树节点时触发
+				// 1. 获取被点击的节点code
+				// 2.获取当前车间下能用的库存信息
+				handleNodeClick(data) {
+					this.currentCode = data.code
+					this.deviceCode = data.code
+					this.currentName=data.name
+					this.getInventoryInformation(data.code)
+					this.getMaterialsInfo(data.code)
+					if(data.code.length == 9 || data.code.length == 12){
+						this.getLifeCycleAndEarlyWarningNum(data.code)
+					}
+					// 在线备件table被勾选的数据
+					// 下线数量
+					this.offNum=1
+					this.offMaxNum=0
+					this.onNum=1
+					this.onMaxNum=0
+					this.onLineTableSelectedData={}
+					this.outLineTableSelectedData={}
+					
+					
+					
+				},
+				// 获取当前位置码的寿命周期和提前预警月数
+				// 设置预警寿命按钮点击
+				getLifeCycleAndEarlyWarningNum(code){
+					//是否选中数据
+					var that = this
+					// 获取备件当前预警寿命
+					axios.post('/imc/customOpt', {
+								req: '232',
+								data: JSON.stringify({
+									"currentCode": code,
+									"func": "warnLifeSelect",
+								})
+							})
+							.then(function(response) {
+								that.lifeNum=response.data.data.returnData['lifeNum']
+								that.earlyWarningNum=response.data.data.returnData['earlyWarningNum']
+							})
+							.catch(function(error) {
+							});
+				},
+				// 在线信息输入条件重置
+				restMaterial(code){
+			  		this.materialCode = ''
+			  		this.materialName = ''
+			  		this.materialStatus.length = 0
+					this.getMaterialsInfo(code)
+				},
+
+				// 获取九位码或十二位码下挂靠的物料信息
+				getMaterialsInfo(code){
+					var that = this
+					axios.post('/imc/customOpt', {
+								req: '232',
+								data: JSON.stringify({
+									"workshopcode": code,
+									"func": "getMaterialsInfo",
+									"currentPage": that.onLineTableCurrentPage,
+									"prePage":that.onLineTablePrePage,
+									"materialCode":JSON.stringify({'op': 'contains', 'value': this.materialCode}),
+									"materialName":JSON.stringify({'op': 'contains', 'value': this.materialName}),
+									"materialStatus":JSON.stringify({'op': 'equal', 'value': this.materialStatus.join("|")})
+								})
+							})
+							.then(function(response) {
+								
+								var onLineTableData = response.data.data.returnData.returnInfoList
+								
+								that.onLineTableData = onLineTableData
+
+								that.onLineTableTotal = response.data.data.returnData.total
+								if (that.onLineTableTotal > 1){
+									that.onLineSinglePage = false
+								}
+								else{
+									that.onLineSinglePage = true
+								}
+							})
+							.catch(function(error) {
+								
+							});
+				},
+				// 库存信息输入条件重置
+				restInventory(code){
+			  		this.inventoryCode = ''
+			  		this.inventoryName = ''
+			  		this.inventoryStatus.length = 0
+					this.getInventoryInformation(code)
+				},
+
+				// 获取库存信息
+				getInventoryInformation(code){
+			  		
+					var that = this
+					axios.post('/imc/customOpt', {
+								req: '232',
+								data: JSON.stringify({
+									"workshopcode": code,
+									"func": "getInventoryInformation",
+									"currentPage": that.offLineTableCurrentPage,
+									"prePage":that.offLineTablePrePage,
+									"inventoryCode":JSON.stringify({'op': 'contains', 'value': this.inventoryCode}),
+									"inventoryName":JSON.stringify({'op': 'contains', 'value': this.inventoryName}),
+									"inventoryStatus":JSON.stringify({'op': 'equal', 'value': this.inventoryStatus.join("|")})
+								})
+							})
+							.then(function(response) {
+								
+								var inventoryTableData = response.data.data.returnData.returnInfoList
+								
+								that.inventoryTableData = inventoryTableData
+								that.offLineTableTotal = response.data.data.returnData.total
+
+								if (that.offLineTableTotal > 1){
+									that.offLineSinglePage = false
+								}
+								else{
+									that.offLineSinglePage = true
+								}
+								
+							})
+							.catch(function(error) {
+								
+							});
+				},
+				// 加载 树数据   
+				loadNodeFunc(node, resolve) {
+					let that = this;
+
+					if (node.level === 0) {
+						that.loadtreeData(resolve);
+					}
+
+					if (node.level >= 1) {
+						this.getChildByList(node.data.code, resolve);
+						return resolve([]); // 加上这个，防止在该节点没有子节点时一直转圈的问题发生。
+					} 
+				},
+				loadtreeData( resolve) {      // 获取loadtreeData 就是父节点数据，getChildByList就是异步获取子节点数据
+					var that = this
+					axios.post('/imc/customOpt', {
+								req: '228',
+								data: JSON.stringify({
+									"parentId": 'root'
+								})
+							})
+							.then(function(response) {
+								
+								var treeData = response.data.data['treeData']
+								
+								that.treeData = treeData
+
+								resolve(treeData)
+								
+							})
+							.catch(function(error) {
+								
+							});
+				},
+				// 获取子节点请求
+				getChildByList( _parentID,resolve) {
+					var that = this
+					axios.post('/imc/customOpt', {
+								req: '228',
+								data: JSON.stringify({
+									"parentId": _parentID
+								})
+							})
+							.then(function(response) {
+								var treeData = response.data.data['treeData']
+								that.addToTreeData(treeData, _parentID)
+								resolve(treeData)
+								
+							})
+							.catch(function(error) {
+								
+							});
+				},
+				async  getChildNode(parentID) {
+					try {
+						const response = await axios.post('/imc/customOpt', {
+							req: '228',
+							data: JSON.stringify({
+								"parentId": parentID
+							})
+						});
+						const treeData = response.data.data['treeData'];
+						return treeData;
+					} catch (error) {
+						throw error;
+					}
+				},
+				
+				async fetchData(parentcode, currentCode) {
+					try {
+						
+						var returnData = await this.getChildNode(parentcode);
+						var treeData = this.treeData;
+						const findNodeByCode= (treeData, returnData, parentcode) =>{
+						
+						  for (const node of treeData) {
+							if (node.code.toString() === parentcode.toString()) {
+							  if (!node.children){
+									node.children = returnData;
+									return;
+							  }
+
+							}
+							if (node.children && node.children.length > 0) {
+							  findNodeByCode(node.children, returnData, parentcode);
+							}
+						  }
+						}
+						findNodeByCode(treeData, returnData, parentcode)
+						// 这里可以继续处理 treeData
+						this.$nextTick(() => {
+							this.$refs['deviceTree'].store.nodesMap[parseInt(parentcode)].expanded = true;
+							this.$refs['deviceTree'].store.nodesMap[parentcode].expanded = true;
+							// this.$refs['deviceTree'].store.nodesMap[parseInt(parentcode)].isCurrent = false;
+							// this.$refs['deviceTree'].store.nodesMap[parentcode].isCurrent = false;
+							// this.$refs['deviceTree'].store.nodesMap[parseInt(currentCode)].isCurrent = true;
+							// this.$refs['deviceTree'].store.nodesMap[currentCode].isCurrent = true;
+					})
+					} catch (error) {
+						console.error(error);
+					}
+				},
+
+
+				addToTreeData(returnData, parentcode) {
+				  this.findNodeByCode(this.treeData, returnData, parentcode);
+				},
+
+				// 辅助方法：根据节点code在树数据中查找节点
+				findNodeByCode(treeData, returnData, parentcode) {
+			  	
+				  for (const node of treeData) {
+					if (node.code.toString() === parentcode.toString()) {
+					  // 在treeData中找到对应的父节点
+					  if (!node.children) {
+						node.children = [];
+					  }
+					  node.children = returnData;
+					  return;
+					}
+					if (node.children && node.children.length > 0) {
+					  this.findNodeByCode(node.children, returnData, parentcode);
+					}
+				  }
+				},
+				formatDate(date) {
+					const year = date.getFullYear();
+					const month = String(date.getMonth() + 1).padStart(2, '0');
+					const day = String(date.getDate()).padStart(2, '0');
+					return `${year}-${month}-${day}`;
+				},
+				getMyDate() {
+					// 获取当前日期
+					const today = new Date();
+
+					// 计算上个月的年份和月份
+					const lastMonthYear = today.getMonth() > 0 ? today.getFullYear() : today.getFullYear() - 1;
+					const lastMonthMonth = today.getMonth() > 0 ? today.getMonth() : 12;
+
+					// 创建上个月29号和本月28号的日期
+					const lastMonth29 = new Date(lastMonthYear, lastMonthMonth - 1, 29);
+					const thisMonth28 = new Date(today.getFullYear(), today.getMonth(), 28);
+
+					// 如果当前日小于等于28
+					if (today.getDate() <= 28) {
+						// 检查上个月是否有29号
+						if (lastMonth29.getMonth() === lastMonthMonth - 1) {
+							return {'date1':this.formatDate(lastMonth29), 'date2': this.formatDate(thisMonth28)};
+						} else {
+							// 返回本月1号日期和本月28号日期
+							const thisMonth1 = new Date(today.getFullYear(), today.getMonth(), 1);
+							return {'date1':this.formatDate(thisMonth1), 'date2':this.formatDate(thisMonth28)};
+						}
+					} else {  // 如果当前日大于28
+						// 计算下个月的年份和月份
+						const nextMonthYear = today.getMonth() < 11 ? today.getFullYear() : today.getFullYear() + 1;
+						const nextMonthMonth = today.getMonth() < 11 ? today.getMonth() + 1 : 1;
+
+						// 创建本月29号和下个月28号的日期
+						const thisMonth29 = new Date(today.getFullYear(), today.getMonth(), 29);
+						const nextMonth28 = new Date(nextMonthYear, nextMonthMonth - 1, 28);
+
+						return {'date1': this.formatDate(thisMonth29), 'date2': this.formatDate(nextMonth28)};
+					}
+				},
+				isDateInRange(targetDate, startDate, endDate) {
+					// 将字符串日期转换为 Date 对象
+					const target = new Date(targetDate);
+					const start = new Date(startDate);
+					const end = new Date(endDate);
+
+					// 检查日期是否在范围内
+					return target >= start && target <= end;
+				},
+				handleSizeChange(e, type){
+			  		if(type=='onLine'){
+			  			this.onLineTablePrePage = e
+						this.getMaterialsInfo(this.currentCode)
+					}
+			  		if(type=='offLine'){
+			  			this.offLineTablePrePage = e
+						this.getInventoryInformation(this.currentCode)
+					}
+			  		if(type=='warning'){
+			  			this.warningTablePrePage = e
+						this.getWarningInfo()
+					}
+				},
+				handleCurrentChange(e, type){
+			  	
+			  		if(type=='onLine'){
+			  			this.onLineTableCurrentPage = e
+						this.getMaterialsInfo(this.currentCode)
+					}
+			  		if(type=='offLine'){
+			  			this.offLineTableCurrentPage = e
+						this.getInventoryInformation(this.currentCode)
+					}
+			  		if(type=='warning'){
+			  			this.warningTableCurrentPage = e
+						this.getWarningInfo()
+					}
+				},
+
+				// 使用计算属性过滤Tree节点
+				filteredTreeData(){
+					
+					if (!this.keyword) {
+						return this.treeData;
+					}
+					var expandCode = ''
+					var currentCode = ''
+					// 根据输入值获取 2 4 6 9 12位码
+					var code2 = this.keyword.substring(0,2)
+					var code4 = this.keyword.substring(0,4)
+					var code6 = this.keyword.substring(0,6)
+					var code9 = this.keyword.substring(0,9)
+					var code12 = this.keyword.substring(0,12)
+					if(code2.length == 2){
+						// 获取节点数据
+						this.fetchData('root', code2)
+					}
+					if(code4.length == 4){
+						// 获取节点数据
+						this.fetchData(code2, code4)
+					}
+					if(code6.length == 6){
+						// 获取节点数据
+						this.fetchData(code4, code6)
+					}
+					if(code9.length == 9){
+						// 获取节点数据
+						this.fetchData(code6, code9)
+					}
+					if(code12.length == 12){
+						// 获取节点数据
+						this.fetchData(code9, code12)
+					}
+					// const filterNodes = (data) => {
+					// 	return data.filter((node) => {
+					// 		if (node.name.includes(this.keyword) || node.code.toString().includes(this.keyword)) {
+					// 			return true;
+					// 		}
+					//
+					// 		if (node.children && node.children.length > 0) {
+					// 			node.children = filterNodes(node.children);
+					// 			return node.children.length > 0;
+					// 		}
+					//
+					// 		return false;
+					// 	});
+					// };
+
+
+				},
+				getWarningInfo(){
+			  		this.dialogVisibleWarning = true
+					var that = this
+					axios.post('/imc/customOpt', {
+								req: '232',
+								data: JSON.stringify({
+									"func": "getWarningInfo",
+									"currentPage": this.warningTableCurrentPage,
+									"prePage":this.warningTablePrePage,
+									"deviceCode":JSON.stringify({'op': 'beginwith', 'value': this.deviceCode}),
+									"warningMaterialCode":JSON.stringify({'op': 'contains', 'value': this.warningMaterialCode}),
+									"warningMaterialName":JSON.stringify({'op': 'contains', 'value': this.warningMaterialName})
+								})
+							})
+							.then(function(response) {
+								
+								var warningTableData = response.data.data.returnData.returnInfoList
+
+								that.warningTableData = warningTableData
+
+								that.warningTableTotal = response.data.data.returnData.total
+								if (that.warningTableTotal > 1){
+									that.warningSinglePage = false
+								}
+								else{
+									that.warningSinglePage = true
+								}
+							})
+							.catch(function(error) {
+
+							});
+				},
+				restWarningInfo(){
+			  		this.warningMaterialCode = ''
+			  		this.warningMaterialName = ''
+			  		this.deviceCode = ''
+					this.getWarningInfo()
+				},
+				getCellStyle(value) {
+			  	
+				  // 根据值设置样式
+				  if (value > 0) {
+					return { color: 'orange', fontWeight: 800, fontSize: '24px' };
+				  }
+				  else{
+				  	return { color: 'red', fontWeight: 800, fontSize: '24px' };
+				  }
+				}
+
+
+		}
+		});
+
+		app.use(ElementPlus);
+		app.mount('#app');
+	</script>
+
+<style>
+	/*表格选中行高亮颜色改变*/
+	.el-table--striped .el-table__body tr.el-table__row--striped.current-row td, .el-table__body tr.current-row>td {
+		color: #fff;
+		background-color: #a2a4a7!important;
+	},
+
+	/*轮翻消息*/
+	.bs-sysMsg {
+	    position: relative;
+	    display: flex;
+	    width: 100%;
+	    padding: 30px 12px;
+	    margin-bottom: 10px;
+	    border-radius: 2px;
+	    color: #red;
+	    /* background-color: #fdf6ec; */
+	    overflow: hidden;
+	    opacity: 1;
+	    align-items: center;
+	    transition: opacity .2s;
+		text-align: left;
+	}
+	.bs-sysMsg .msg__content {
+	    display: table-cell;
+	    padding: 0 8px;
+	    width: 100%;
+	}
+	.bs-sysMsg .msg__content a.item {
+	    color: red;
+	    font-size: 18px;
+	    opacity: 1;
+	}
+	.bs-sysMsg .msg__content a.item:hover{text-decoration: underline;}
+	.btn {
+	  border: none;
+	  background-color: inherit;
+	  padding: 0 8px;
+	  font-size: 17px;
+	  cursor: pointer;
+	  display: inline-block;
+	  opacity: 1;
+	}
+	/* 鼠标悬停 */
+	.btn:hover {background: white;}
+	.danger {color: red;text-decoration: underline;}
+	/* 加载完成前不显示文本 */
+	[v-cloak] {
+		display: none !important;
+	}
+
+
+</style>

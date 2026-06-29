@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>资质上传</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1, maximum-scale=1">
+		<meta http-equiv="Expires" content="0">
+		<meta http-equiv="Pragma" content="no-cache">
+		<meta http-equiv="Cache-control" content="no-cache">
+		<meta http-equiv="Cache" content="no-cache">
+		<meta name="referrer" content="no-referrer">
+		<meta http-equiv="Access-Control-Allow-Origin" content="*" />
+		<!-- import CSS -->
+		<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+		<script src="./elementui/js/jquery-3.7.0.min.js"></script>
+	</head>
+	<body>
+		<div id="app">
+			<template>
+				<!--移动端界面-->
+				<div v-if="pagetype=='mobile'">
+					<div style="margin-top: 20%" v-if="PageShow==1">
+						<el-form ref="form" :model="form" label-width="70px" size="mini">
+							<el-form-item label="公司名称">
+								<el-input v-model="form.gsmc"></el-input>
+							</el-form-item>
+							<el-form-item label="联系人">
+								<el-input v-model="form.lxr"></el-input>
+							</el-form-item>
+							<el-form-item label="联系电话">
+								<el-input v-model="form.lxdh"></el-input>
+							</el-form-item>
+							<el-form-item label="是否法人">
+								<el-radio-group v-model="form.sffr">
+									<el-radio label="是"></el-radio>
+									<el-radio label="否"></el-radio>
+								</el-radio-group>
+							</el-form-item>
+							<el-form-item label="用途">
+								<el-select v-model="form.yt" placeholder="请选择用途...">
+									<el-option label="生活服务公司采购物资报价" value="生活服务公司采购物资报价"></el-option>
+									<el-option label="装备客户管理" value="装备客户管理"></el-option>
+									<el-option label="XXXXXXXXX" value="XXXXXXXXX"></el-option>
+								</el-select>
+							</el-form-item>
+						</el-form>
+						<div style="text-align: center;margin-top: 20%;">
+							<el-button type="primary" @click="onSubmit" size="mini">下一步</el-button>
+						</div>
+					</div>
+
+					<!--法人上传界面-->
+					<div style="margin-top: 20%" v-if="PageShow==2 && form.sffr=='是'">
+						{{ID}}：我是法人
+						<el-button type="primary" @click="backPage">上一步</el-button>
+					</div>
+
+					<!--委托人上传界面-->
+					<div style="margin-top: 20%" v-if="PageShow==2 && form.sffr=='否'">
+						{{ID}}：我是委托人
+						<el-button type="primary" @click="backPage">上一步</el-button>
+					</div>
+				</div>
+
+
+				<!--电脑端界面-->
+				<div v-if="pagetype=='pc'">
+					<div style="margin-top: 3%; padding: 10px;" v-if="PageShow==1">
+						<el-form ref="form" :model="form" label-width="80px">
+							<el-form-item label="公司名称">
+								<el-input v-model="form.gsmc"></el-input>
+							</el-form-item>
+							<el-form-item label="联系人">
+								<el-input v-model="form.lxr"></el-input>
+							</el-form-item>
+							<el-form-item label="联系电话">
+								<el-input v-model="form.lxdh"></el-input>
+							</el-form-item>
+							<el-form-item label="是否法人">
+								<el-radio-group v-model="form.sffr">
+									<el-radio label="是"></el-radio>
+									<el-radio label="否"></el-radio>
+								</el-radio-group>
+							</el-form-item>
+							<el-form-item label="用途">
+								<el-select v-model="form.yt" placeholder="请选择用途...">
+									<el-option label="生活服务公司采购物资报价" value="生活服务公司采购物资报价"></el-option>
+									<el-option label="装备客户管理" value="装备客户管理"></el-option>
+									<el-option label="XXXXXXXXX" value="XXXXXXXXX"></el-option>
+								</el-select>
+							</el-form-item>
+						</el-form>
+						<div style="text-align: center">
+							<el-button type="primary" @click="onSubmit">下一步</el-button>
+						</div>
+					</div>
+
+					<!--法人上传界面-->
+					<div style="margin-top: 20%" v-if="PageShow==2 && form.sffr=='是'">
+						{{ID}}：我是法人
+						<el-button type="primary" @click="backPage">上一步</el-button>
+					</div>
+
+					<!--委托人上传界面-->
+					<div style="margin-top: 20%" v-if="PageShow==2 && form.sffr=='否'">
+						{{ID}}：我是委托人
+						<el-button type="primary" @click="backPage">上一步</el-button>
+					</div>
+				</div>
+
+			</template>
+		</div>
+	</body>
+	<script src="./elementui/js/vue.js"></script>
+	<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	<script>
+		new Vue({
+			el: '#app',
+			data: {
+				PageShow: 1,
+				pagetype: '',
+				form: {
+					gsmc: '',
+					lxr: '',
+					lxdh: '',
+					sffr: '',
+					yt: ''
+				},
+				return_ID: ''
+			},
+			mounted() {
+				this.isMobile();
+				// this.GetQueryString();
+			},
+			methods: {
+				isMobile() {
+					// 获取用户代理字符串
+					var userAgent = navigator.userAgent;
+					// 判断是否为手机设备
+					var isMobile = /Mobile|Android|iPhone|iPad|iPod|Windows Phone/i.test(userAgent);
+					// 输出判断结果
+					if (isMobile) {
+						this.pagetype = 'mobile';
+					} else {
+						this.pagetype = 'pc';
+					}
+				},
+
+				GetQueryString() {
+					const searchParams = new URLSearchParams(window.location.search);
+					const params = {};
+					for (const [key, value] of searchParams.entries()) {
+						params[key] = value;
+					}
+					const arr = params['imgUrls'].split(',');
+					for (i = 0; i < arr.length; i++) {
+						arr[i] = arr[i].replace(/\*/g, '&');
+					}
+					//this.imgUrls = arr;
+				},
+
+				onSubmit() {
+					var that = this;
+					var postData = {
+						req: 230,
+						data: '[{"gsmc":"' + this.form.gsmc + '", "lxr":"' + this.form.lxr + '", "lxdh":"' + this.form.lxdh + '", "sffr":"' + this.form.sffr + '", "yt":"' + this.form.yt + '"}]'
+					};
+
+					axios.post('https://www.shtggroup.com/imc/customOpt', postData)
+						// axios.post('http://192.168.3.88:8080/imc/customOpt', postData)
+						.then(response => {
+							// 请求成功处理响应数据
+							console.log('响应数据:', response.data);
+							that.return_ID = response.data.msg;
+							that.PageShow = 2;
+						})
+						.catch(error => {
+							// 请求失败处理错误
+							console.error('请求失败:', error);
+						});
+				},
+				backPage() {
+					this.PageShow = 1;
+				},
+
+
+			}
+		})
+	</script>
+	<style>
+
+	</style>
+</html>

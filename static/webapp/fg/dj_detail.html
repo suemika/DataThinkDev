@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>车辆登记</title>
+     <link rel="stylesheet" href="../../webapp/fg/css/style.css">
+
+
+    <script src="../../easyui/js-easyui/mint-ui/vue.js"></script>
+    <script src="../../easyui/js-easyui/mint-ui/index.js"></script>
+    <script src="../../easyui/js-easyui/mint-ui/vue-resource.min.js"></script>
+    <script src="../../easyui/js-easyui/jquery-3.3.1.min.js"></script>
+
+    <script type="text/javascript">
+	//获得页面传过来的参数
+	function GetQueryString(name)
+	{
+		 var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+		 var r = window.location.search.substr(1).match(reg);
+		 if(r!=null)return  unescape(r[2]); return null;
+	}
+
+	</script>
+
+</head>
+<body>
+
+
+
+<div id="app" >
+<mt-header  title="下发委托"></mt-header>
+
+                <mt-field label="订单编号" placeholder="请输入" v-model="ddbh"  readonly="true"  ></mt-field>
+                <mt-field label="是否长协" placeholder="请输入" v-model="sfcx"  readonly="true"  ></mt-field>
+                <mt-field label="物料编码" placeholder="请输入" v-model="wlbm"  readonly="true"  ></mt-field>
+                <mt-field label="物料名称" placeholder="请输入" v-model="wlmc"  readonly="true"  ></mt-field>
+                <mt-field label="车号" placeholder="请输入" v-model="ch"  ></mt-field>
+                <mt-field label="加工点" placeholder="请选择" v-model="jgd"   @click.native="qry_jgd" ></mt-field>
+                <mt-field label="法人单位" placeholder="请选择" v-model="frdw"  @click.native="qry_frdw" ></mt-field>
+                <mt-field label="收款账号" placeholder="请选择" v-model="skzh"  readonly="true" ></mt-field>
+                <mt-field label="货主" placeholder="请输入" v-model="hz"  ></mt-field>
+                <mt-field label="预计到厂时间" placeholder="请输入" type="date"   v-model="yjdcsj"  ></mt-field>
+                <mt-field label="预计重量（吨）" placeholder="请输入"  type="number" v-model="yjzl"  ></mt-field>
+                <mt-field label="预计料型" placeholder="请输入" v-model="yjlx"  ></mt-field>
+                <mt-field label="对方毛重（吨）" placeholder="请输入"  type="number" v-model="dfmz"  ></mt-field>
+                <mt-field label="毛重时间" placeholder="请输入"  type="date"  v-model="mzsj"  ></mt-field>
+                <mt-field label="对方皮重（吨）" placeholder="请输入"  type="number" v-model="dfpz"  ></mt-field>
+
+    <mt-button  type="danger" size="large"  :disabled="btn_dj"  @click.native="dj">确定</mt-button>
+
+
+    <mt-popup v-model="popupVisible" popup-transition="popup-fade" position="bottom">
+              <div class="picker-toolbar-title">
+                <div class="usi-btn-cancel" @click="popupVisible = !popupVisible">取消</div>
+                <div class="">加工点选择</div>
+                <div class="usi-btn-sure" @click="addrConfirm">确定</div>
+              </div>
+              <mt-picker ref='picker' :slots="slots" value-key='name' @change="onValuesChange"></mt-picker>
+    </mt-popup>
+
+        <mt-popup v-model="popupVisible1" popup-transition="popup-fade" position="bottom">
+              <div class="picker-toolbar-title">
+                <div class="usi-btn-cancel" @click="popupVisible1 = !popupVisible1">取消</div>
+                <div class="">法人单位选择</div>
+                <div class="usi-btn-sure" @click="addrConfirm1">确定</div>
+              </div>
+              <mt-picker ref='picker' :slots="slots1" value-key='name' @change="onValuesChange1"></mt-picker>
+    </mt-popup>
+
+
+</div>
+
+
+
+<script>
+
+    new Vue({
+      el: '#app',
+      data:{
+
+            ddbh:'',
+            sfcx:'',
+            wlbm:'',
+            wlmc:'',
+            ch:'',
+            jgd:'',
+            frdw:'',
+            skzh:'',
+            hz:'',
+            yjdcsj:'',
+            yjzl:'',
+            yjlx:'',
+            dfmz:'',
+            mzsj:'',
+            dfpz:'',
+            ddID:'',
+            ddflID:'',
+            wlID:'',
+
+            btn_dj:false,
+
+
+          tmp_jgd:'',
+          popupVisible:false,
+          slots:[],
+          slots2:
+				[
+					{
+						values: ['年假33434343434', '事假34324234层次23423v23', '病假', '婚假', '其他', '婚假']
+					}
+
+				],
+          tmp_frdw:'',
+          popupVisible1:false,
+          slots1:[],
+
+
+
+
+      },
+        http: { headers: {'Content-Type': 'application/x-www-form-urlencoded'} },
+      methods: {
+
+           dj:function(){
+
+                 if(this.ch=='' || this.ch==undefined ){
+                     alert('请输入车号');
+                     return;
+                 }
+                 if(this.jgd=='' || this.jgd==undefined ){
+                     alert('请选择加工点');
+                     return;
+                 }
+                 if(this.frdw=='' || this.frdw==undefined ){
+                     alert('请选择法人单位');
+                     return;
+                 }
+                 if(this.yjdcsj=='' || this.yjdcsj==undefined ){
+                     alert('请输入预计到厂时间');
+                     return;
+                 }
+                 var jsondata = '[{"ddID":"'+this.ddID+'","ch":"'+this.ch+'","yjlx":"'+this.yjlx+'","jgd":"'+this.jgd+'","yjzl":"'+this.yjzl+'","yjdcsj":"'+this.yjdcsj+'","dfmz":"'+this.dfmz+'","mzsj":"'+this.mzsj+'","dfpz":"'+this.dfpz+'","hz":"'+this.hz+'","ddflID":"'+this.ddflID+'","frdw":"'+this.frdw+'","skzh":"'+this.skzh+'","wlID":"'+this.wlID+'"}]';
+                this.btn_dj=true;
+                document.getElementById('app').style.background = '#D3D3D3';
+                var param=GetQueryString("ID");
+                if (param!=''|| param!=null){
+                  //  var data = '[{ "业务单号": "' + param+ '" }]';
+                    this.$http.post('/imc/customOpt',{
+                            req: '36',
+                            data: jsondata
+                        }, {emulateJSON:true}).then
+                        (function(res) {
+                            document.getElementById('app').style.background = '#ffffff';
+                            alert(res.data.msg);
+                            // window.location.reload();
+                             //window.location.href="https://www.shtggroup.com/mobile/ylxc/main.html?id=排队";
+                        },function(res){
+                            console.log(res.status);
+                        });
+
+
+
+                }
+
+
+           },
+
+         qry_jgd:function(){
+                this.popupVisible = true;
+         },
+
+          onValuesChange(picker, values) {
+            this.tmp_jgd = values[0];
+          },
+          addrConfirm() {
+
+               if(this.tmp_jgd=='' || this.tmp_jgd==undefined ){
+                   this.tmp_jgd =this.slots[0].values[0];
+               }
+               this.jgd =  this.tmp_jgd ;
+            this.popupVisible = false;
+          },
+          qry_frdw:function(){
+                this.popupVisible1 = true;
+         },
+
+          onValuesChange1(picker, values) {
+            this.tmp_frdw = values[0];
+          },
+          addrConfirm1() {
+               if(this.tmp_frdw=='' || this.tmp_frdw==undefined ){
+                   this.tmp_frdw =this.slots1[0].values[0];
+               }
+              this.frdw =  this.tmp_frdw ;
+              this.popupVisible1 = false;
+
+               this.$http.post('/imc/queryData',{
+                             req:'m143Req',
+                             page:1,
+                             rows:1000,
+                             sort:'收款单位',
+                             order:'desc',
+                             filterRules:'[{"field":"收款单位","op":"equal","value":"'+this.frdw +'"}]',
+                             pid:''
+                        }, {emulateJSON:true}).then
+                        (function(res) {
+                            var data = res.data.rows;
+                            this.skzh= data[0].收款账户;
+                        },function(res){
+                            console.log(res.status);
+                        });
+
+          },
+
+
+
+
+            },
+        mounted: function () {
+
+                var self = this;
+                var param=GetQueryString("ID");
+                if (param!=''|| param!=null){
+
+                    this.$http.post('/imc/queryData',{
+                             req:'m141Req',
+                             page:1,
+                             rows:10,
+                             sort:'下单日期',
+                             order:'desc',
+                             filterRules:'[{"field":"订单分录ID","op":"equal","value":"'+param+'"}]',
+                             pid:''
+                        }, {emulateJSON:true}).then
+                        (function(res) {
+                            var data = res.data.rows;
+                            self.ddbh=data[0].订单编号;
+                            self.sfcx=data[0].是否长协;
+                            self.wlbm=data[0].物料编码;
+                            self.wlmc=data[0].物料名称;
+                            self.ddID=data[0].订单ID;
+                            self.ddflID=data[0].订单分录ID;
+                            self.wlID=data[0].物料ID;
+
+                        },function(res){
+                            console.log(res.status);
+                        });
+
+
+
+                }
+
+                 this.$http.post('/imc/queryData',{
+                             req:'m142Req',
+                             page:1,
+                             rows:1000,
+                             sort:'加工点编码',
+                             order:'desc',
+                            // filterRules:'[{"field":"PID","op":"equal","value":"'+param+'"}]',
+                             filterRules:'[]',
+                             pid:''
+                        }, {emulateJSON:true}).then
+                        (function(res) {
+                            var data = res.data.rows;
+
+
+                            var  item = {};
+                            var  arry=[];
+                             for(let i = 0,len = data.length; i < len; ++i){
+                                arry.push(data[i].加工点名称);
+					         }
+                            item['values'] =arry;
+                            this.slots.push(item);
+
+
+                        },function(res){
+                            console.log(res.status);
+                        });
+
+                this.$http.post('/imc/queryData',{
+                             req:'m143Req',
+                             page:1,
+                             rows:1000,
+                             sort:'收款单位',
+                             order:'desc',
+                            // filterRules:'[{"field":"PID","op":"equal","value":"'+param+'"}]',
+                             filterRules:'[]',
+                             pid:''
+                        }, {emulateJSON:true}).then
+                        (function(res) {
+                            var data = res.data.rows;
+
+                            var  item = {};
+                            var  arry=[];
+                             for(let i = 0,len = data.length; i < len; ++i){
+                                arry.push(data[i].收款单位);
+					         }
+                            item['values'] =arry;
+                            this.slots1.push(item);
+
+
+                        },function(res){
+                            console.log(res.status);
+                        });
+
+
+
+
+      }
+
+
+    })
+</script>
+
+
+<style>
+
+
+    span{
+
+        display: block;
+        color: #884488;
+        margin-bottom: 2px;
+    }
+
+     .input_ch  {
+        height:25px;
+        align:middle;
+        width:200px;
+        font-size: large;
+
+    }
+     .input_yjdcsj {
+        height:25px;
+        align:middle;
+        width:200px;
+        font-size: large;
+
+    }
+
+    .mint-header {
+  background: #fff;
+  color: #666;
+  font-size: 16px;
+}
+
+.mint-popup {
+  width: 100%;
+}
+
+.picker-toolbar-title {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  height: 40px;
+  line-height: 40px;
+  font-size: 16px;
+  background: #f5f5f5;
+}
+
+.usi-btn-cancel,
+.usi-btn-sure {
+  color: #108EE9;
+}
+
+
+    #app{
+        background: #ffffff;
+    }
+
+
+</style>
+</body>
+</html>

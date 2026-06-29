@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消息中心</title>
+    <link rel="stylesheet" href="./CSS/message.css">
+    <script src="./JS/message.js" defer></script>
+</head>
+
+<body>
+    <div class="container">
+        <!-- 消息列表页 -->
+        <div id="list-page" class="page active">
+            <h2 class="message_title">精益通知</h2>
+            <div class="message-list" id="message-list">
+                <!-- 消息列表将通过JS动态生成 -->
+            </div>
+        </div>
+
+        <!-- 消息详情页 -->
+        <div id="detail-page" class="page">
+            <div class="back-button" id="back-button">← 返回消息列表</div>
+            <div class="detail-card" id="detail-content">
+                <!-- 详情内容将通过JS动态生成 -->
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

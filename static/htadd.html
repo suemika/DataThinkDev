@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		
+				   
+	  
+	 
+		<script src="http://cdn.staticfile.org/jquery/2.1.1/jquery.min.js" type="text/javascript"></script>
+		<!-- bootstrap -->
+		<link href="http://cdn.staticfile.org/twitter-bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
+		<script src="http://cdn.staticfile.org/twitter-bootstrap/3.3.1/js/bootstrap.min.js" type="text/javascript"></script>
+		<!-- bootstrap-select -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+		
+
+ 
+		
+	</head>
+	<body>
+		<div class="container" style="max-width:90%!important">
+			
+		  <div class="page-header" style="text-align: center;">
+		      <h1>合同登记表</h1>
+		  </div>
+		 
+		    <div class="row">
+		      <div class="col-xs-12 col-sm-6">
+					<p>合同编码：</p>
+		      </div>
+		      <div class="col-xs-12 col-sm-6">
+					<p>公司名称：</p>
+		      </div>
+		    </div>
+			<div class="row">
+			  <div class="col-xs-12 col-sm-6">
+					<input type="text" class="form-control" id ="conFumber" readonly>
+			  </div>
+			  <div class="col-xs-6 col-sm-6">	
+				<select class="form-control" id="companyName" onchange="changeHTID()">
+					<option value="SHTG">石横特钢集团有限公司</option>
+					<option value="FG">肥城石横特钢机械制造有限公司</option>
+					<option value="TD">肥城市桃都新能源有限公司</option>
+					<option value="ASD">山东阿斯德科技有限公司</option>
+				</select>
+			  </div>
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-6">
+					<span class="require">*</span><span>合同名称：</span>
+				</div>
+				<div class="col-xs-12 col-sm-6">
+					<p>项目名称：</p>
+				</div>
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-6">
+					<input type="text" class="form-control" id="conName" >
+				</div>
+				<div class="col-xs-12 col-sm-6">	
+						
+					<select class="selectpicker show-tick form-control" data-live-search="true" id="projectName">
+						
+				   </select>
+					  
+				</div>
+			</div>
+			
+			
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<p>登记日期：</p>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<p>是否盖章：</p>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<p>盖章份数：</p>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<p>盖章日期：</p>
+				</div>
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					
+					<div class="form-group">
+					  <input type="date" class="form-control" id="signDate" readonly>
+					</div>
+					
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<select class="form-control" id="sealFlag">
+						<option>否</option>
+						<option>是</option>
+					</select>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"  id="sealNum">
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="date" class="form-control"  id="sealDate">
+				</div>
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>合同分类：</span>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>项目来源：</span>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<p>开工令号：</p>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>
+						是否对方合同：
+					</span>
+				</div>
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<select class="form-control" id="conType" onchange="changeHTID()">
+						<option value="XM">技改项目</option>
+						<option value="RX">日常维修</option>
+						<option value="ZX">专业维修</option>
+						<option value="XX">大项修</option>
+						<option value="ICP">信息服务</option>
+						<option value="YP">研发</option>
+					</select>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<select class="form-control" id="proSource">
+						<option>开工令</option>
+						<option>检修计划</option>
+						<option>委外单</option>
+						<option>报告</option>
+						<option>其他</option>
+					</select>
+				</div>
+				<div class="col-xs-12 col-sm-3">			
+					<input type="text" class="form-control"  id="orderNum">
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<select class="form-control" id="targetCon">
+						<option>是</option>
+						<option>否</option>
+					</select>
+				</div>
+			</div>
+			
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-4">
+					<p>费用归属单位：</p>
+				</div>
+				<div class="col-xs-12 col-sm-4" >
+					<p id="fyzxTitle">招投标编码：</p>
+				</div>
+				<div class="col-xs-12 col-sm-4">
+					<p id="fyjeTitle">计划编号：</p>
+				</div>
+				
+			</div>
+			<div class="row">
+				<div class="col-xs-12 col-sm-4">
+					<select class="form-control" id="costUnit">
+						<option>外部</option>
+						<option>内部</option>
+					</select>
+				</div>
+				<div class="col-xs-12 col-sm-4" id="fyzxInput">
+					<input type="text" class="form-control"  id="tenderNum">
+				</div>
+				<div class="col-xs-12 col-sm-4" id="fyjeInput">
+					<input type="text" class="form-control"  id="planNum">
+				</div>
+			</div>
+			
+			
+			<div class="row" id="titleShow" style="display:none">
+				
+			</div>
+			<div class="row" id="inputShow" style="display:none">
+				
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-12">
+					<span class="require">*</span><span>合同付款约定：</span>
+				</div>				
+			</div>
+			<div class="row">
+				<div class="col-xs-12 col-sm-12">
+					<input type="text" class="form-control" placeholder="请填写合同中付款的约定" id="payment">
+				</div>				
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-12">
+					<span class="require">*</span><span>合同内容：</span>
+				</div>				
+			</div>
+			<div class="row">
+				<div class="col-xs-12 col-sm-12">
+					<textarea class="form-control" id="content"></textarea> 
+				</div>				
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-4">
+					<span class="require">*</span><span>付款方式：</span>
+				</div>
+				<div class="col-xs-12 col-sm-4">
+					<span class="require">*</span><span>合同金额（元）：</span>
+				</div>
+				<div class="col-xs-12 col-sm-1">
+				</div>				
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>经办人：</span>
+				</div>		
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-4">
+					<select class="form-control" id="payType">
+						<option>银行承兑</option>
+						<option>商业承兑</option>
+						<option>电汇</option>
+						<option>现汇</option>
+					</select>
+				</div>
+				<div class="col-xs-12 col-sm-4">
+					<input type="text" class="form-control" id="amount">
+					
+				</div>
+				<div class="col-xs-12 col-sm-1">
+					
+					<div class="form-check form-switch" >
+					      <input class="form-check-input" style="width:40px;margin-right: 8px;" type="checkbox" id="amountflag" name="darkmode" value="yes" checked>
+					      <label class="form-check-label" for="mySwitch">暂估价</label>
+					    </div>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control" id="agentPer">
+				</div>		
+			</div>
+			
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-4">
+					<span>税率（%）：</span>
+				</div>
+				<div class="col-xs-12 col-sm-4">
+					<span class="require">*</span><span>税额（元）：</span>
+				</div>
+						
+				<div class="col-xs-12 col-sm-4">
+					<span class="require">*</span><span>不含税金额：</span>
+				</div>		
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-4">
+					<input type="text" class="form-control" id="taxRate">
+				</div>
+				<div class="col-xs-12 col-sm-4">
+					<input type="text" class="form-control" id="taxAmount">
+					
+				</div>
+				<div class="col-xs-12 col-sm-4">
+					<input type="text" class="form-control" id="taxNotAmount">
+				</div>		
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>签订日期：</span>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>开工日期：</span>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>竣工日期：</span>
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<span>实际完工日期：</span>
+				</div>		
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<input type="date" class="form-control"  id="enterDate">
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="date" class="form-control"  id="startDate">
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="date" class="form-control"  id="finishDate">
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<input type="date" class="form-control"  id="actFinishDate">
+				</div>		
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>对方单位：</span>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>对方地址：</span>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>对方签订人：</span>
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<p>对方联系方式：</p>
+				</div>		
+			</div>
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"  id="customerName">
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"  id="customerAdress">
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control" id="customerSigner" >
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control" id="customerPhone" >
+				</div>		
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>第一次付款比例（%）：</span>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>第一次付款金额（元）：</span>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>第一次款日期：</span>
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>第一次付款类型：</span>
+				</div>		
+			</div>
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"  id="fristScale">
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"  id="fristAmount">
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="date" class="form-control"   id="fristDate">
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control" placeholder="如:预付款、全款等" id="fristType">
+				</div>		
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<p>第二次付款比例（%）：</p>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<p>第二次付款金额（元）：</p>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<p>第二次款日期：</p>
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<p>第二次付款类型：</p>
+				</div>		
+			</div>
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"   id="secondScale">
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"  id="secondAmount">
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="date" class="form-control"  id="secondDate">
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control" placeholder="如:进度款等"  id="secondType">
+				</div>		
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<p>第三次付款比例（%）：</p>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<p>第三次付款金额（元）：</p>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<p>第三次款日期：</p>
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<p>第三次付款类型：</p>
+				</div>		
+			</div>
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"  id="thirdScale">
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"  id="thirdAmount">
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="date" class="form-control"  id="thirdDate">
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"  placeholder="如:指标验证款等" id="thirdType">
+				</div>		
+			</div>
+			
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<p>第四次付款比例（%）：</p>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<p>第四次付款金额（元）：</p>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<p>第四次款日期：</p>
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<p>第四次付款类型：</p>
+				</div>		
+			</div>
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"  id="fourScale">
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control" id="fourAmount" >
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="date" class="form-control"  id="fourDate">
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"  placeholder="如:质保金等" id="fourType">
+				</div>		
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-2">
+					登记人
+				</div>
+				<div class="col-xs-12 col-sm-2">
+					状态
+				</div>
+
+
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-2">
+					<input type="text" class="form-control" id="addPerson" readonly>
+				</div>
+				<div class="col-xs-12 col-sm-2">
+					<input type="text" class="form-control" id="status" value="未提交" readonly>
+				</div>
+
+			</div>
+
+
+
+			<table class="table" id="htfjTab">
+				<caption ><span style="margin-right:10px;">合同、报告等附件</span> <button type="button" class="btn btn-success" style="width:80px;" onclick="fileDialog('603')">上传</button>  </caption>
+				<tr>
+					<td width="80%">文件名称</td>
+					<td>操作</td>
+				</tr>
+
+			</table>
+
+
+			<table class="table" id="otherhtTab">
+				<caption ><span style="margin-right:10px;">对方合同文本</span> <button type="button" class="btn btn-success" style="width:80px;" onclick="fileDialog('604')">上传</button>  </caption>
+				<tr>
+					<td width="80%">文件名称</td>
+					<td>操作</td>
+				</tr>
+
+
+			</table>
+
+
+			<div class="row">
+				<div class="col-xs-12 col-sm-3"></div>
+				<div class="col-xs-12 col-sm-3"></div>
+				<div class="col-xs-12 col-sm-3">
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<button type="button" class="btn btn-success" style="width:80px;margin-right:50px;" onclick="submitInfo()">提交</button>
+					<button type="button" class="btn btn-primary"style="width:80px;" onclick="closeWin()">取消</button>
+				</div>
+			</div>
+			  
+			</div>
+			
+			<!--
+			
+			<div class="position-fixed top-0 end-0 p-3" >
+				<div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+					<div class="toast-header">
+						<strong class="me-auto">消息提醒</strong>
+						<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+					</div>
+					<div class="toast-body" id="MsgText">
+						这是一个Bootstrap 5弹窗示例。
+					</div>
+				</div>
+			</div>
+			-->
+			<div class="modal fade" id="fileUploadModal" tabindex="-1" role="dialog" aria-labelledby="myModalFileLabel" aria-hidden="true">
+			    <div class="modal-dialog">
+			        <div class="modal-content">
+			            <div class="modal-header">
+			                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			                <h4 class="modal-title" id="myModalFileLabel">附件上传</h4>
+			            </div>
+			            <div class="modal-body" >
+							<inpt type="hidden"  id="uploadType" />
+
+							<input type="file" class="form-control-file" id="exampleFormControlFile"/>
+			            </div>
+			            <div class="modal-footer">
+							<button type="button" class="btn btn-primary" data-dismiss="modal" onclick="fileUpload()">确定</button>
+			                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+
+			            </div>
+			        </div><!-- /.modal-content -->
+			    </div><!-- /.modal-dialog -->
+			</div>
+
+
+			
+			<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			    <div class="modal-dialog">
+			        <div class="modal-content">
+			            <div class="modal-header">
+			                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			                <h4 class="modal-title" id="myModalLabel">提示</h4>
+			            </div>
+			            <div class="modal-body" id="MsgText">
+			                这里是弹窗的内容。
+			            </div>
+			            <div class="modal-footer">
+							<button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+			                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+			                
+			            </div>
+			        </div><!-- /.modal-content -->
+			    </div><!-- /.modal-dialog -->
+			</div>
+			
+		</div> 
+		
+		<div style="display:none;">
+			<input type="text" class="form-control" id="maxFnumber" >
+			<input type="text" class="form-control" id="dataID" >
+			
+			<a id="dowloadBtn">下载测试</a>
+		</div>
+		
+
+		 
+		
+		
+	</body>
+
+	
+
+	<!--
+	
+	<script src="../js/jquery-3.0.0.min.js"></script>
+	
+	<script src="../js/jquery-3.3.1.min.js"></script>
+	-->
+	<script>
+		$(document).ready(function(){
+			
+			//获取当前人员、合同号等基础信息
+			//var sessionid=sessionStorage.getItem("sessionidd");
+			
+			var nowUrl=window.location.href;
+			
+			var url=nowUrl.substring(0,nowUrl.indexOf('htadd.html'));
+	
+
+			var sessionid=getCookie("sessionidd");
+			var str=[{ "field": "session","op":"equal", "value": sessionid }]
+			var datastr= JSON.stringify(str)
+
+			$.ajax({
+					type: "post",
+					async:false,
+					url: url+"imc/queryData",
+					data: {
+						req: "m681Req",
+						page: 1,
+						rows: 50,
+						sort: "fnumber",
+						order: "asc",
+						filterRules: datastr,
+						pid: ""
+					},
+					success: function(data) {				
+						//var result=JSON.parse(data).rows;
+						$("#maxFnumber").val(data.rows[0].fnumber);
+						$("#addPerson").val(data.rows[0].perName)
+						$("#dataID").val(data.rows[0].ID);
+						
+						var companyName=$("#companyName").val();
+						var conType=$("#conType").val();
+						var str=companyName+"-CDI-"+conType+"-"+data.rows[0].fnumber;
+						$("#conFumber").val(str);
+						getHtfjList();
+						getOtherHtList();
+					}
+				})
+				
+				$("#costUnit").change(function(){
+					if($("#costUnit").val()=="内部"){
+						$("#fyzxTitle").text("费用走向：");
+						$("#fyjeTitle").text("费用金额：");
+						$("#fyzxInput").html('<select class="form-control" id="costTrend"><option>维修费</option><option>研发费</option><option>信息费</option><option>专项费用</option><option>微机维修费</option></select>');
+						$("#fyjeInput").html('<input type="text" class="form-control"  id="costAmount">');	
+						$("#titleShow").html('<div class="col-xs-12 col-sm-6" ><p id="fyzxTitle">招投标编码：</p></div><div class="col-xs-12 col-sm-6"><p id="fyjeTitle">计划编号：</p></div>');	
+						$("#inputShow").html('<div class="col-xs-12 col-sm-6" id="fyzxInput"><input type="text" class="form-control"  id="tenderNum"></div><div class="col-xs-12 col-sm-6" id="fyjeInput"><input type="text" class="form-control"  id="planNum"></div>');	
+						
+						$('#titleShow').css('display', 'block');
+						$('#inputShow').css('display', 'block');
+				
+					}else{
+						
+						$("#fyzxTitle").text("招投标编码：");
+						$("#fyjeTitle").text("计划编号：");
+						$("#fyzxInput").html('<input type="text" class="form-control"  id="tenderNum"></div>');
+						$("#fyjeInput").html('<input type="text" class="form-control"  id="planNum"></div>');	
+						$("#titleShow").html('');	
+						$("#inputShow").html('');	
+						
+						$('#titleShow').css('display', 'none');
+						$('#inputShow').css('display', 'none');
+										
+					}
+				})
+				
+				$("#signDate").val(formatDate(new Date()));
+				
+				
+				   $('#fristScale').blur(function(){
+					   
+						var fristScale=$("#fristScale").val();
+						var amount=$("#amount").val();
+						
+						if(fristScale==undefined || fristScale=="" || fristScale == null){
+							//dialogTest("付款比例不能为空！");
+							return;
+						}
+						if(amount==undefined || amount=="" || amount == null){
+							//dialogTest("合同金额不能为空！");
+							return;
+						}
+						var result=parseFloat(amount)*parseFloat(fristScale)/100
+						result=result.toFixed(6);
+						$("#fristAmount").val(result);
+				   })
+				   
+				   
+				   $('#secondScale').blur(function(){
+				   					   
+						var secondScale=$("#secondScale").val();
+						var amount=$("#amount").val();
+						
+						if(secondScale==undefined || secondScale=="" || secondScale == null){
+							//dialogTest("付款比例不能为空！");
+							return;
+						}
+						if(amount==undefined || amount=="" || amount == null){
+							//dialogTest("合同金额不能为空！");
+							return;
+						}
+						var result=parseFloat(amount)*parseFloat(secondScale)/100
+						result=result.toFixed(6);
+						$("#secondAmount").val(result);
+				   })
+				   
+				   $('#thirdScale').blur(function(){
+				   					   
+						var thirdScale=$("#thirdScale").val();
+						var amount=$("#amount").val();
+						
+						if(thirdScale==undefined || thirdScale=="" || thirdScale == null){
+							//dialogTest("付款比例不能为空！");
+							return;
+						}
+						if(amount==undefined || amount=="" || amount == null){
+							//dialogTest("合同金额不能为空！");
+							return;
+						}
+						var result=parseFloat(amount)*parseFloat(thirdScale)/100
+						result=result.toFixed(6);
+						$("#thirdAmount").val(result);
+				   })
+				   
+				   $('#fourScale').blur(function(){
+				   					   
+						var fourScale=$("#fourScale").val();
+						var amount=$("#amount").val();
+						
+						if(fourScale==undefined || fourScale=="" || fourScale == null){
+							//dialogTest("付款比例不能为空！");
+							return;
+						}
+						if(amount==undefined || amount=="" || amount == null){
+							//dialogTest("合同金额不能为空！");
+							return;
+						}
+						var result=parseFloat(amount)*parseFloat(fourScale)/100
+						result=result.toFixed(6);
+						$("#fourAmount").val(result);
+				   })
+				   
+				   $('#taxRate').blur(function(){
+				   					   
+						var taxRate=$("#taxRate").val();
+						var amount=$("#amount").val();
+						
+						if(taxRate==undefined || taxRate=="" || taxRate == null){
+							//dialogTest("付款比例不能为空！");
+							return;
+						}
+						if(amount==undefined || amount=="" || amount == null){
+							//dialogTest("合同金额不能为空！");
+							return;
+						}
+						var result=parseFloat(amount)/(parseFloat(taxRate)/100+1)*parseFloat(taxRate)/100;
+						result=result.toFixed(6);
+						$("#taxAmount").val(result);
+						$("#taxNotAmount").val(amount-result);
+				   })
+				   
+					
+				//获取项目信息
+				$.ajax({
+						type: "post",
+						async:false,
+						url: url+"imc/queryData",
+						data: {
+							req: "m735Req",
+							page: 1,
+							rows: 50,
+							sort: "ID",
+							order: "asc",
+							filterRules: [],
+							pid: ""
+						},
+						success: function(data) {	
+							var result=data.rows;
+							for(var i=0;i<result.length;i++){
+								var newOption = $('<option></option>')
+								                            .attr('value', result[i].项目名称) // 设置 value 属性
+								                            .text(result[i].项目名称);    // 设置显示文本
+								
+								        // 将新的 option 追加到 select 元素中
+								        $('#projectName').append(newOption);
+							}
+													
+						},
+						error:function(data){
+							dialogTest("获取项目表单信息失败！");
+						
+						}
+					})
+			
+		})
+		
+		function changeHTID(){
+			
+			var conType=$("#conType").val();
+			var companyName=$("#companyName").val();
+			var maxFnumber=$("#maxFnumber").val();
+			var str=companyName+"-CDI-"+conType+"-"+maxFnumber;
+			$("#conFumber").val(str);
+			
+		}
+		
+		function getCookie(name){
+		  var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+		  if(arr=document.cookie.match(reg)){
+			return unescape(arr[2]);
+		  }else{
+			return null;
+		  }
+		}
+
+		
+		function formatDate(date) {
+		  const day = date.getDate().toString().padStart(2, '0');
+		  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // 月份是从0开始的
+		  const year = date.getFullYear();
+		  const hours = date.getHours().toString().padStart(2, '0');
+		  const minutes = date.getMinutes().toString().padStart(2, '0');
+		  const seconds = date.getSeconds().toString().padStart(2, '0');
+		 
+		  return `${year}-${month}-${day}`;
+		}
+
+		function fileDialog(str){
+			$("#uploadType").val(str);
+			$('#fileUploadModal').modal('show');
+		}
+
+		function fileUpload(){
+
+
+			var tableid=$("#uploadType").val();
+			var id=$("#dataID").val();
+
+			var nowUrl=window.location.href;
+						
+			var url=nowUrl.substring(0,nowUrl.indexOf('htadd.html'));
+	
+
+			var fileStr=[{"field":"table_id","value":tableid},{"field":"row_id","value":id}]
+			var file_datastr= JSON.stringify(fileStr)
+
+			var fileInput = document.getElementById('exampleFormControlFile');
+			var file = fileInput.files[0];
+			var formData = new FormData();
+
+			formData.append('file', file);
+			formData.append('filterRules', file_datastr);
+			formData.append('req', '');
+			formData.append('page', '');
+			formData.append('rows', '');
+			formData.append('sort', '');
+			formData.append('order', '');
+			formData.append('pid', '');
+
+			var xhr = new XMLHttpRequest();
+
+
+			xhr.open('POST', url+"imc/uploadAttachments", true);
+
+			// 发送请求
+			xhr.send(formData);
+			// 监听请求状态
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState === XMLHttpRequest.DONE) {
+				   	if (xhr.status === 200) {
+						alert('文件上传成功!');
+						if(tableid=='603')
+							getHtfjList();
+						else
+							getOtherHtList();
+					} else {
+						alert('文件上传失败!');
+					}
+				}
+			};
+
+
+		}
+
+		function downloadHtfj(tableId,rowId,filenName){
+
+			var str=[{ "field": "table_id","op":"equal", "value": String(tableId)},{ "field": "row_id","op":"equal", "value": String(rowId) }]
+			var datastr= JSON.stringify(str)
+			var nowUrl=window.location.href;
+			
+			var url=nowUrl.substring(0,nowUrl.indexOf('htadd.html'));
+			$.ajax({
+					type: "post",
+					async:false,
+					url: url+"imc/getAttachments",
+					data: {
+						req: "",
+						page: 1,
+						rows: 50,
+						sort: "ID",
+						order: "asc",
+						filterRules: datastr,
+						pid: ""
+					},
+					success: function(data) {
+						for(var j=0;j<data.rows.length;j++){
+							if(data.rows[j].fileName==fileName){
+								$("#dowloadBtn").attr("href",data.rows[j].downloadUrl);
+								document.getElementById("dowloadBtn").click();
+								break;
+							}
+						}
+					}
+				})
+
+
+		}
+
+		function removefile(uuid,index,uploadType){
+
+			var str=[{ "field": "uuid","op":"equal", "value":uuid }]
+			var datastr= JSON.stringify(str)
+			var url=window.location.href.replace('htadd.html','');
+
+			$.ajax({
+					type: "post",
+					async:false,
+					url: url+"imc/delAttachments",
+					data: {
+						req: "",
+						page: 1,
+						rows: 50,
+						sort: "ID",
+						order: "asc",
+						filterRules: datastr,
+						pid: ""
+					},
+					success: function(data) {
+						if(data.status==0){
+
+							dialogTest("删除成功！");
+							if(uploadType=='603')
+								document.getElementById("htfjTab").deleteRow(index);
+							else
+								document.getElementById("otherhtTab").deleteRow(index);
+						}else{
+							dialogTest("删除失败，请联系管理员查看！");
+						}
+
+					}
+				})
+
+			//document.getElementById("htfjTab").deleteRow(index);
+
+		}
+
+		function getOtherHtList(){
+			var id=$("#dataID").val();
+			var nowUrl=window.location.href;
+			
+			var url=nowUrl.substring(0,nowUrl.indexOf('htadd.html'));
+			var str=[{ "field": "tableId","op":"equal", "value": "604" },{ "field": "rowId","op":"equal", "value": id }]
+			var datastr= JSON.stringify(str)
+
+			$.ajax({
+					type: "post",
+					async:false,
+					url: url+"imc/queryData",
+					data: {
+						req: "m23Req",
+						page: 1,
+						rows: 50,
+						sort: "ID",
+						order: "asc",
+						filterRules: datastr,
+						pid: ""
+					},
+					success: function(data) {
+
+						if(data!=null){
+
+							var tabletmp=document.getElementById("otherhtTab");
+							for(var j=1;j<tabletmp.rows.length;j++){
+								tabletmp.deleteRow(j);
+							}
+
+							var showTmp='';
+							for(var i=0;i<data.rows.length;i++){
+								showTmp+='<tr><td>'+data.rows[i].fileName+'</td><td><button type="button" class="btn btn-success" onclick="downloadHtfj('+data.rows[i].tableId+','+data.rows[i].rowId+',/''+data.rows[i].fileName+'/')" style="width:60px;margin-right:10px;">下载</button><button type="button" class="btn btn-danger" onclick="removefile(\''+String(data.rows[i].uuid)+'\',\''+(i+1)+'\',\'604\')" style="width:60px;">删除</button></td></tr>';
+							}
+							$("#otherhtTab").append(showTmp);
+						}
+
+					}
+				})
+
+		}
+
+		function getHtfjList(){
+			var id=$("#dataID").val();
+			var nowUrl=window.location.href;
+			
+			var url=nowUrl.substring(0,nowUrl.indexOf('htadd.html'));
+
+
+
+			var str=[{ "field": "tableId","op":"equal", "value": "603" },{ "field": "rowId","op":"equal", "value": id }]
+			var datastr= JSON.stringify(str)
+
+			$.ajax({
+					type: "post",
+					async:false,
+					url: url+"imc/queryData",
+					data: {
+						req: "m23Req",
+						page: 1,
+						rows: 50,
+						sort: "ID",
+						order: "asc",
+						filterRules: datastr,
+						pid: ""
+					},
+					success: function(data) {
+
+						if(data!=null){
+
+							var tableObj=document.getElementById("htfjTab");
+							for(var j=1;j<tableObj.rows.length;j++){
+								tableObj.deleteRow(j);
+							}
+
+							var showStr='';
+							for(var i=0;i<data.rows.length;i++){
+								showStr+='<tr><td>'+data.rows[i].fileName+'</td><td><button type="button" class="btn btn-success" onclick="downloadHtfj('+data.rows[i].tableId+','+data.rows[i].rowId+',/''+data.rows[i].fileName+'/')" style="width:60px;margin-right:10px;">下载</button><button type="button" class="btn btn-danger" onclick="removefile(\''+String(data.rows[i].uuid)+'\',\''+(i+1)+'\',\'603\')" style="width:60px;">删除</button></td></tr>';
+							}
+							$("#htfjTab").append(showStr);
+						}
+
+					}
+				})
+
+		}
+		
+		function dialogTest(str){
+			
+			
+			document.getElementById("MsgText").innerHTML=str;
+					
+			$('#myModal').modal('show');
+		}
+		
+		function submitInfo(){
+			
+			var targetCon=$("#targetCon").val();
+			//获取合同、报告等附件表格数量
+			var htfjNum=document.getElementById("htfjTab").rows.length;
+			//获取是否对方合同的表格行数量
+			var otherhtfjNum=document.getElementById("otherhtTab").rows.length;
+			//判断是否对方合同选择了是，且两个附件表格都没有行（表示没有上传附件）
+			if (targetCon=='是' && otherhtfjNum==1){
+				dialogTest("请上传对方合同文本！");
+				return;
+			}
+			//判断合同、报告有没有上传附件
+			if (htfjNum<=1){
+				dialogTest("请上传合同、报告等附件！");
+				return;
+			}
+		
+		
+			//必填校验和传值
+			var conFumber=$("#conFumber").val();
+			var companyName=$("#companyName").val();
+			var conName=$("#conName").val();
+			var projectName=$("#projectName").val();
+			var signDate=$("#signDate").val();
+			var sealFlag=$("#sealFlag").val();
+			var sealNum=$("#sealNum").val();
+			var sealDate=$("#sealDate").val();
+			var conType=$("#conType").val();
+			var proSource=$("#proSource").val();
+			var orderNum=$("#orderNum").val();
+			
+			var tenderNum=$("#tenderNum").val();
+			var planNum=$("#planNum").val();
+			var payment=$("#payment").val();
+			var content=$("#content").val();
+			var payType=$("#payType").val();
+			var amount=$("#amount").val();
+			var amountflag=$("#amountflag").val();
+			var agentPer=$("#agentPer").val();
+			var enterDate=$("#enterDate").val();
+			var startDate=$("#startDate").val();
+			var finishDate=$("#finishDate").val();
+			var actFinishDate=$("#actFinishDate").val();
+			var customerName=$("#customerName").val();
+			var customerAdress=$("#customerAdress").val();
+			var customerSigner=$("#customerSigner").val();
+			var customerPhone=$("#customerPhone").val();
+			
+			var fristScale=$("#fristScale").val();
+			var fristAmount=$("#fristAmount").val();
+			var fristDate=$("#fristDate").val();
+			var fristType=$("#fristType").val();
+			
+			var secondScale=$("#secondScale").val();
+			var secondAmount=$("#secondAmount").val();
+			var secondDate=$("#secondDate").val();
+			var secondType=$("#secondType").val();
+			
+			var thirdScale=$("#thirdScale").val();
+			var thirdAmount=$("#thirdAmount").val();
+			var thirdDate=$("#thirdDate").val();
+			var thirdType=$("#thirdType").val();
+			
+			var fourScale=$("#fourScale").val();
+			var fourAmount=$("#fourAmount").val();
+			var fourDate=$("#fourDate").val();
+			var fourType=$("#fourType").val();
+			
+			var addPerson=$("#addPerson").val();
+						
+			var costUnit=$("#costUnit").val();
+			
+			var taxRate=$("#taxRate").val();
+			
+			var taxAmount=$("#taxAmount").val();
+			
+			var taxNotAmount=$("#taxNotAmount").val();
+			
+			var costTrend="";
+			var costAmount=0;
+			
+			if(costUnit=="内部"){
+				costTrend=$("#costTrend").val();
+				costAmount=$("#costAmount").val();
+				if(costTrend==undefined || costTrend=="" || costTrend == null){
+					dialogTest("费用走向不能为空！");
+					return;
+				}
+				if(costAmount==undefined || costAmount=="" || costAmount == null){
+					dialogTest("费用金额不能为空！");
+					return;
+				}
+			}else{
+				costTrend="";
+				costAmount=0;
+			}
+			
+			
+			
+			
+			
+			if(conName==undefined || conName=="" || conName == null){
+				dialogTest("合同名称不能为空！");
+				return;
+			}
+			
+			if(conType==undefined || conType=="" || conType == null){
+				dialogTest("合同分类不能为空！");
+				return;
+			}
+			if(proSource==undefined || proSource=="" || proSource == null){
+				dialogTest("项目来源不能为空！");
+				return;
+			}
+			if(targetCon==undefined || targetCon=="" || targetCon == null){
+				dialogTest("是否对方合同不能为空！");
+				return;
+			}
+			if(payment==undefined || payment=="" || payment == null){
+				dialogTest("合同付款约定不能为空！");
+				return;
+			}
+			if(payType==undefined || payType=="" || payType == null){
+				dialogTest("付款方式不能为空！");
+				return;
+			}
+			if(amount==undefined || amount=="" || amount == null){
+				dialogTest("合同金额不能为空！");
+				return;
+			}
+			if(agentPer==undefined || agentPer=="" || agentPer == null){
+				dialogTest("经办人不能为空！");
+				return;
+			}
+			
+			if(enterDate==undefined || enterDate=="" || enterDate == null){
+				dialogTest("签订日期不能为空！");
+				return;
+			}
+			if(startDate==undefined || startDate=="" || startDate == null){
+				dialogTest("开工日期不能为空！");
+				return;
+			}
+			if(finishDate==undefined || finishDate=="" || finishDate == null){
+				dialogTest("竣工日期不能为空！");
+				return;
+			}
+		
+						
+			if(customerName==undefined || customerName=="" || customerName == null){
+				dialogTest("对方单位不能为空！");
+				return;
+			}
+			if(customerAdress==undefined || customerAdress=="" || customerAdress == null){
+				dialogTest("对方地址不能为空！");
+				return;
+			}
+			
+			if(customerSigner==undefined || customerSigner=="" || customerSigner == null){
+				dialogTest("对方签订人不能为空！");
+				return;
+			}
+			
+			if(customerSigner==undefined || customerSigner=="" || customerSigner == null){
+				dialogTest("对方签订人不能为空！");
+				return;
+			}
+			if(content==undefined || content=="" || content == null){
+				dialogTest("合同内容不能为空！");
+				return;
+			}
+			
+			if(fristScale==undefined || fristScale=="" || fristScale == null){
+				dialogTest("第一次付款比例不能为空！");
+				return;
+			}
+			
+			if(fristAmount==undefined || fristAmount=="" || fristAmount == null){
+				dialogTest("第一次付款金额不能为空！");
+				return;
+			}
+			
+			if(fristDate==undefined || fristDate=="" || fristDate == null){
+				dialogTest("第一次付款日期不能为空！");
+				return;
+			}
+			
+			if(fristType==undefined || fristType=="" || fristType == null){
+				dialogTest("第一次付款类型不能为空！");
+				return;
+			}
+			
+		
+			if(taxAmount==undefined || taxAmount=="" || taxAmount == null){
+				dialogTest("税额不能为空！");
+				return;
+			}
+			
+			if(taxNotAmount==undefined || taxNotAmount=="" || taxNotAmount == null){
+				dialogTest("不含税金额不能为空！");
+				return;
+			}
+			
+			var ID=$("#dataID").val();
+			
+			var htfj="";
+			var dfht="";
+			
+			var table = document.getElementById('htfjTab');
+			var rows = table.getElementsByTagName('tr');
+			for (var i = 1; i < rows.length; i++) {
+				var cols = rows[i].getElementsByTagName('td');
+				htfj+=cols[0].innerHTML+',';
+			}
+			if(htfj.length>1)
+				htfj=htfj.substring(0,htfj.length-1);
+			
+			var table = document.getElementById('otherhtTab');
+			var rows = table.getElementsByTagName('tr');
+			for (var i = 1; i < rows.length; i++) {
+				var cols = rows[i].getElementsByTagName('td');
+				dfht+=cols[0].innerHTML+',';
+			}
+			if(dfht.length>1)
+				dfht=dfht.substring(0,dfht.length-1);
+			
+			//开始调用附件上传
+			
+			var str=[{ "ID":ID,"合同编码":conFumber,"公司名称":companyName, "项目名称":projectName,"登记日期":signDate,"是否盖章":sealFlag,"盖章份数":sealNum,"盖章日期":sealDate,"合同分类":conType,
+			"项目来源":proSource,"招投标申请单号":tenderNum,"开工令号":orderNum,"委外单号":planNum,"是否对方合同":targetCon,"合同名称":conName,"合同付款约定":payment,"付款方式":payType,"合同内容":content,"合同金额":amount,
+			 "暂估价":amountflag,"经办人":agentPer,"签订日期":enterDate,"工期起":startDate,"工期止":finishDate,"实际完工日期":actFinishDate,"对方单位":customerName,"对方地址":customerAdress,"对方签订人":customerSigner,
+			 "对方联系方式":customerPhone,"费用归属单位":costUnit,"费用走向":costTrend,"费用金额":costAmount,"税率":taxRate,"税额":taxAmount,"不含税金额":taxNotAmount,
+			 "第一次付款比例":fristScale,"第一次付款金额":fristAmount,"第一次付款日期":fristDate,"第一次付款类型":fristType,"第二次付款比例":secondScale,"第二次付款金额":secondAmount,
+			 "第二次付款日期":secondDate,"第二次付款类型":secondType,"第三次付款比例":thirdScale,"第三次付款金额":thirdAmount,"第三次付款日期":thirdDate,"第三次付款类型":thirdType,"第四次付款比例":fourScale,
+			 "第四次付款金额":fourAmount,"第四次付款日期":fourDate,"第四次付款类型":fourType,"登记人":addPerson,"合同报告附件":htfj,"对方合同文本":dfht}]
+			
+			var nowUrl=window.location.href;
+			
+			var url=nowUrl.substring(0,nowUrl.indexOf('htadd.html'));
+			
+			var datastr= JSON.stringify(str)
+			$.ajax({
+					type: "post",
+					async:false,
+					url: url+"imc/customOpt",
+					data: {
+						req: "482",
+						data:datastr
+					},
+					success: function(data) {
+						if(data.msg=='success'){
+							dialogTest("添加成功！");
+							setTimeout(function() {
+							  // 这里是延迟执行的代码
+							  history.back();
+							}, 2000);
+							
+						}else{
+							dialogTest("添加失败,请联系开发人员处理!报错信息："+data.msg);
+						}
+					}
+				})
+			
+			
+		}
+		function closeWin(){
+			
+			history.back();
+		}
+		
+		
+		function generateUUID() {
+			var d = new Date().getTime(); //Timestamp
+			var d2 = (performance && performance.now && (performance.now()*1000)) || 0; //Time in microseconds since page-load or 0 if unsupported
+			return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+				var r = Math.random() * 16; //random number between 0 and 16
+				if(d > 0) { //Use timestamp until depleted
+					r = (d + r)%16 | 0;
+					d = Math.floor(d/16);
+				} else { //Use microseconds since page-load if supported
+					r = (d2 + r)%16 | 0;
+					d2 = Math.floor(d2/16);
+				}
+				return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+			});
+		}
+ 
+	
+		
+	</script>
+	<style type="text/css">
+	.form-control{
+		margin-bottom: 8px;
+	}
+	.require{
+		color:red;
+	}
+	.dropdown-menu-search {
+	  max-height: 340px;
+	  overflow-y: scroll;
+	  border-radius: 0;
+	  padding: 4px;
+	}
+	 
+	.dropdown-menu-search input {
+	  margin: 5px 0;
+	}
+	
+		</style>
+</html>

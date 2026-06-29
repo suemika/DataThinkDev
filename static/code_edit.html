@@ -1,0 +1,207 @@
+﻿<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <title>代码编辑器</title>
+    <link rel="stylesheet" href="../../amissdk/antd.css" />
+	<script src="../../amissdk/sdk.js"></script>
+    <link rel="stylesheet" href="../../amissdk/sdk.css" />
+    <link rel="stylesheet" href="../../amissdk/helper.css" />
+    <link rel="stylesheet" href="../../amissdk/iconfont.css" />
+
+    <style>
+      html,
+      body,
+      .app-wrapper {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" class="app-wrapper"></div>
+    <script type="text/javascript">
+      (function () {
+        let amis = amisRequire('amis/embed');
+        // 通过替换下面这个配置来生成不同页面
+        let amisJSON = {
+                "type": "page",
+                "name": "mypage",
+                "initApi":{
+                  "method": 'post',
+                  "url": '/imc/queryData',
+                  "data": {
+                      "req": 'm17Req',
+                      "page": '1',
+                      "rows": '1',
+                      "sort": 'ID',
+                      "order": 'asc',
+                      "pid": '',
+                      "filterRules": '[{"field":"functionID","op":"equal","value":"${functionID}"},{"field":"functionType","op":"equal","value":"${functionType}"},{"field":"recordID","op":"equal","value":"${ID}"}]'
+				  }
+			    },
+                "body": [
+                  {
+                    "type": "flex",
+                    "justify": "center",
+                    "items": [
+                      {
+                        "style": {
+                          "fontSize":"22px",
+                          "color":"skyblue"
+                        },
+                        "type": "tpl",
+                        "tpl": "${CONCATENATE('WEBIDE【GLUE(',glueType,')】',commitMessage)}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "flex",
+                    "justify": "flex-end",
+                    "items": {
+                      "type": "button-toolbar",
+                      "label": "",
+                      "buttons": [
+                        {
+                          "type": "button",
+                          "icon": "fa fa-history",
+                          "label": "版本回溯",
+                          "level": "enhance",
+                          "actionType": "dialog",
+                          "dialog": {
+                            "name": "mydialog",
+                            "actions": [],
+                            "size": "lg",
+                            "title": "历史提交",
+                            "body":{
+                              "type": "crud",
+                              "api": {
+                                "method": 'post',
+                                "url": '/imc/queryData',
+                                "data": {
+                                    "req": 'm18Req',
+                                    "page": '${page}',
+                                    "rows": '${perPage}',
+                                    "sort": 'ID',
+                                    "order": 'desc',
+                                    "pid": '',
+                                    "filterRules": '[{"field":"functionID","op":"equal","value":"${functionID}"},{"field":"functionType","op":"equal","value":"${functionType}"}]'
+                                },
+                                "dataType": 'json',
+                              },
+                              "syncLocation": false,
+                              "columns": [
+                                {
+                                  "name": "functionID",
+                                  "label": "功能ID"
+                                },
+                                {
+                                  "name": "functionType",
+                                  "label": "功能类型"
+                                },
+                                {
+                                  "name": "commitMessage",
+                                  "label": "提交信息"
+                                },
+                                {
+                                  "name": "commitDateTime",
+                                  "label": "提交日期"
+                                },
+                                {
+                                  "name": "glueType",
+                                  "label": "代码类型"
+                                }
+                              ],
+                              "itemAction":{
+                                "type": "button",
+                                "actionType":"ajax",
+                                "reload": "mypage?ID=${ID}",
+                                "api":{
+                                  "method": 'post',
+                                  "url": '/imc/queryData',
+                                  "data": {
+                                      "req": 'm17Req',
+                                      "page": '1',
+                                      "rows": '1',
+                                      "sort": 'ID',
+                                      "order": 'asc',
+                                      "pid": '',
+                                      "filterRules": '[{"field":"functionID","op":"equal","value":"${functionID}"},{"field":"functionType","op":"equal","value":"${functionType}"},{"field":"recordID","op":"equal","value":"${ID}"}]'
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "type": "button",
+                          "icon": "fa fa-save",
+                          "label": "保存",
+                          "level": "primary",
+                          "actionType": "dialog",
+                          "dialog":{
+                            "title":"保存代码",
+                            "body":{
+                              "type": "form",
+                              "api":{
+                                "method": "post",
+                                "dataType": "form",
+                                "url": "/imc/customOpt",
+                                "data": {
+                                  "req": "18",
+                                  "data": "{\"glueSource\": \"${glueSource|base64Encode}\",\"functionID\": \"${functionID}\", \"functionType\": \"${functionType}\", \"glueType\": \"${glueType}\", \"commitMessage\": \"${commitMessage}\"}"}
+                              },
+                              "body":[{
+                                "type": "static",
+                                "name": "functionID",
+                                "label": "功能ID"
+                              },
+                              {
+                                "type": "select",
+                                "name": "functionType",
+                                "label": "功能类型",
+                                "required": true,
+                                "autoComplete": "post:/imc/queryDict?code=gnlx&q=$term"
+                              },{
+                                "type": "static",
+                                 "name": "glueType",
+                                 "label": "代码类型",
+                                  "required": true
+                                },{
+                                "type":"input-text",
+                                "name": "commitMessage",
+                                "label":"提交信息",
+                                "required": true,
+                                "description":"代码修改信息的备注，方便历史版本查看。"
+                                }]
+                            }
+                          }
+                        },
+                        {
+                          "type": "button",
+                          "icon": "fa fa-close",
+                          "label": "关闭",
+                          "level": "warning",
+                          "onClick":"window.close();"
+                        }
+                      ]
+                    }
+                  },{
+                      "type": "editor",
+                      "name": "glueSource",
+                      "label": "",
+                      "language":"sql",
+                      "allowFullscreen": true,
+                      "size":"xxl",
+                      "placeholder": "请输入......"
+                    }
+                ]
+              };
+        let amisScoped = amis.embed('#root', amisJSON);
+      })();
+    </script>
+  </body>
+</html>

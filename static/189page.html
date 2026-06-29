@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<script type="text/javascript" src="js/jquery-3.0.0.min.js"></script>
+		<script type="text/javascript" src="js/crypto-js.min.js"></script>
+		<script>
+			$(function(){ 
+				var urlParams = new URLSearchParams(window.location.search);
+				var req = urlParams.get('req');
+				
+			　　 
+			
+				var postData = {
+				  req: "202",
+				  data: ""
+				};
+				
+				// 发送POST请求
+				$.ajax({
+				  url: "/imc/customOpt",
+				  type: "POST",
+				  data: JSON.stringify(postData),
+				  contentType: "application/json",
+				  success: function(response) {
+					console.log(response);
+					var userid = response.msg;
+					var timestamp = Math.floor(Date.now() / 1000);
+					console.log(userid);
+					
+					var token = CryptoJS.MD5(userid+"ecology"+timestamp);
+					$(location).attr('href', "https://www.shtggroup.com/elindex?p="+req+"Req&eluserid="+userid+"&eltimestamp="+timestamp+"&elsecrect="+token);
+					
+				  },
+				  error: function(xhr, status, error) {
+					console.log("请求失败！");
+					console.log(error);
+				  }
+				});
+			
+				
+			}); 
+			
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

@@ -1,0 +1,198 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>查看地图</title>
+</head>
+<script charset="utf-8" src="https://map.qq.com/api/gljs?v=1.exp&key=OB4BZ-D4W3U-B7VVO-4PJWW-6TKDJ-WPB77"></script>
+<style type="text/css">
+    html,
+    body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    #container {
+        width: 100%;
+        height: 100%;
+    }
+
+    .btnContainer {
+        position: absolute;
+        left: 20px;
+        top: 20px;
+        z-index: 10000;
+    }
+
+    .btnContainer button {
+        padding: 10px 14px;
+        box-sizing: border-box;
+        border: none;
+        background-color: #3876ff;
+        border-radius: 2px;
+        color: #fff;
+        font-size: 14px;
+        line-height: 14px;
+        margin-bottom: 10px;
+    }
+</style>
+<body>
+<div id="container"></div>
+<script type="text/javascript">
+    // 使用正则表达式获取参数值
+    function getUrlParameter(name) {
+        name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]');
+        const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        const results = regex.exec(window.location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    }
+
+    // 获取单个参数值
+    const deviceinfo = getUrlParameter('deviceinfo');
+    const scaninfo = getUrlParameter('scaninfo');
+    console.log('deviceinfo:' + deviceinfo);
+    console.log('scaninfo:' + scaninfo);
+
+    var arr = deviceinfo.split(',');
+    var lat = arr[0];
+    var lng = arr[1];
+    var cx = arr[2];
+    var qy = arr[3];
+    var sbmc = arr[4];
+    var sbm = arr[5];
+
+    var arr_scan = scaninfo.split(',');
+    var lat_scan = arr_scan[0];
+    var lng_scan = arr_scan[1];
+    var adr_scan = arr_scan[2];
+
+    if (lat.length > 1) {
+        showMap('deviceinfo');
+    }
+
+    if (lat_scan.length > 1) {
+        showMap('scaninfo');
+    }
+
+    function showMap(type) {
+        // var geometries_arr = [];
+        //
+        // if (type == 'deviceinfo') {
+        //     var center = new TMap.LatLng(lat, lng);
+        // }
+        //
+        // if (type == 'scaninfo') {
+        //     var center_scan = new TMap.LatLng(lat_scan, lng_scan);
+        // }
+        //
+        //
+        // console.log(obj_dev);
+        // console.log(obj_scan);
+
+        // 初始化地图
+        var map = new TMap.Map('container', {
+            zoom: 15, // 设置地图缩放
+            draggable: true, //设置是否可以拖拽
+            scrollwheel: false, //设置是否可以滚动
+            disableDoubleClickZoom: true, //设置是否可以双击放大
+            minZoom: 7, //此处设置地图的缩放级别  最小值是6
+            maxZoom: 16, //此处设置地图的缩放级别  最大值是7
+            center: new TMap.LatLng(36.231184, 116.545114), // 设置地图中心点坐标，
+            pitch: 0, // 俯仰度
+            rotation: 0, // 旋转角度
+            baseMap: {
+                type: 'satellite',
+                features: ['base']
+            },
+        });
+
+        // MultiMarker文档地址：https://lbs.qq.com/webApi/javascriptGL/glDoc/glDocMarker
+        var marker = new TMap.MultiMarker({
+            map: map,
+            styles: {
+                // 点标记样式
+                marker: new TMap.MarkerStyle({
+                    width: 20, // 样式宽
+                    height: 30, // 样式高
+                    anchor: {
+                        x: 10,
+                        y: 30
+                    }, // 描点位置
+                }),
+            },
+            geometries: [{
+                "id": 'marker1',
+                "styleId": 'marker',
+                "position": new TMap.LatLng(lat, lng),
+                "properties": {
+                    "title": "marker1"
+                },
+                "rank": 10
+            }, {
+                "id": 'marker2',
+                "styleId": 'marker',
+                "position": new TMap.LatLng(lat_scan, lng_scan),
+                "properties": {
+                    "title": "marker2"
+                },
+                "rank": 1
+            }]
+        });
+
+        var infoWindow = new TMap.InfoWindow({
+            map: map,
+            position: new TMap.LatLng(36.231184, 116.545114),
+            offset: {x: 0, y: -32} //设置信息窗相对position偏移像素
+        });
+        infoWindow.close();//初始关闭信息窗关闭
+        //监听标注点击事件
+        marker.on("click", function (evt) {
+            console.log(evt);
+            //设置infoWindow
+            infoWindow.open(); //打开信息窗
+            infoWindow.setPosition(evt.geometry.position);//设置信息窗位置
+            if (evt.geometry.id == 'marker1') {
+                infoWindow.setContent('<div style="text-align :left;">产线：' + cx + '<br>区域：' + qy + '<br>设备名称：' + sbmc + '<br>设备码：' + sbm + '</div>');
+            }
+            if (evt.geometry.id == 'marker2') {
+                infoWindow.setContent('<div style="text-align :left;">位置信息：'+adr_scan+'<br>经度：' + lng_scan + '<br>纬度：' + lat_scan + '</div>');
+            }
+            // infoWindow.setContent(evt.geometry.position.toString());
+        })
+
+
+        //初始化infoWindow
+        // if (type == 'deviceinfo') {
+        //     var context = '<div style="text-align :left;">产线：' + cx + '<br>区域：' + qy + '<br>设备名称：' + sbmc + '<br>设备码：' + sbm + '</div>';
+        //
+        //     var infoWindow = new TMap.InfoWindow({
+        //         map: map,
+        //         position: new TMap.LatLng(lat, lng), //设置信息框位置
+        //         offset: {
+        //             x: 0,
+        //             y: -30
+        //         },
+        //         content: context //设置信息框内容
+        //     });
+        // }
+        //
+        // if (type == 'scaninfo') {
+        //     var context = '<div style="text-align :left;">经度：' + lng_scan + '<br>纬度：' + lat_scan + '</div>';
+        //
+        //     var infoWindow = new TMap.InfoWindow({
+        //         map: map,
+        //         position: new TMap.LatLng(lat_scan, lng_scan), //设置信息框位置
+        //         offset: {
+        //             x: 0,
+        //             y: -30
+        //         },
+        //         content: context //设置信息框内容
+        //     });
+        // }
+    }
+</script>
+</body>
+</html>

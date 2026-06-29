@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <META    HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <META    HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+    <META    HTTP-EQUIV="Expires" CONTENT="0">
+    <title>发包-专家评审</title>
+    <link rel="stylesheet" href="../../amissdk/antd.css" />
+	<script src="../../amissdk/sdk.js"></script>
+    <link rel="stylesheet" href="../../amissdk/sdk.css" />
+    <link rel="stylesheet" href="../../amissdk/helper.css" />
+    <link rel="stylesheet" href="../../amissdk/iconfont.css" />
+
+    <style>
+      html,
+      body,
+      .app-wrapper {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" class="app-wrapper"></div>
+    <script type="text/javascript">
+      (function () {
+        let amis = amisRequire('amis/embed');
+        // 通过替换下面这个配置来生成不同页面
+        let amisJSON = {
+  "type": "page",
+  "title": "",
+  "body": [
+    {
+      "type": "flex",
+      "direction": "column",
+      "items": [
+        {
+          "type": "service",
+          "api": {
+            "method": "post",
+            "url": "/imc/queryData",
+            "dataType": "form",
+            "data": {
+              "req": "m408Req",
+              "page": "1",
+              "rows": "50",
+              "sort": "ID",
+              "order": "desc",
+              "pid": "",
+              "filterRules": "[]"
+            }
+          },
+          "body": [
+            {
+              "type": "flex",
+              "direction": "column",
+              "items": [
+                {
+                  "type": "flex",
+                  "direction": "row",
+                  "justify": "flex-start",
+                  "items": [
+                    {
+                      "style": {
+                        "font-size": "16px",
+                        "text-align": "center",
+                        "width": "300px",
+                        "height": ""
+                      },
+                      "type": "tpl",
+                      "tpl": "评委:${rows[0].用户}-工作包批次:${rows[0].工作包批次名称}",
+                      "themeCss": {
+                        "baseControlClassName": {
+                          "border:default": {
+                            "border-radius": "5px"
+                          },
+                          "padding-and-margin:default": {
+                            "margin-bottom": "10px",
+                            "margin-top": "10px"
+                          },
+                          "font:default": {
+                            "color": "black"
+                          }
+                        }
+                      },
+                      "id": "u:0f56625756ea"
+                    },
+                    {
+                      "type": "button",
+                      "label": "提交评审结果",
+                      "level": "light",
+                      "confirmTitle": "提示信息",
+                      "confirmText": "若存在待评审或待定的工作包，将无法提交评审结果，是否要继续提交?",
+                      "actionType": "ajax",
+                      "api": {
+                        "method": "post",
+                        "url": "/imc/customOpt",
+                        "data": {
+                          "req": 314,
+                          "data": "${rows|json}"
+                        }
+                      },
+                      "id": "u:4bfcfe291118",
+                      "disabledOn": "${IF(${rows[0].工作包批次名称} == '暂无',true, false)}",
+                      "onEvent": {
+                        "click": {
+                          "actions": [
+                            {
+                              "actionType": "refresh"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "id": "u:87ef8118f96f"
+                },
+                {
+                  "type": "flex",
+                  "direction": "row",
+                  "items": [
+                    {
+                      "type": "card",
+                       "style":{
+                          "width":"50%",
+                            "height":"50%"
+                        },
+                      "header": {
+                        "title": "",
+                        "subTitle": ""
+                      },
+                      "body": [
+                        {
+                          "type": "flex",
+                          "direction": "row",
+                          "items": [
+                            {
+                              "type": "static-image",
+                              "src": "../../images/S.png",
+                              "width":"50px",
+                                "height":"50px",
+                              "imageMode": "thumb",
+                              "id": "u:ba453e7891f1",
+                              "innerClassName": "no-border"
+                            },
+                            {
+                              "type": "flex",
+                              "direction": "column",
+                              "items": [
+                                {
+                                  "type": "tpl",
+                                  "tpl": "基础包",
+                                  "id": "u:1dec5c0e6038"
+                                },
+                                {
+                                  "type": "flex",
+                                  "direction": "row",
+                                  "items": [
+                                    {
+                                      "style": {
+                                        "text-align": "left",
+                                        "margin": "0px 10px 0px 0px"
+                                      },
+                                      "type": "tpl",
+                                      "tpl": "${rows[0].基础包S级工作包数量}",
+                                      "id": "u:1dec5c0e6038"
+                                    },
+                                    {
+                                      "style": {
+                                        "text-align": "right"
+                                      },
+                                      "type": "tpl",
+                                      "id": "u:1dec5c0e6038",
+                                      "tpl": "${rows[0].基础包S级工作包数量占比}"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "tpl",
+                                  "tpl": "拓展包",
+                                  "id": "u:1dec5c0e6038"
+                                },
+                                      {
+                                  "type": "flex",
+                                  "direction": "row",
+                                  "items": [
+                                    {
+                                      "style": {
+                                        "text-align": "left",
+                                        "margin": "0px 10px 0px 0px"
+                                      },
+                                      "type": "tpl",
+                                      "tpl": "${rows[0].拓展包S级工作包数量}",
+                                      "id": "u:1dec5c0e6038"
+                                    },
+                                    {
+                                      "style": {
+                                        "text-align": "right"
+                                      },
+                                      "type": "tpl",
+                                      "id": "u:1dec5c0e6038",
+                                      "tpl": "${rows[0].拓展包S级工作包数量占比}"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "id": "u:c60b4ba46728"
+                            }
+                          ],
+                          "inline": false,
+                          "id": "u:2c3c2439e069"
+                        }
+                      ],
+                      "actions": [
+                      ],
+                      "id": "u:d3cf7982e857",
+                      "actionsCount": 1
+                    },
+                    {
+                      "type": "card",
+                       "style":{
+                          "width":"50%",
+                            "height":"50%"
+                        },
+                      "header": {
+                        "title": "",
+                        "subTitle": ""
+                      },
+                      "body": [
+                        {
+                          "type": "flex",
+                          "inline": false,
+                          "id": "u:2c3c2439e069",
+                          "direction": "row",
+                          "items": [
+                            {
+                              "type": "static-image",
+                              "src": "../../images/A.png",
+                              "width":"50px",
+                                "height":"50px",
+                              "imageMode": "thumb",
+                              "id": "u:ba453e7891f1",
+                              "innerClassName": "no-border"
+                            },
+
+                            {
+                              "type": "flex",
+                              "direction": "column",
+                              "items": [
+                                {
+                                  "type": "tpl",
+                                  "tpl": "基础包",
+                                  "id": "u:1dec5c0e6038"
+                                },
+                                {
+                                  "type": "flex",
+                                  "direction": "row",
+                                  "items": [
+                                    {
+                                      "style": {
+                                        "text-align": "left",
+                                        "margin": "0px 10px 0px 0px"
+                                      },
+                                      "type": "tpl",
+                                      "tpl": "${rows[0].基础包A级工作包数量}",
+                                      "id": "u:1dec5c0e6038"
+                                    },
+                                    {
+                                      "style": {
+                                        "text-align": "right"
+                                      },
+                                      "type": "tpl",
+                                      "id": "u:1dec5c0e6038",
+                                      "tpl": "${rows[0].基础包A级工作包数量占比}"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "tpl",
+                                  "tpl": "拓展包",
+                                  "id": "u:1dec5c0e6038"
+                                },
+                                      {
+                                  "type": "flex",
+                                  "direction": "row",
+                                  "items": [
+                                    {
+                                      "style": {
+                                        "text-align": "left",
+                                        "margin": "0px 10px 0px 0px"
+                                      },
+                                      "type": "tpl",
+                                      "tpl": "${rows[0].拓展包A级工作包数量}",
+                                      "id": "u:1dec5c0e6038"
+                                    },
+                                    {
+                                      "style": {
+                                        "text-align": "right"
+                                      },
+                                      "type": "tpl",
+                                      "id": "u:1dec5c0e6038",
+                                      "tpl": "${rows[0].拓展包A级工作包数量占比}"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "id": "u:c60b4ba46728"
+                            }
+                          ]
+                        }
+                      ],
+                      "actions": [
+                      ],
+                      "id": "u:d3cf7982e857",
+                      "actionsCount": 1
+                    },
+                          {
+                      "type": "card",
+                             "style":{
+                          "width":"50%",
+                            "height":"50%"
+                        },
+                      "header": {
+                        "title": "",
+                        "subTitle": ""
+                      },
+                      "body": [
+                        {
+                          "type": "flex",
+                          "inline": false,
+                          "id": "u:2c3c2439e069",
+                          "direction": "row",
+                          "items": [
+                            {
+                              "type": "static-image",
+                              "src": "../../images/B+.png",
+                              "width":"50px",
+                                "height":"50px",
+                              "id": "u:ba453e7891f1",
+                              "imageMode": "thumb",
+                              "innerClassName": "no-border"
+                            },
+                            {
+                              "type": "flex",
+                              "direction": "column",
+                              "items": [
+                                {
+                                  "type": "tpl",
+                                  "tpl": "基础包",
+                                  "id": "u:1dec5c0e6038"
+                                },
+                                {
+                                  "type": "flex",
+                                  "direction": "row",
+                                  "items": [
+                                    {
+                                      "style": {
+                                        "text-align": "left",
+                                        "margin": "0px 10px 0px 0px"
+                                      },
+                                      "type": "tpl",
+                                      "tpl": "${rows[0].基础包BPlus级工作包数量}",
+                                      "id": "u:1dec5c0e6038"
+                                    },
+                                    {
+                                      "style": {
+                                        "text-align": "right"
+                                      },
+                                      "type": "tpl",
+                                      "id": "u:1dec5c0e6038",
+                                      "tpl": "${rows[0].基础包BPlus级工作包数量占比}"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "tpl",
+                                  "tpl": "拓展包",
+                                  "id": "u:1dec5c0e6038"
+                                },
+                                      {
+                                  "type": "flex",
+                                  "direction": "row",
+                                  "items": [
+                                    {
+                                      "style": {
+                                        "text-align": "left",
+                                        "margin": "0px 10px 0px 0px"
+                                      },
+                                      "type": "tpl",
+                                      "tpl": "${rows[0].拓展包BPlus级工作包数量}",
+                                      "id": "u:1dec5c0e6038"
+                                    },
+                                    {
+                                      "style": {
+                                        "text-align": "right"
+                                      },
+                                      "type": "tpl",
+                                      "id": "u:1dec5c0e6038",
+                                      "tpl": "${rows[0].拓展包BPlus级工作包数量占比}"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "id": "u:c60b4ba46728"
+                            }
+                          ]
+                        }
+                      ],
+                      "actions": [
+                      ],
+                      "id": "u:d3cf7982e857",
+                      "actionsCount": 1
+                    },
+                    {
+                      "type": "card",
+                       "style":{
+                          "width":"50%",
+                            "height":"50%"
+                        },
+                      "header": {
+                        "title": "",
+                        "subTitle": ""
+                      },
+                      "body": [
+                        {
+                          "type": "flex",
+                          "inline": false,
+                          "id": "u:2c3c2439e069",
+                          "direction": "row",
+                          "items": [
+                            {
+                              "type": "static-image",
+                              "src": "../../images/B.png",
+                              "width":"50px",
+                                "height":"50px",
+                              "imageMode": "thumb",
+                              "id": "u:ba453e7891f1",
+                              "innerClassName": "no-border"
+                            },
+                            {
+                              "type": "flex",
+                              "direction": "column",
+                              "items": [
+                                {
+                                  "type": "tpl",
+                                  "tpl": "基础包",
+                                  "id": "u:1dec5c0e6038"
+                                },
+                                {
+                                  "type": "flex",
+                                  "direction": "row",
+                                  "items": [
+                                    {
+                                      "style": {
+                                        "text-align": "left",
+                                        "margin": "0px 10px 0px 0px"
+                                      },
+                                      "type": "tpl",
+                                      "tpl": "${rows[0].基础包B级工作包数量}",
+                                      "id": "u:1dec5c0e6038"
+                                    },
+                                    {
+                                      "style": {
+                                        "text-align": "right"
+                                      },
+                                      "type": "tpl",
+                                      "id": "u:1dec5c0e6038",
+                                      "tpl": "${rows[0].基础包B级工作包数量占比}"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "tpl",
+                                  "tpl": "拓展包",
+                                  "id": "u:1dec5c0e6038"
+                                },
+                                      {
+                                  "type": "flex",
+                                  "direction": "row",
+                                  "items": [
+                                    {
+                                      "style": {
+                                        "text-align": "left",
+                                        "margin": "0px 10px 0px 0px"
+                                      },
+                                      "type": "tpl",
+                                      "tpl": "${rows[0].拓展包B级工作包数量}",
+                                      "id": "u:1dec5c0e6038"
+                                    },
+                                    {
+                                      "style": {
+                                        "text-align": "right"
+                                      },
+                                      "type": "tpl",
+                                      "id": "u:1dec5c0e6038",
+                                      "tpl": "${rows[0].拓展包B级工作包数量占比}"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "id": "u:c60b4ba46728"
+                            }
+                          ]
+                        }
+                      ],
+                      "actions": [
+                      ],
+                      "id": "u:d3cf7982e857",
+                      "actionsCount": 1
+                    },
+
+                    {
+                      "type": "card",
+                       "style":{
+                          "width":"50%",
+                            "height":"50%"
+                        },
+                      "header": {
+                        "title": "",
+                        "subTitle": ""
+                      },
+                      "body": [
+                        {
+                          "type": "flex",
+                          "inline": false,
+                          "id": "u:2c3c2439e069",
+                          "direction": "row",
+                          "items": [
+                            {
+                              "type": "static-image",
+                              "src": "../../images/C.png",
+                              "width":"50px",
+                                "height":"50px",
+                              "imageMode": "thumb",
+                              "id": "u:ba453e7891f1",
+                              "innerClassName": "no-border"
+                            },
+                            {
+                              "type": "flex",
+                              "direction": "column",
+                              "items": [
+                                {
+                                  "type": "tpl",
+                                  "tpl": "基础包",
+                                  "id": "u:1dec5c0e6038"
+                                },
+                                {
+                                  "type": "flex",
+                                  "direction": "row",
+                                  "items": [
+                                    {
+                                      "style": {
+                                        "text-align": "left",
+                                        "margin": "0px 10px 0px 0px"
+                                      },
+                                      "type": "tpl",
+                                      "tpl": "${rows[0].基础包C级工作包数量}",
+                                      "id": "u:1dec5c0e6038"
+                                    },
+                                    {
+                                      "style": {
+                                        "text-align": "right"
+                                      },
+                                      "type": "tpl",
+                                      "id": "u:1dec5c0e6038",
+                                      "tpl": "${rows[0].基础包C级工作包数量占比}"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "tpl",
+                                  "tpl": "拓展包",
+                                  "id": "u:1dec5c0e6038"
+                                },
+                                      {
+                                  "type": "flex",
+                                  "direction": "row",
+                                  "items": [
+                                    {
+                                      "style": {
+                                        "text-align": "left",
+                                        "margin": "0px 10px 0px 0px"
+                                      },
+                                      "type": "tpl",
+                                      "tpl": "${rows[0].拓展包C级工作包数量}",
+                                      "id": "u:1dec5c0e6038"
+                                    },
+                                    {
+                                      "style": {
+                                        "text-align": "right"
+                                      },
+                                      "type": "tpl",
+                                      "id": "u:1dec5c0e6038",
+                                      "tpl": "${rows[0].拓展包C级工作包数量占比}"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "id": "u:c60b4ba46728"
+                            }
+                          ]
+                        }
+                      ],
+                      "actions": [
+                      ],
+                      "id": "u:d3cf7982e857",
+                      "actionsCount": 1
+                    },
+                    {
+                      "type": "card",
+                       "style":{
+                          "width":"50%",
+                            "height":"50%"
+                        },
+                      "header": {
+                        "title": "",
+                        "subTitle": ""
+                      },
+                      "body": [
+                        {
+                          "type": "flex",
+                          "inline": false,
+                          "id": "u:2c3c2439e069",
+                          "direction": "row",
+                          "items": [
+                            {
+                              "type": "static-image",
+                              "src": "../../images/不予立项.png",
+                              "width":"100px",
+                                "height":"50px",
+                              "imageMode": "thumb",
+                              "id": "u:ba453e7891f1",
+                              "innerClassName": "no-border"
+                            },
+                            {
+                              "type": "flex",
+                              "direction": "column",
+                              "items": [
+                                {
+                                  "type": "tpl",
+                                  "tpl": "基础包",
+                                  "id": "u:1dec5c0e6038"
+                                },
+                                {
+                                  "type": "flex",
+                                  "direction": "row",
+                                  "items": [
+                                    {
+                                      "style": {
+                                        "text-align": "left",
+                                        "margin": "0px 10px 0px 0px"
+                                      },
+                                      "type": "tpl",
+                                      "tpl": "${rows[0].基础包不予立项工作包数量}",
+                                      "id": "u:1dec5c0e6038"
+                                    },
+                                    {
+                                      "style": {
+                                        "text-align": "right"
+                                      },
+                                      "type": "tpl",
+                                      "id": "u:1dec5c0e6038",
+                                      "tpl": "${rows[0].基础包不予立项工作包数量占比}"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "tpl",
+                                  "tpl": "拓展包",
+                                  "id": "u:1dec5c0e6038"
+                                },
+                                      {
+                                  "type": "flex",
+                                  "direction": "row",
+                                  "items": [
+                                    {
+                                      "style": {
+                                        "text-align": "left",
+                                        "margin": "0px 10px 0px 0px"
+                                      },
+                                      "type": "tpl",
+                                      "tpl": "${rows[0].拓展包不予立项工作包数量}",
+                                      "id": "u:1dec5c0e6038"
+                                    },
+                                    {
+                                      "style": {
+                                        "text-align": "right"
+                                      },
+                                      "type": "tpl",
+                                      "id": "u:1dec5c0e6038",
+                                      "tpl": "${rows[0].拓展包不予立项工作包数量占比}"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "id": "u:c60b4ba46728"
+                            }
+                          ]
+                        }
+                      ],
+                      "actions": [
+                      ],
+                      "id": "u:d3cf7982e857",
+                      "actionsCount": 1
+                    },
+                    {
+                      "type": "card",
+                       "style":{
+                          "width":"50%",
+                            "height":"50%"
+                        },
+                      "header": {
+                        "title": "",
+                        "subTitle": ""
+                      },
+                      "body": [
+                        {
+                          "type": "flex",
+                          "inline": false,
+                          "id": "u:2c3c2439e069",
+                          "direction": "row",
+                          "items": [
+                            {
+                              "type": "static-image",
+                              "src": "../../images/待定.png",
+                              "width":"100px",
+                                "height":"50px",
+                              "imageMode": "thumb",
+                              "id": "u:ba453e7891f1",
+                              "innerClassName": "no-border"
+                            },
+                            {
+                              "type": "flex",
+                              "direction": "column",
+                              "items": [
+                                {
+                                  "type": "tpl",
+                                  "tpl": "基础包",
+                                  "id": "u:1dec5c0e6038"
+                                },
+                                {
+                                  "type": "flex",
+                                  "direction": "row",
+                                  "items": [
+                                    {
+                                      "style": {
+                                        "text-align": "left",
+                                        "margin": "0px 10px 0px 0px"
+                                      },
+                                      "type": "tpl",
+                                      "tpl": "${rows[0].基础包待定工作包数量}",
+                                      "id": "u:1dec5c0e6038"
+                                    },
+                                    {
+                                      "style": {
+                                        "text-align": "right"
+                                      },
+                                      "type": "tpl",
+                                      "id": "u:1dec5c0e6038",
+                                      "tpl": "${rows[0].基础包待定工作包数量占比}"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "tpl",
+                                  "tpl": "拓展包",
+                                  "id": "u:1dec5c0e6038"
+                                },
+                                      {
+                                  "type": "flex",
+                                  "direction": "row",
+                                  "items": [
+                                    {
+                                      "style": {
+                                        "text-align": "left",
+                                        "margin": "0px 10px 0px 0px"
+                                      },
+                                      "type": "tpl",
+                                      "tpl": "${rows[0].拓展包待定工作包数量}",
+                                      "id": "u:1dec5c0e6038"
+                                    },
+                                    {
+                                      "style": {
+                                        "text-align": "right"
+                                      },
+                                      "type": "tpl",
+                                      "id": "u:1dec5c0e6038",
+                                      "tpl": "${rows[0].拓展包待定工作包数量占比}"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "id": "u:c60b4ba46728"
+                            }
+                          ]
+                        }
+                      ],
+                      "actions": [
+                      ],
+                      "id": "u:d3cf7982e857",
+                      "actionsCount": 1
+                    },
+                    {
+                      "type": "card",
+                       "style":{
+                          "width":"50%",
+                            "height":"50%"
+                        },
+                      "header": {
+                        "title": "",
+                        "subTitle": ""
+                      },
+                      "body": [
+                        {
+                          "type": "flex",
+                          "direction": "row",
+                          "items": [
+                            {
+                              "type": "static-image",
+                              "src": "../../images/待评审.png",
+                              "width":"100px",
+                                "height":"50px",
+                              "imageMode": "thumb",
+                              "id": "u:ba453e7891f1",
+                              "innerClassName": "no-border"
+                            },
+                            {
+                              "type": "flex",
+                              "direction": "column",
+                              "items": [
+                                {
+                                  "type": "tpl",
+                                  "tpl": "基础包",
+                                  "id": "u:1dec5c0e6038"
+                                },
+                                {
+                                  "type": "flex",
+                                  "direction": "row",
+                                  "items": [
+                                    {
+                                      "style": {
+                                        "text-align": "left",
+                                        "margin": "0px 10px 0px 0px"
+                                      },
+                                      "type": "tpl",
+                                      "tpl": "${rows[0].基础包未评审工作包数量}",
+                                      "id": "u:1dec5c0e6038"
+                                    },
+                                    {
+                                      "style": {
+                                        "text-align": "right"
+                                      },
+                                      "type": "tpl",
+                                      "id": "u:1dec5c0e6038",
+                                      "tpl": "${rows[0].基础包未评审工作包数量占比}"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "tpl",
+                                  "tpl": "拓展包",
+                                  "id": "u:1dec5c0e6038"
+                                },
+                                      {
+                                  "type": "flex",
+                                  "direction": "row",
+                                  "items": [
+                                    {
+                                      "style": {
+                                        "text-align": "left",
+                                        "margin": "0px 10px 0px 0px"
+                                      },
+                                      "type": "tpl",
+                                      "tpl": "${rows[0].拓展包未评审工作包数量}",
+                                      "id": "u:1dec5c0e6038"
+                                    },
+                                    {
+                                      "style": {
+                                        "text-align": "right"
+                                      },
+                                      "type": "tpl",
+                                      "id": "u:1dec5c0e6038",
+                                      "tpl": "${rows[0].拓展包未评审工作包数量占比}"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "id": "u:c60b4ba46728"
+                            }
+                          ],
+                          "inline": false,
+                          "id": "u:2c3c2439e069"
+                        }
+                      ],
+                      "actions": [
+                      ],
+                      "id": "u:d3cf7982e857",
+                      "actionsCount": 1
+                    }
+                  ],
+                  "id": "u:1c523d839a6e"
+                }
+              ],
+              "id": "u:d45f194b5c4a"
+            }
+          ],
+          "interval": 1000,
+          "silentPolling": true,
+          "id": "u:b2e2e54eff48"
+        },
+        {
+          "type": "crud",
+          "id": "small_crud409",
+          "name": "small_crud409",
+          "className": "m-b-none",
+          "syncLocation": false,
+          "autoGenerateFilter": true,
+          "autoFillHeight": true,
+          "defaultParams": {
+            "perPage": "5",
+            "orderBy": "ID",
+            "orderDir": "asc"
+          },
+          "perPageAvailable": [
+            5,
+            10,
+            20,
+            50,
+            100,
+            500,
+            10000
+          ],
+          "checkOnItemClick": true,
+          "headerToolbar": [
+            "reload",
+            "switch-per-page",
+            {
+              "type": "tpl",
+              "tpl": "共${total}条",
+              "id": "u:ee03ccb5467f"
+            },
+            "pagination"
+          ],
+          "footerToolbar": [
+          ],
+          "columns": [
+            {
+              "name": "ID",
+              "label": "ID",
+              "width": 150,
+              "align": "center",
+              "sortable": true,
+              "copyable": false,
+              "fixed": "",
+              "id": "u:a6c3b234d2a2",
+              "placeholder": "-",
+              "toggled": false
+            },
+            {
+              "name": "名称",
+              "label": "工作包名称",
+              "width": 150,
+              "align": "center",
+              "sortable": true,
+              "copyable": false,
+              "searchable": true,
+              "fixed": "",
+              "id": "u:a6c3b234d2a2"
+            },
+            {
+              "name": "类别",
+              "label": "工作包类别",
+              "width": 150,
+              "align": "center",
+              "sortable": true,
+              "copyable": false,
+              "fixed": "",
+              "id": "u:5fbf2767f197",
+              "searchable": {
+                "autoComplete": "post:/imc/queryDict?code=gzblb&q=$term",
+                "id": "u:45ed932aaa58"
+              }
+            },
+            {
+              "name": "现状分析",
+              "label": "现状分析",
+              "width": 300,
+              "align": "left",
+              "sortable": true,
+              "copyable": false,
+              "fixed": "",
+              "id": "u:b0fe428f618d",
+              "type": "html"
+            },
+            {
+              "name": "目标",
+              "label": "目标",
+              "width": 300,
+              "align": "left",
+              "sortable": true,
+              "copyable": false,
+              "fixed": "",
+              "type": "html",
+              "id": "u:1d070de8835f"
+            },
+            {
+              "name": "意见",
+              "label": "专家评审意见",
+              "width": 150,
+              "align": "center",
+              "sortable": true,
+              "copyable": false,
+              "fixed": "",
+              "id": "u:38e065596fe3",
+              "searchable": {
+                "autoComplete": "post:/imc/queryDict?code=gzbndpj&q=$term",
+                "id": "u:45ed932aaa58"
+              }
+            },
+            {
+              "name": "备注",
+              "label": "备注",
+              "width": 150,
+              "align": "center",
+              "sortable": true,
+              "copyable": false,
+              "fixed": "",
+              "id": "u:12357c2703b0"
+            },
+            {
+              "label": "是否提交",
+              "fixed": "",
+              "id": "u:e24866861ef9",
+              "name": "是否提交",
+              "width": 150,
+              "align": "center",
+              "sortable": true,
+              "copyable": false
+            },
+            {
+              "type": "operation",
+              "label": "操作",
+              "fixed": "right",
+              "buttons": [
+                {
+                  "label": "添加备注",
+                  "type": "button",
+                  "level": "info",
+                  "actionType": "dialog",
+                  "dialog": {
+                    "title": "添加备注",
+                    "resizable": true,
+                    "actions": [
+                      {
+                        "type": "button",
+                        "actionType": "cancel",
+                        "level": "light",
+                        "label": "关闭"
+                      },
+                      {
+                        "type": "button",
+                        "actionType": "prev",
+                        "visibleOn": "data.hasPrev",
+                        "label": "上一条"
+                      },
+                      {
+                        "type": "button",
+                        "actionType": "next",
+                        "visibleOn": "data.hasNext",
+                        "label": "下一条"
+                      },
+                      {
+                        "type": "submit",
+                        "actionType": "next",
+                        "visibleOn": "data.hasNext",
+                        "label": "保存并下一条",
+                        "level": "primary"
+                      },
+                      {
+                        "type": "submit",
+                        "label": "保存",
+                        "level": "primary"
+                      }
+                    ],
+                    "size": "xl",
+                    "body": {
+                      "type": "form",
+                      "columnCount": 0,
+                      "id": "edit_form409",
+                      "api": {
+                        "method": "post",
+                        "url": "/imc/update",
+                        "dataType": "json",
+                        "data": {
+                          "req": "m409Req",
+                          "data": "{\"备注\": \"${备注}\", \"ID\": \"${ID}\"}"
+                        }
+                      },
+                      "body": [
+                        {
+                          "name": "备注",
+                          "label": "备注",
+                          "type": "input-text"
+                        }
+                      ]
+                    }
+                  },
+                  "id": "u:90b62d9f32fe"
+                },
+                {
+                  "label": "不予立项",
+                  "actionType": "ajax",
+                  "api": {
+                    "method": "post",
+                    "url": "/imc/customOpt",
+                    "data": {
+                      "req": 316,
+                      "data": "{\"备注\": \"${备注}\", \"ID\": \"${ID}\"}"
+                    }
+                  },
+                  "confirmText": "",
+                  "feedback": {
+                    "visibleOn": "(this.visibleOn)",
+                    "title": "${title}",
+                    "body": "${body}",
+                    "actions": [
+                    ]
+                  },
+                  "id": "u:b5729a6c301a"
+                },
+                {
+                  "label": "S",
+                  "actionType": "ajax",
+                  "api": {
+                    "method": "post",
+                    "url": "/imc/customOpt",
+                    "data": {
+                      "req": 317,
+                      "data": "{\"备注\": \"${备注}\", \"ID\": \"${ID}\"}"
+                    }
+                  },
+                  "confirmText": "",
+                  "feedback": {
+                    "visibleOn": "(this.visibleOn)",
+                    "title": "${title}",
+                    "body": "${body}",
+                    "actions": [
+                    ]
+                  },
+                  "id": "u:d616e94f4950"
+                },
+                {
+                  "label": "A",
+                  "actionType": "ajax",
+                  "api": {
+                    "method": "post",
+                    "url": "/imc/customOpt",
+                    "data": {
+                      "req": 318,
+                      "data": "{\"备注\": \"${备注}\", \"ID\": \"${ID}\"}"
+                    }
+                  },
+                  "confirmText": "",
+                  "feedback": {
+                    "visibleOn": "(this.visibleOn)",
+                    "title": "${title}",
+                    "body": "${body}",
+                    "actions": [
+                    ]
+                  },
+                  "id": "u:2e23c8e81bbd"
+                },
+                {
+                  "label": "B+",
+                  "actionType": "ajax",
+                  "api": {
+                    "method": "post",
+                    "url": "/imc/customOpt",
+                    "data": {
+                      "req": 330,
+                      "data": "{\"备注\": \"${备注}\", \"ID\": \"${ID}\"}"
+                    }
+                  },
+                  "confirmText": "",
+                  "feedback": {
+                    "visibleOn": "(this.visibleOn)",
+                    "title": "${title}",
+                    "body": "${body}",
+                    "actions": [
+                    ]
+                  },
+                  "id": "u:ce66a2891e8a"
+                },
+                {
+                  "label": "B",
+                  "actionType": "ajax",
+                  "api": {
+                    "method": "post",
+                    "url": "/imc/customOpt",
+                    "data": {
+                      "req": 319,
+                      "data": "{\"备注\": \"${备注}\", \"ID\": \"${ID}\"}"
+                    }
+                  },
+                  "confirmText": "",
+                  "feedback": {
+                    "visibleOn": "(this.visibleOn)",
+                    "title": "${title}",
+                    "body": "${body}",
+                    "actions": [
+                    ]
+                  },
+                  "id": "u:ce66a2891e8a"
+                },
+                {
+                  "label": "C",
+                  "actionType": "ajax",
+                  "api": {
+                    "method": "post",
+                    "url": "/imc/customOpt",
+                    "data": {
+                      "req": 320,
+                      "data": "{\"备注\": \"${备注}\", \"ID\": \"${ID}\"}"
+                    }
+                  },
+                  "confirmText": "",
+                  "feedback": {
+                    "visibleOn": "(this.visibleOn)",
+                    "title": "${title}",
+                    "body": "${body}",
+                    "actions": [
+                    ]
+                  },
+                  "id": "u:d28272d4a20f"
+                },
+                {
+                  "label": "待定",
+                  "actionType": "ajax",
+                  "api": {
+                    "method": "post",
+                    "url": "/imc/customOpt",
+                    "data": {
+                      "req": 323,
+                      "data": "{\"备注\": \"${备注}\", \"ID\": \"${ID}\"}"
+                    }
+                  },
+                  "confirmText": "",
+                  "feedback": {
+                    "visibleOn": "(this.visibleOn)",
+                    "title": "${title}",
+                    "body": "${body}",
+                    "actions": [
+                    ]
+                  },
+                  "id": "u:d28272d4a20f"
+                }
+              ],
+              "id": "u:5b94dce69f2d"
+            }
+          ],
+          "api": {
+            "method": "post",
+            "url": "/imc/queryData",
+            "dataType": "form",
+            "data": {
+              "req": "m409Req",
+              "page": "${page}",
+              "rows": "${perPage}",
+              "sort": "${orderBy}",
+              "order": "${orderDir}",
+              "pid": "${ID}",
+              "filterRules": "[{\"field\": \"意见\", \"op\": \"contains\", \"value\": \"${意见}\"},{\"field\": \"工作包类别\", \"op\": \"contains\", \"value\": \"${类别}\"},{\"field\": \"名称\", \"op\": \"contains\", \"value\": \"${名称}\"}]"
+            }
+          }
+        }
+      ],
+      "id": "u:569761a4e32c"
+    }
+  ],
+  "id": "u:bd32840399c6"
+};
+        let amisScoped = amis.embed('#root', amisJSON);
+      })();
+    </script>
+  </body>
+</html>

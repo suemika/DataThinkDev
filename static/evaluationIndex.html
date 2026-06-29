@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+        <title>流程健康检查</title>
+
+        <!-- <link rel="stylesheet" href="customcss/index.css">
+        <script src="customjs/vue.min.js"></script>
+        <script src="customjs/index.js"></script>
+        <script src="customjs/axios.min.js"></script>
+        <script src="customjs/vant.min.js"></script> -->
+        <link rel="stylesheet" href="elementui/css/indexjyb.css" />
+		<script src="elementui/js/vue.min.js"></script>
+		<script src="elementui/js/indexjyb.js"></script>
+		<script src="elementui/js/axios@1.4.0.js"></script>
+        <style>
+            .btn-group {
+                margin-top: 20px;
+                display: flex;
+                justify-content: space-between;
+                padding: 0 15px;
+            }
+            .nav-item {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 60px;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+            .nav-item.active {
+                color: #409EFF;
+            }
+            .nav-item i {
+                font-size: 24px;
+                margin-bottom: 2px;
+            }
+            .nav-item span {
+                font-size: 12px;
+            }
+        </style>
+    </head>
+
+    <body style="overflow: hidden;">
+        <div id="app" style="margin-top:10px;overflow-y: hidden;">
+            <el-container style="height: 100vh;overflow-y: hidden;">
+                <!-- 头部 -->
+                <div class="user-info-bar">
+                    <img src="./img/jyb-logo.jpg" alt="系统Logo" class="site-logo">
+                    <div class="user-welcome" v-if="userName">欢迎，{{ userName + "【" + userRole + "】" }}</div>
+                    <div class="user-welcome" v-else>正在加载用户信息...</div>
+                </div>
+                <el-divider style="color:#DCDFE6"></el-divider>
+                <el-main style="overflow-y: auto;">
+                    <!-- 首页内容 -->
+                    <div v-show="currentPage === 'home'">
+                        <div class="form-container">
+                            <el-form  class="centerd-form" ref="form" :model="indexForm" label-width="100px" :rules="rules" label-position="top">
+                                <!-- 流程名称下拉框 -->
+								<el-form-item label="流程名称过滤" prop="progressNameFilter">
+                                    <el-input v-model="indexForm.progressNameFilter" placeholder="请输入流程名称进行过滤" @change="filterProgressByName"></el-input>
+                                </el-form-item>
+                                <el-form-item label="流程名称" prop="processID">
+                                    <el-select 
+                                        filterable 
+                                        v-model="indexForm.processID" 
+                                        placeholder="请选择流程"
+                                        style="width:100%"
+										:key="filterProcessList.length"
+                                        >
+                                        <el-option
+                                            v-for="(item, index) in filterProcessList"
+                                            :key="index"
+                                            :label="item.流程名称"
+                                            :value="item.流程编号">
+                                        </el-option>
+                                    </el-select>
+                                </el-form-item>
+    
+                                <!-- 检查类型单选框 -->
+                                <el-form-item label="检查类型" prop="checkType" style="display: flex; flex-flow:column nowrap; align-items: flex-start;">
+                                    <el-radio-group v-model="indexForm.checkType">
+                                        <div v-show="userRole=='精益骨干'" style="margin-top: 5px;">
+                                            <el-radio label="首次检查"></el-radio>
+                                        </div>
+                                        <div v-show="userRole == '流程负责人'" style="margin-top: 5px;">
+                                            <el-radio label="常规检查"></el-radio>
+                                        </div>
+                                        <div v-show="userRole=='精益骨干'" style="margin-top: 5px;">
+                                            <el-radio label="精益办抽查"></el-radio>
+                                        </div>
+                                    </el-radio-group>
+                                </el-form-item>
+    
+                                <!-- 按钮组 -->
+                                <el-form-item style="margin-top: 100px;">
+                                    <el-row :gutter="20" style="width:100%">
+                                        <el-col :span="24">
+                                            <el-button 
+                                                round
+                                                type="primary" 
+                                                icon="el-icon-circle-check"
+                                                style="width:100%"
+                                                @click="handleCheck">开始检查</el-button>
+                                        </el-col>
+                                    </el-row>
+                                </el-form-item>
+                            </el-form>
+                        </div>
+                        
+                    </div>
+
+                    <!-- 数据查询页内容 -->
+                    <div v-show="currentPage === 'query'">
+                        <!-- 移动端优化后的筛选条件 -->
+                        <!-- 移动端筛选按钮 -->
+                        <div class="mobile-filter-btn">
+                            <el-button 
+                            icon="el-icon-refresh"
+                            @click="getCheckRecord"
+                            class="top-filter-trigger">
+                            刷新
+                        </el-button>
+                            <el-button 
+                                icon="el-icon-s-fold"
+                                @click="showTopFilter = true"
+                                class="top-filter-trigger">
+                                筛选
+                            </el-button>
+                        </div>
+
+                    <!-- 顶部筛选面板 -->
+                    <el-drawer
+                        title="筛选条件"
+                        :visible.sync="showTopFilter"
+                        direction="rtl"
+                        :size="mobileFilterHeight"
+                        class="right-align-btn">
+                        <div class="filter-content">
+                            <el-form label-position="top">
+                                <!-- 筛选表单项 -->
+                                <el-form-item label="业务域">
+                                    <el-select
+                                        v-model="queryFilter.businessDomain"
+                                        placeholder="请选择"
+                                        clearable>
+                                        <el-option
+                                            v-for="(item, index) in businessDomains"
+                                            :key="index"
+                                            :label="item.业务域名称"
+                                            :value="item.业务域名称">
+                                        </el-option>
+                                    </el-select>
+                                </el-form-item>
+                                <el-form-item label="流程名称">
+                                    <el-select
+                                        v-model="queryFilter.processName"
+                                        placeholder="请选择"
+                                        clearable>
+                                        <el-option
+                                            v-for="(item, index) in processList"
+                                            :key="index"
+                                            :label="item.流程名称"
+                                            :value="item.流程名称">
+                                        </el-option>
+                                    </el-select>
+                                </el-form-item>
+                                <el-form-item label="检查类型"style="display: flex; flex-flow:column nowrap; align-items: flex-start;">
+                                    <el-radio-group v-model="queryFilter.checkType">
+                                        <div  style="margin-top: 5px;">
+                                            <el-radio label="首次检查"></el-radio>
+                                        </div>
+                                        <div style="margin-top: 5px;">
+                                            <el-radio label="常规检查"></el-radio>
+                                        </div>
+                                        <div  style="margin-top: 5px;">
+                                            <el-radio label="精益办抽查"></el-radio>
+                                        </div>
+                                    </el-radio-group>
+                                </el-form-item>
+                                <el-form-item label="检查状态"style="display: flex; flex-flow:column nowrap; align-items: flex-start;">
+                                    <el-radio-group v-model="queryFilter.checkStatus">
+                                        <div  style="margin-top: 5px;">
+                                            <el-radio label="进行中"></el-radio>
+                                        </div>
+                                        <div style="margin-top: 5px;">
+                                            <el-radio label="已完成"></el-radio>
+                                        </div>
+                                    </el-radio-group>
+                                </el-form-item>
+                                
+                                <!-- 其他表单项 -->
+                                
+                                <div class="filter-actions">
+                                    <el-button 
+                                        type="primary" 
+                                        @click="handleFilterQuery"
+                                        style="width:100%">
+                                        查询
+                                    </el-button>
+                                </div>
+                                <div class="filter-actions">
+                                    <el-button 
+                                        type="warning" 
+                                        @click="initQueryFilter"
+                                        style="width:100%">
+                                        重置
+                                    </el-button>
+                                </div>
+                            </el-form>
+                        </div>
+                    </el-drawer>
+                    
+                        <!-- 响应式表格 -->
+                        <div class="responsive-table">
+                            
+                            <el-card 
+                                v-for="(item, index) in tableData" 
+                                :key="index"
+                                shadow="hover"
+                               
+                                
+                                class="compact-card"
+                                :body-style="{ padding: '12px'}">
+                                <div @click="handleViewDetail(item)">
+                                    <!-- 卡片头部 -->
+                                <div slot="header" class="card-header">
+                                    <div style="text-align: center;">
+                                        <span class="process-name">{{ item.流程名称 }}</span>
+                                        <span style="font-size: 12px;color:#409EFF;">{{ '['+item.流程编号+']' }}</span>
+                                    </div>
+                                    <el-divider style="color:#DCDFE6"></el-divider>
+                                    <div class="title-group">
+                                        <el-tag 
+                                            type="success"
+                                            effect="plain" 
+                                            size="mini"
+                                            class="type-tag">
+                                            {{ item.业务域 }}
+                                        </el-tag>
+                                        
+                                        <el-tag 
+                                            effect="plain" 
+                                            size="mini"
+                                            class="type-tag">
+                                            {{ item.检查类型 }}
+                                        </el-tag>
+                                    </div>
+                                </div>
+
+                                <!-- 主体内容 -->
+                                <div class="card-content"  >
+                                    <!-- 得分区块 -->
+                                    <el-row :gutter="8" class="score-row">
+                                        <el-col :span="8">
+                                            <div class="score-main">
+                                                <div class="score-label">总得分</div>
+                                                <el-tag 
+                                                    type="success" 
+                                                    size="small"
+                                                    class="score-tag">
+                                                    {{ item.总得分 }}
+                                                </el-tag>
+                                            </div>
+                                        </el-col>
+                                        <el-col :span="8">
+                                            <div class="score-main">
+                                                <div class="score-label">执行得分</div>
+                                                <el-tag 
+                                                    type="" 
+                                                    size="small"
+                                                    class="score-tag">
+                                                    {{ item.执行得分 }}
+                                                </el-tag>
+                                            </div>
+                                        </el-col>
+                                        <el-col :span="8">
+                                            <div class="score-main">
+                                                <div class="score-label">有效得分</div>
+                                                <el-tag 
+                                                    type="warning" 
+                                                    size="small"
+                                                    class="score-tag">
+                                                    {{ item.有效得分 }}
+                                                </el-tag>
+                                            </div>
+                                        </el-col>
+
+                                    </el-row>
+                                    <div class="card-actions">
+                                        
+                                        <span v-if="item.提交时间" style="font-size: 14px;color: gray;">{{item.提交时间}}</span>
+                                        <el-tag 
+                                        v-if="!item.提交时间"
+                                            type="danger"
+                                            size="mini"
+                                            >
+                                            {{ '进行中' }}
+                                        </el-tag>
+                                    </div>
+                                </div>
+                                </div>
+                                
+                            </el-card>
+                        </div>
+                    
+                        <!-- 移动端分页 -->
+                        <div class="fixed-pagination-container">
+                            <div class="mobile-pagination">
+                                <el-pagination
+                                    :total="total"
+                                    :page-size="pageSize"
+                                    :current-page="currentPageNum"
+                                    layout="total,pager"
+                                    @current-change="handleCurrentChange"
+                                    >
+                                </el-pagination>
+                            </div>
+                        </div>
+                    </div>
+                </el-main>
+
+                <!-- 底部导航 -->
+                <el-footer style="height: 60px; border-top: 1px solid #e4e7ed; background: #fff;">
+                    <div style="display: flex; height: 100%;">
+                        <div class="nav-item" :class="{active: currentPage === 'home'}" @click="switchPage('home')">
+                            <i class="el-icon-s-home"></i>
+                            <span>首页</span>
+                        </div>
+                        <div class="nav-item" :class="{active: currentPage === 'query'}" @click="switchPage('query')">
+                            <i class="el-icon-search"></i>
+                            <span>数据查询</span>
+                        </div>
+                    </div>
+                </el-footer>
+            </el-container>
+            <!-- 在原有dialog中添加tabs结构 -->
+            <el-dialog 
+                :title="dialogTitle" 
+                :visible.sync="dialogVisible" 
+                :fullscreen="isMobile"
+                :destroy-on-close="true"
+                width="90%"
+                top="5vh"
+                :destroy-on-close="true"
+                @opened="handleDialogOpened"
+                @closed="handleDialogClosed">
+
+                <!-- 固定Tabs栏 -->
+                <div class="fixed-tabs">
+                    <el-tabs 
+                        v-model="activeTab" 
+                        type="card"
+                        tab-position="top"
+                        @tab-click="handleTabChange">
+                        <el-tab-pane 
+                            v-for="(section, index) in formSections"
+                            :key="index"
+                            :name="section.ID"
+                            :label="section.环节">
+                        </el-tab-pane>
+                    </el-tabs>
+                </div>
+
+                <!-- 表单内容区域 -->
+                <div class="form-content">
+                    <el-form 
+                        ref="surveyForm"
+                        :model="surveyFormData"
+                        label-position="top"
+                        label-width="120px"
+                        class="multi-form"
+                        :rules="surveyRules"
+                        >
+
+                        <div class="section-header">
+                            <h3 class="section-title">{{currentSelectedSectionTypeName+'-'+currentSelectedSectionName}}</h3>
+                            <el-divider></el-divider>
+                        </div>
+                        <el-form-item label="检查方法" class="custom-label">
+                            <el-input
+                                type="textarea"
+                                :autosize="{ minRows: 2, maxRows: 4}"
+                                :disabled="true"
+                                style="background-color: #ffffff;font-size:16px;font-weight:1200"
+                                v-model="currentJCMethod">
+                            </el-input>
+                        </el-form-item>
+                        <el-form-item label="打分标准" class="custom-label">
+                            <el-input
+                                type="textarea"
+                                :autosize="{ minRows: 8, maxRows: 12}"
+                                :disabled="true"
+                                v-model="currentDFStandard">
+                            </el-input>
+                        </el-form-item>
+                        <el-form-item label="得分" prop="score" class="custom-label">
+							<el-select v-model="surveyFormData.score">
+								<el-option
+								  v-for="item in currentDFSelectList"
+								  :key="item"
+								  :label="item"
+								  :value="item"
+								/>
+							</el-select>
+                        </el-form-item>
+                        <el-form-item label="评价" prop="comments" class="custom-label">
+                            <el-input
+                                type="textarea"
+                                :autosize="{ minRows: 8, maxRows: 12}"
+                                v-model="surveyFormData.comments"
+                                placeholder="涉及到扣分项，要写清楚扣分的事项及明细">
+                            </el-input>
+						<el-form-item/>
+						<el-form-item label="改善举措(选填)" prop="measure" class="custom-label">
+                            <el-input
+                                type="textarea"
+                                :autosize="{ minRows: 8, maxRows: 12}"
+                                v-model="surveyFormData.measure"
+                                placeholder="涉及到扣分项对应的问题时，要明确可落地、可执行的改善举措、负责人和完成时间">
+                            </el-input>
+						<el-form-item/>
+                    </el-form>
+                </div>
+
+                <!-- 底部操作栏 -->
+                <div slot="footer" class="dialog-footer">
+                    <el-button @click="saveDraft">暂存</el-button>
+                    <el-button 
+                        type="primary" 
+                        @click="handleSubmit"
+                        :loading="submitting">
+                        提交（{{ completedSections }}/{{ formSections.length }}）
+                    </el-button>
+                </div>
+            </el-dialog>
+        </div>
+
+        <script>
+            new Vue({
+                el: '#app',
+                data() {
+                    return {
+                        currentPage: 'home',
+                        userName: '',
+                        userAccount: '',
+                        userRole: '',
+                        indexForm: {
+                            processID: '',
+                            checkType: '',
+							progressNameFilter:''
+                        },
+                        processList: [],
+						filterProcessList: [],
+                        rules: {
+                            processID: [
+                                { required: true, message: '请选择流程名称', trigger: 'change' }
+                            ],
+                            checkType: [
+                                { required: true, message: '请选择检查类型', trigger: 'change' }
+                            ]
+                        },
+                        surveyRules: {
+                            score: [
+                                { required: true, message: '请输入得分', trigger: 'blur' }
+                            ],
+                            comments: [
+                                { required: true, message: '请输入评价', trigger: 'blur' }
+                            ]
+                        },
+                        queryFilter: {
+                            businessDomain: '',
+                            processName: '',
+                            checkType: '',
+                            checkStatus:''
+                        },
+                        tableData: [],
+                        currentPageNum: 1,
+                        pageSize: 5,
+                        total: 0,
+                        showTopFilter: false,
+                        mobileFilterHeight: '70%',
+                        dialogVisible: false,
+                        dialogTitle: '流程健康检查表',
+                        isMobile: true,
+                        activeTab: 1,
+                        submitting: false,
+                        formSections: [],
+                        // 当前选中的环节
+                        currentSelectedSectionName:'',
+                        currentSelectedSectionTypeName:'',
+                        // 当前标准编号
+                        currentSelectedSectionID:'',
+                        // 当前检查方法
+                        currentJCMethod:'',
+                        // 当前打分标准
+                        currentDFStandard:'',
+						// 当前得分下拉框
+						currentDFSelectList: [],
+                        surveyFormData: {
+                            score: '',
+                            comments: '',
+							measure:''
+                        },
+                        submitData: {
+                            'evaluationID': '',
+                            'checkType': '',
+                            'processID': '',
+                            'userAccount': '',
+                            'surveyData': [],
+                            'submitType':''
+                        },
+                        businessDomains: [],
+                    }
+                },
+                computed: {
+                    completedSections() {
+                        // 防御性编程：确保surveyData存在且是数组
+                        const surveyData = this.submitData.surveyData || [];
+                        
+                        return surveyData.filter(item => {
+                        // 检查score有效性（包含0值）
+                        const validScore = (
+                            item.score !== null && 
+                            item.score !== undefined && 
+                            item.score !== ''
+                        );
+                        
+                        // 检查comments有效性（需trim后判断）
+                        const validComments = (
+                            item.comments && 
+                            typeof item.comments === 'string' && 
+                            item.comments.trim() !== ''
+                        );
+
+                        return validScore && validComments;
+                        }).length;
+                    },
+            
+                },
+                mounted() {
+                    this.getUserAccountByToken()
+                    //this.userAccount='0146999'
+                    //this.getUserInfo()
+                    this.getProcessList()
+                    this.getBusinessDomains()
+                    this.getSectionList()
+                    
+                },
+                methods: {
+                    // 根据token获取userAccount
+                    getUserAccountByToken(){
+                        if (this.userAccount == '') {
+						this.token = this.getUrlParameter("token");
+						let data = new FormData();
+						axios.post("http://edi.sdstg.com/api/sys-authentication/loginService/getTokenLoginName?token=" +
+							this.token, data).then((response) => {
+							console.log(response.data.result);
+							if (response.data.result == false) {} else {
+								this.userAccount = response.data.loginName;
+                                this.getUserInfo()
+							}
+
+						});
+					}
+                    },
+                    //获取当前用户信息
+                    getUserInfo() {
+                        if (this.userAccount) {
+                            axios.post('/imc/queryData', {
+                                req: 'm892Req',
+                                page: '1',
+                                rows: '10',
+                                sort: 'ID',
+                                order: 'asc',
+                                pid: '',
+                                filterRules: JSON.stringify([{'field':'账号', 'op': 'contains', 'value': this.userAccount}])
+                            })
+                        .then(response => {
+                            if(response.status === 200) {
+                                this.userAccount = response.data.rows[0]['账号'];
+                                this.userName = response.data.rows[0]['姓名'];
+                                this.userRole = response.data.rows[0]['角色'];
+                                this.getCheckRecord()
+                            } else {
+                                this.$message.error(res.message);
+                            }
+                        })
+                        .catch(error => {
+                            this.$message.error('获取用户信息失败');
+                        });
+                        }
+                    },
+                    getProcessList() {
+                        
+                        axios.post('/imc/queryData', {
+							req: 'm893Req',
+							page: '1',
+							rows: '9999',
+							sort: '流程编号',
+							order: 'asc',
+							pid: '',
+							filterRules: ''
+						})
+                        .then(response => {
+                            if(response.status === 200) {
+                                this.processList = response.data.rows;
+								this.filterProcessList = this.processList;
+                            } else {
+                                this.$message.error(res.message);
+                            }
+                        })
+                        .catch(error => {
+                            this.$message.error('获取流程列表失败');
+                        });
+                    },
+					// 根据输入的流程名称过滤流程
+					filterProgressByName() {
+					debugger
+					  if (!this.indexForm.progressNameFilter.trim()) {
+						this.filterProcessList = this.processList;
+					  } else {
+						const regex = new RegExp(
+						  this.indexForm.progressNameFilter.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 
+						  'i'
+						);
+						this.filterProcessList = this.processList.filter(item => regex.test(item.流程名称));
+					  }
+					},
+                    getBusinessDomains() {
+                        
+                        axios.post('/imc/queryData', {
+							req: 'm902Req',
+							page: '1',
+							rows: '10',
+							sort: 'ID',
+							order: 'asc',
+							pid: '',
+							filterRules: ''
+						})
+                        .then(response => {
+                            if(response.status === 200) {
+                                this.businessDomains = response.data.rows;
+                            } else {
+                                this.$message.error(res.message);
+                            }
+                        })
+                        .catch(error => {
+                            this.$message.error('获取业务域失败');
+                        });
+                    },
+
+
+                    handleQuery() {
+                        this.$refs.form.validate(valid => {
+                            if(valid) {
+                                
+                            }
+                        });
+                    },
+
+                    async handleCheck() {
+                        
+                        try {
+                            const valid = await this.$refs.form.validate();
+                            if (valid) {
+                                if (this.indexForm.checkType === '首次检查') {
+                                        const status = await this.isFirstCheckCompleted();
+                                        if (status === '是') {
+                                        this.$message.error('您已完成首次检查，请选择常规检查或精益办抽查');
+                                        return;
+                                    } else if (status === '否') {
+                                        await this.getSectionList();
+                                        this.dialogVisible = true;
+                                        this.submitData['checkType'] = this.indexForm.checkType
+                                        this.submitData['processID'] = this.indexForm.processID
+                                        this.submitData['userAccount'] = this.userAccount
+                                        console.log(this.submitData)
+                                    } else {
+                                    this.$message.error('获取流程信息失败!');
+                                    }
+                                } else {
+                                    await this.getSectionList();
+                                    this.dialogVisible = true;
+                                    this.submitData['checkType'] = this.indexForm.checkType
+                                    this.submitData['processID'] = this.indexForm.processID
+                                    this.submitData['userAccount'] = this.userAccount
+                                }
+                            }
+                        } catch (error) {
+                            this.$message.error('验证失败');
+                        }
+                    },
+
+                    // 判定流程是否已完成首次检查
+                    async isFirstCheckCompleted() {
+                        try {
+                            const response = await axios.post('/imc/queryData', {
+                                req: 'm893Req',
+                                page: '1',
+                                rows: '1',
+                                sort: '流程编号',
+                                order: 'asc',
+                                pid: '',
+                                filterRules: JSON.stringify([{
+                                    field: '流程编号', 
+                                    op: 'contains', 
+                                    value: this.indexForm.processID
+                                }])
+                            });
+
+                            if (response.status !== 200) {
+                                throw new Error(`请求失败，状态码：${response.status}`);
+                            }
+
+                            const data = response.data;
+                            
+                            if (!data.rows || data.rows.length === 0) {
+                                throw new Error('未找到相关流程记录');
+                            }
+
+                            const result = data.rows[0]['是否完成首次评价'];
+                            return result;
+
+                        } catch (error) {
+                            console.error('检查首次评价时出错:', error);
+                            this.$message.error(error.message || '获取首次评价状态失败');
+                            // 根据业务需求选择下列两种处理方式之一：
+                            // 1. 抛出错误给上层调用者
+                            throw error; 
+                            // 2. 返回默认值
+                            // return false; 
+                        }
+                    },
+
+                    // 获取标准
+                    getSectionList() {
+                        
+                        axios.post('/imc/queryData', {
+							req: 'm894Req',
+							page: '1',
+							rows: '999',
+							sort: '排序',
+							order: 'asc',
+							pid: '',
+							filterRules: ''
+						})
+                        .then(response => {
+                            if(response.status === 200) {
+                                this.formSections = response.data.rows;
+								this.currentDFSelectList = this.formSections[0].得分;
+                                this.currentSelectedSectionName = this.formSections[0].环节;	
+                                this.currentSelectedSectionTypeName = this.formSections[0].类型;	
+                                this.currentJCMethod = this.formSections[0].检查方法;
+                                this.currentDFStandard = this.formSections[0].打分标准;	
+                                this.currentSelectedSectionID = this.formSections[0].ID;
+                            } else {
+                                this.$message.error(res.message);
+                            }
+                        })
+                        .catch(error => {
+                            this.$message.error('获取标准失败');
+                        });
+                    },
+
+                    switchPage(page) {
+                        this.currentPage = page;
+                        if(this.currentPage === 'query') {
+                        							
+                        }
+                    },
+                    // 新增方法：获取URL参数
+                    getUrlParameter(name) {
+                        name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]');
+                        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+                        var results = regex.exec(location.search);
+                        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+                    },
+
+                    
+                     // 新增方法
+                    handleFilterQuery() {
+                        // 实际应发送请求到后端接口
+                        this.getCheckRecord();
+                        this.showTopFilter = false;
+                    },
+                    
+                    handleViewDetail(row) {
+                        this.submitData['evaluationID'] = row.检查ID;
+                        this.submitData['checkType'] = row.检查类型;
+                        this.submitData['processID'] = row.流程编号;
+                        this.submitData['userAccount'] = this.userAccount;
+                        const that = this;
+                        // 获取submitData中的surveyData
+                        axios.post('/imc/customOpt', {
+								req: '689',
+								data: JSON.stringify(row)
+							})
+							.then(function(response) {
+								if(response.data.data.status == 'success'){
+                                        that.submitData.surveyData = response.data.data.data;
+                                        that.currentSelectedSectionName = that.submitData.surveyData[0].sectionName;	
+                                        that.currentSelectedSectionTypeName = that.submitData.surveyData[0].sectionType;
+                                        that.currentJCMethod = that.submitData.surveyData[0].checkMethod;
+                                        that.currentDFStandard = that.submitData.surveyData[0].dfStandard;
+                                        that.currentSelectedSectionID = that.submitData.surveyData[0].sectionID;
+                                        that.surveyFormData.score = that.submitData.surveyData[0].score;
+                                        that.surveyFormData.comments = that.submitData.surveyData[0].comments;
+                                        that.surveyFormData.measure = that.submitData.surveyData[0].measure;
+                                    }
+									if(response.data.data.status == 'error'){
+                                        that.$message({
+                                            message: '获取详细信息失败!',
+                                            type:'error'
+                                        });
+                                    }
+								
+							})
+							.catch(function(error) {
+                                that.$message({
+                                            message: '获取详细信息失败！',
+                                            type:'error'
+                                        });
+							}); 
+                        this.dialogVisible = true
+                    },
+
+
+                    handleCurrentChange(val) {
+                        this.currentPageNum = val;
+                        this.getCheckRecord();
+                    },
+                    openSurvey(context) {
+                        this.dialogTitle = `${context.processName} - ${context.checkType}检查`;
+                        this.dialogVisible = true;
+                        this.checkMobile();
+                        this.loadDraft();
+                    },
+
+
+                    // 提交处理
+                    async handleSubmit() {
+                        try {
+                        
+                            this.submitData['submitType'] = '1'
+                            this.submitting = true;
+                            this.updateSurveyData();
+                            if (!this.submitData.surveyData || this.submitData.surveyData.length === 0) {
+                                this.$message.error('请填写所有必填项');
+                                return;
+                            }
+                            if (this.submitData.surveyData.length !== this.formSections.length) {
+                                this.$message.error('请填写所有必填项');
+                                return;
+                            }
+                            let count = 0
+                            for (let item of this.submitData.surveyData) {
+                                if ((!item.score && item.score != 0) || !item.comments) {
+                                    this.$message.error('请填写所有必填项');
+                                    return;
+                                }else{
+                                	count = count + 1
+                                	}
+                            }
+                            if(count < this.formSections.length){
+							this.$message.error('请填写所有必填项');
+                                    return;
+							}
+
+                            this.$confirm('确认提交吗？', '提示', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                customClass: 'center-buttons',
+                                type: 'warning'
+                                }).then(() => {
+                                    
+                                    this.insertCheckRecord(1)
+                                }).catch(() => {
+                                this.$message({
+                                    type: 'info',
+                                    message: '已取消提交!'
+                                });          
+                            });
+                            
+                        } catch (error) {
+                            this.$message.error(error.message || '提交失败');
+                        } finally {
+                            this.submitting = false;
+                        }
+                    },
+
+
+                    // 加载草稿
+                    loadDraft() {
+                        const draft = localStorage.getItem('surveyDraft');
+                        if (draft) {
+                            this.formData = JSON.parse(draft);
+                        }
+                    },
+
+                    // 检测移动端
+                    checkMobile() {
+                        this.isMobile = window.innerWidth < 768;
+                    },
+
+                    // 对话框打开回调
+                    handleDialogOpened() {
+                        this.$nextTick(() => {
+                            const formContent = document.querySelector('.form-content');
+                            if (formContent) {
+                                formContent.scrollTop = 0;
+                            }
+                        });
+                    },
+                    // 对话框关闭回调
+                    handleDialogClosed() {
+                        this.$refs.form.resetFields();
+                        this.submitData = {
+                            'evaluationID': '',
+                            'checkType': '',
+                            'processID': '',
+                            'userAccount': '',
+                           'surveyData': [],
+                           'submitType':''
+                        }
+                        this.currentJCMethod = ''
+                        this.currentDFStandard = ''
+                        this.currentSelectedSectionName = ''
+                        this.currentSelectedSectionTypeName = ''
+                        this.currentSelectedSectionID = ''
+                        this.surveyFormData.score = ''
+                        this.surveyFormData.comments = ''
+                        this.surveyFormData.measure = ''
+                        this.activeTab = 1
+                        		
+                    },
+                    updateSurveyData() {
+                        // 空值保护
+                        if (!this.submitData.surveyData) {
+                            this.submitData.surveyData = [];
+                        }
+
+                        // 构造新条目
+                        const newItem = {
+                            sectionID: this.currentSelectedSectionID,
+                            sectionType: this.currentSelectedSectionTypeName,
+                            sectionName: this.currentSelectedSectionName,
+                            score: this.surveyFormData.score,
+                            comments: this.surveyFormData.comments,
+                            measure: this.surveyFormData.measure
+                        };
+
+                        // 查找索引
+                        const index = this.submitData.surveyData.findIndex(
+                            item => item.sectionID === newItem.sectionID
+                        );
+
+                        // 更新或新增
+                        if (index > -1) {
+                            this.$set(this.submitData.surveyData, index, {
+                            ...this.submitData.surveyData[index],
+                            ...newItem
+                            });
+                        } else {
+                            this.submitData.surveyData.push(newItem);
+                        }
+                    },
+                    async beforeTabLeave(){
+                        return await this.surveyFormVaildate()
+                    },
+                     // 标签切换拦截器
+                     surveyFormVaildate() {
+                        let p = new Promise((resolve, reject) => {
+                            this.$refs.surveyForm.validate(async(valid) => {
+                            if (valid) {
+                                resolve() // 允许切换
+                            } else {
+                                this.$message.error('请完成当前表单必填项')
+                                reject() // 拒绝切换
+                            }
+                            
+                            })
+                        })
+                        return p
+                    },
+                    
+                    handleTabChange(tab) {
+                        
+                        // 将数据放入submitData中
+                        this.updateSurveyData()
+                        this.surveyFormData.score = '';
+                        this.surveyFormData.comments = '';
+                        this.surveyFormData.measure = '';
+                        // 设置当前的类型、环节
+                        for(let i=0;i<this.formSections.length;i++){
+                            if(this.formSections[i].ID === tab.name){
+								this.currentDFSelectList = this.formSections[i].得分;
+                                this.currentSelectedSectionName = this.formSections[i].环节;	
+                                this.currentSelectedSectionTypeName = this.formSections[i].类型;	
+                                this.currentJCMethod = this.formSections[i].检查方法;
+                                this.currentDFStandard = this.formSections[i].打分标准;	
+                                this.currentSelectedSectionID = this.formSections[i].ID;
+                                // 从submitData中获取当前环节的信息
+                                for(let i=0;i<this.submitData.surveyData.length;i++){
+                                    if(this.submitData.surveyData[i].sectionID === tab.name){
+                                        this.surveyFormData.score = this.submitData.surveyData[i].score
+                                        this.surveyFormData.comments = this.submitData.surveyData[i].comments
+                                        this.surveyFormData.measure = this.submitData.surveyData[i].measure
+                                        break	
+                                    }		
+                                }
+                                break
+                            }	
+                        }
+                        
+                        
+                        
+                        
+                    },
+                    // 暂存
+                    saveDraft() {
+                    
+                        this.submitData['submitType'] = '2'
+                        this.updateSurveyData()
+                        this.insertCheckRecord(2)
+                    }, 
+                    // 插入检查记录到数据库
+                    insertCheckRecord(submitType) {
+                        const that = this
+                        axios.post('/imc/customOpt', {
+								req: '678',
+								data: JSON.stringify(this.submitData)
+							})
+							.then(function(response) {
+								if(submitType===1){
+									that.submitBtn = false
+                                    if(response.data.data.status == 'success'){
+                                        that.dialogVisible = false;
+                                        that.$refs.form.resetFields();
+                                        that.submitData = {
+                                            'evaluationID': '',
+                                            'checkType': '',
+                                            'processID': '',
+                                            'userAccount': '',
+                                           'surveyData': [],
+                                           'submitType':''
+                                        }
+                                        that.surveyFormData.score = ''
+								  that.surveyFormData.comments = ''
+								  that.surveyFormData.measure = ''
+                                        that.$message({
+                                            message: '提交成功！',
+                                            type:'success'
+                                        });
+                                        // 刷新数据
+                                        that.getCheckRecord()
+                                    }
+									if(response.data.data.status == 'error'){
+                                        that.$message({
+                                            message:response.data.data.message,
+                                            type:'error'
+                                        });
+                                    }
+								}
+								if(submitType===2){
+                                    if(response.data.data.status == 'success'){
+                                        that.submitData.evaluationID = response.data.data.evaluationID
+                                        that.$message({
+                                            message: '暂存成功！',
+                                            type:'success'
+                                        });
+                                        // 刷新数据
+                                        that.getCheckRecord()
+                                    }
+									if(response.data.data.status == 'error'){
+                                        that.$message({
+                                            message: response.data.data.message,
+                                            type:'error'
+                                        });
+                                    }
+								}
+								
+							})
+							.catch(function(error) {
+									if(submitType===1){
+										that.submitBtn = false
+										that.$message({
+											message: '提交失败，请重试！',
+											type: 'error'
+										});
+									}
+									if(submitType===2){
+										that.$message({
+											message: '暂存失败，请重试！',
+											type: 'error'
+										});
+									}
+							});  							
+                    },
+                    // 获取检查记录
+                    getCheckRecord() {
+                        const that = this
+                        const queryData = {
+                            'userAccount': this.userAccount,
+                            'currentPage': this.currentPageNum,
+                            'pageSize': this.pageSize,
+                            'queryFilter':this.queryFilter
+                        }
+                        axios.post('/imc/customOpt', {
+								req: '685',
+								data: JSON.stringify(queryData)
+							})
+							.then(function(response) {
+								if(response.data.data.status == 'success'){
+                                        that.tableData = response.data.data.data
+                                        that.total = response.data.data.total
+                                        if(response.data.data.status == 'success'){
+                                    }
+                                    }
+									if(response.data.data.status == 'error'){
+                                        that.$message({
+                                            message: '查询失败！',
+                                            type:'error'
+                                        });
+                                    }
+								
+							})
+							.catch(function(error) {
+                                that.$message({
+                                            message: '查询失败！',
+                                            type:'error'
+                                        });
+							}); 	
+                    },
+                    // 重置检查记录查询条件
+                    initQueryFilter(){
+                        this.queryFilter = {
+                            'businessDomain': '',
+                            'processName': '',
+                            'checkType': '',
+                            'checkStatus':''
+                        }
+                        this.getCheckRecord()
+                        this.showTopFilter = false
+                    }
+                }
+            });
+        </script>
+
+        <style>
+        .center-buttons .el-message-box__btns {
+		  display: flex;
+		  justify-content: center;
+		}
+
+			.custom-label  {
+			  color: black;
+			  font-size: 18px;
+			  font-weight: bold;
+			}
+			::v-deep .check-sql .el-input__inner{
+			  background-color: black !important;
+			  color: white !important;
+			}
+			.el-textarea.is-disabled .el-textarea__inner {
+				background-color: #ffffff;
+				border-color: #ffffff;
+				color: black;
+				cursor: not-allowed;
+				font-size: 14px;
+			}
+            :deep(.el-radio-group) {
+                display: block;
+            }
+
+            :deep(.el-radio) {
+                display: block;
+                margin: 8px 0;
+            }
+
+            .el-footer {
+                box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.05);
+            }
+
+             /* 新增顶部用户信息样式 */
+             .user-info-bar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 0px;
+                padding: 0 10px;
+            }
+            .user-welcome {
+                color: #606266;
+                font-size: 14px;
+                font-weight: 500;
+            }
+            .site-logo {
+                height: 40px; /* 根据实际图片比例调整 */
+                width: auto;
+            }
+            .form-container {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                min-height: calc(100vh - 500px); /* 140px = 顶部导航(60) + 底部导航(60) + 边距(20) */
+            }
+
+            .centered-form {
+                width: 100%;
+                max-width: 400px;  /* 控制表单最大宽度 */
+                margin: 0 auto;    /* 水平居中 */
+                padding: 20px;
+            }
+          /* 顶部筛选面板优化 */
+            .top-filter-drawer .el-drawer {
+                overflow-y: auto;
+            }
+
+            .filter-content {
+                padding: 15px;
+            }
+
+            .filter-actions {
+                position: sticky;
+                bottom: 0;
+                background: #fff;
+                padding: 15px 0;
+                border-top: 1px solid #ebeef5;
+            }
+            .mobile-filter-btn {
+                padding: 10px;
+                display: flex;
+                justify-content: flex-end;
+                background: #fff;
+                position: sticky;
+                border: none;
+                top: 0;
+                z-index: 1000;
+            }
+
+            .compact-card {
+                margin-bottom: 12px;
+                border-radius: 6px;
+            }
+
+            /* 头部优化 */
+            .card-header {
+                padding: 0 0 8px 0 !important;
+                border: none;
+            }
+
+            .title-group {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .process-name {
+                font-size: 16px;
+                color: #303133;
+                font-weight: 500;
+                max-width: 70%;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .type-tag {
+                height: 22px;
+                line-height: 20px;
+                font-size: 12px;
+                border-radius: 4px;
+                padding: 0 6px;
+            }
+
+            /* 得分区块 */
+            .score-row {
+                margin-bottom: 8px !important;
+            }
+
+            .score-main {
+                background: #f8f9fa;
+                border-radius: 4px;
+                padding: 6px;
+                text-align: center;
+            }
+
+            .score-tag {
+                margin-top: 2px;
+                display: block;
+                font-size: 14px !important;
+                padding: 0 6px !important;
+            }
+
+            .score-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 12px;
+                padding: 4px 0;
+            }
+
+            .label {
+                color: #909399;
+            }
+
+            .value {
+                font-weight: 500;
+            }
+
+            .execution { color: #67C23A; }
+            .effectiveness { color: #E6A23C; }
+
+            /* 操作按钮 */
+            .card-actions {
+                border-top: 1px solid #eee;
+                padding-top: 8px;
+                text-align: right;
+            }
+
+            .detail-btn {
+                padding: 0;
+                font-size: 12px;
+            }
+
+            .detail-btn i {
+                margin-right: 4px !important;
+            }
+            .fixed-tabs {
+                position: sticky;
+                top: 0;
+                background: #fff;
+                z-index: 1000;
+                padding: 0 20px;
+                box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            }
+
+            .form-content {
+                max-height: 60vh;
+                overflow-y: auto;
+                padding: 20px;
+            }
+
+            .section-header {
+                margin-bottom: 25px;
+            }
+
+            .section-title {
+                color: #303133;
+                font-size: 16px;
+                margin-bottom: 10px;
+            }
+
+            .rate-container {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .rate-text {
+                color: #409EFF;
+                font-weight: 500;
+            }
+
+            .multi-form .el-form-item {
+                margin-bottom: 22px;
+            }
+
+            .multi-form .el-radio {
+                margin: 8px 0;
+            }
+
+            .multi-form .el-textarea__inner {
+                min-height: 100px !important;
+            }
+            /* 优化tab切换动画 */
+            .el-tabs__content {
+            transition: transform .3s ease-in-out;
+            }
+
+            /* 移动端触控优化 */
+            .form-content {
+            -webkit-overflow-scrolling: touch;
+            }
+
+            /* 错误提示定位 */
+            .el-form-item__error {
+            position: sticky;
+            bottom: 0;
+            background: #fff;
+            padding: 8px;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+            }
+            /* 新增固定分页样式 */
+            .fixed-pagination-container {
+                position: fixed;
+                bottom: 60px; /* 底部导航栏高度 */
+                left: 0;
+                right: 0;
+                background: #fff;
+                z-index: 1000;
+                padding: 10px;
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            }
+
+            /* 调整原有分页样式 */
+            .mobile-pagination {
+                max-width: 600px;
+                margin: 0 auto;
+                display: flex;
+                justify-content: center;
+            }
+
+            /* 调整表格区域高度 */
+            .responsive-table {
+                padding-bottom: 80px; /* 为分页组件留出空间 */
+            }
+
+            /* 移动端样式优化 */
+            @media screen and (max-width: 768px) {
+                .mobile-filter-btn {
+                    padding: 10px;
+                    background: #fff;
+                    position: sticky;
+                    top: 0;
+                    z-index: 1000;
+                    display: flex;
+                    justify-content: right;
+                    align-items: center;
+                }
+
+                .el-form-item__label {
+                    padding: 8px 0;
+                }
+
+                .el-select {
+                    width: 100%;
+                }
+
+                .el-drawer__header {
+                    margin-bottom: 10px;
+                    padding: 15px;
+                    border-bottom: 1px solid #ebeef5;
+                }
+
+                .el-drawer__body {
+                    padding: 0;
+                }
+                .score-container {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+
+                .compact-card {
+                    margin-bottom: 8px;
+                }
+                
+                
+                .score-row {
+                    margin-bottom: 6px !important;
+                }
+                .fixed-tabs {
+                    padding: 0 10px;
+                }
+
+                .form-content {
+                    max-height: 70vh;
+                    padding: 10px;
+                }
+
+                .section-title {
+                    font-size: 15px;
+                }
+
+                .el-radio {
+                    display: block;
+                    margin: 10px 0;
+                }
+
+                .rate-container {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+                .fixed-pagination-container {
+                    bottom: 50px;
+                    padding: 8px;
+                }
+                
+                .responsive-table {
+                    padding-bottom: 70px;
+                }
+                
+                .mobile-pagination .el-pagination {
+                    padding: 0;
+                }
+                
+                .mobile-pagination .el-pagination__jump {
+                    display: none;
+                }
+
+            }
+
+
+
+        </style>
+    </body>
+</html>

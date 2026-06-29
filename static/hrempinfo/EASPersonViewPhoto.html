@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+		<meta http-equiv="pragma" content="no-cache">
+		<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+		<meta http-equiv="expires" content="Wed, 26 Feb 1997 08:21:57 GMT">
+
+		<title>EAS员工照片预览</title>
+		<link rel="stylesheet" href="/hrempinfo/css/index.css">
+		<script src="/hrempinfo/js/vue.min.js"></script>
+		<script src="/hrempinfo/js/index.js"></script>
+		<script type="text/javascript" src="/hrempinfo/js/jquery-3.3.1.min.js"></script>
+	</head>
+	<body>
+		<div id="app" style="padding:20px;text-align: center;">
+			<img v-if="imageBase64" :src="imageBase64" alt="员工照片" style="max-width: 25%; height: auto;">
+			<br>
+			<br>
+			<div style="font-size: 24px;">
+				{{fnumber}} - {{fname_l2}}
+			</div>
+		</div>
+	</body>
+
+	<script>
+		new Vue({
+			el: '#app',
+			data: function() {
+				return {
+					imageBase64: null,
+					fname_l2: null,
+					fnumber: null
+				}
+			},
+
+			mounted: function() {
+				console.log(this.getQueryVariable('p'));
+				this.getImageBase64(this.getQueryVariable('p'));
+
+			},
+			methods: {
+				// 获取url参数
+				getQueryVariable(name) {
+					var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+					var r = window.location.search.substr(1).match(reg);
+					if (r != null) {
+						return decodeURI(r[2]);
+					} else {
+						return null;
+					}
+				},
+
+				async getImageBase64(personFid) {
+					const formData = new FormData();
+					formData.append('req', 506);
+					formData.append('data', JSON.stringify([{
+						"personFid": personFid
+					}]));
+					try {
+						const response = await fetch('https://ems.sdstg.com/imc/customOpt', {
+							// const response = await fetch('http://192.168.3.88:8080/imc/customOpt', {
+							method: 'POST',
+							body: formData
+						});
+
+						if (!response.ok) {
+							this.$message.error('请求异常：' + response.status);
+						}
+
+						const data = await response.json();
+						console.log(data);
+						// 假设 msg 是 Base64 字符串
+						if (data.data.base64_string) {
+							this.imageBase64 = `data:image/jpeg;base64,${data.data.base64_string}`;
+							this.fnumber = data.data.fnumber;
+							this.fname_l2 = data.data.fname_l2;
+						} else {
+							this.$message.error('未获取到有效的图片数据');
+						}
+
+					} catch (error) {
+						this.$message.error('验证失败', error);
+						this.fullscreenLoading = false;
+					}
+				},
+			}
+		})
+	</script>
+
+	<style>
+	</style>
+</html>

@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		
+				   
+	  
+	 
+		<script src="http://cdn.staticfile.org/jquery/2.1.1/jquery.min.js" type="text/javascript"></script>
+		<!-- bootstrap -->
+		<link href="http://cdn.staticfile.org/twitter-bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
+		<script src="http://cdn.staticfile.org/twitter-bootstrap/3.3.1/js/bootstrap.min.js" type="text/javascript"></script>
+		<!-- bootstrap-select -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+		
+
+ 
+		
+	</head>
+	<body>
+		<div class="container" style="max-width:90%!important">
+			
+		  <div class="page-header" style="text-align: center;">
+		      <h1>合同登记表</h1>
+		  </div>
+		 
+		    <div class="row">
+		      <div class="col-xs-12 col-sm-6">
+					<p>合同编码：</p>
+		      </div>
+		      <div class="col-xs-12 col-sm-6">
+					<p>公司名称：</p>
+		      </div>
+		    </div>
+			<div class="row">
+			  <div class="col-xs-12 col-sm-6">
+					<input type="text" class="form-control" id ="conFumber" readonly>
+			  </div>
+			  <div class="col-xs-6 col-sm-6">	
+				<select class="form-control" id="companyName" readonly>
+					<option value="SHTG">石横特钢集团有限公司</option>
+					<option value="FG">肥城石横特钢机械制造有限公司</option>
+					<option value="TD">肥城市桃都新能源有限公司</option>
+					<option value="ASD">山东阿斯德科技有限公司</option>
+				</select>
+			  </div>
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-6">
+					<span class="require">*</span><span>合同名称：</span>
+				</div>
+				<div class="col-xs-12 col-sm-6">
+					<p>项目名称：</p>
+				</div>
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-6">
+					<input type="text" class="form-control" id="conName" readonly>
+				</div>
+				<div class="col-xs-12 col-sm-6">	
+						
+					<select class="selectpicker show-tick form-control" data-live-search="true" id="projectName" readonly>
+						
+				   </select>
+					  
+				</div>
+			</div>
+			
+			
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<p>登记日期：</p>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<p>是否盖章：</p>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<p>盖章份数：</p>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<p>盖章日期：</p>
+				</div>
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					
+					<div class="form-group">
+					  <input type="date" class="form-control" id="signDate" readonly>
+					</div>
+					
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<select class="form-control" id="sealFlag" readonly>
+						<option>否</option>
+						<option>是</option>
+					</select>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"  id="sealNum" readonly>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="date" class="form-control"  id="sealDate" readonly>
+				</div>
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>合同分类：</span>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>项目来源：</span>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<p>开工令号：</p>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>
+						是否对方合同：
+					</span>
+				</div>
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<select class="form-control" id="conType" onchange="changeHTID()" readonly>
+						<option value="XM">技改项目</option>
+						<option value="RX">日常维修</option>
+						<option value="ZX">专业维修</option>
+						<option value="XX">大项修</option>
+						<option value="ICP">信息服务</option>
+						<option value="YP">研发</option>
+					</select>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<select class="form-control" id="proSource" readonly>
+						<option>开工令</option>
+						<option>检修计划</option>
+						<option>委外单</option>
+						<option>报告</option>
+						<option>其他</option>
+					</select>
+				</div>
+				<div class="col-xs-12 col-sm-3">			
+					<input type="text" class="form-control"  id="orderNum" readonly>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<select class="form-control" id="targetCon" readonly>
+						<option>是</option>
+						<option>否</option>
+					</select>
+				</div>
+			</div>
+			
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-4">
+					<p>费用归属单位：</p>
+				</div>
+				<div class="col-xs-12 col-sm-4" >
+					<p id="fyzxTitle">招投标编码：</p>
+				</div>
+				<div class="col-xs-12 col-sm-4">
+					<p id="fyjeTitle">计划编号：</p>
+				</div>
+				
+			</div>
+			<div class="row">
+				<div class="col-xs-12 col-sm-4">
+					<select class="form-control" id="costUnit" readonly>
+						<option>外部</option>
+						<option>内部</option>
+					</select>
+				</div>
+				<div class="col-xs-12 col-sm-4" id="fyzxInput">
+					<input type="text" class="form-control"  id="tenderNum" readonly> 
+				</div>
+				<div class="col-xs-12 col-sm-4" id="fyjeInput">
+					<input type="text" class="form-control"  id="planNum" readonly>
+				</div>
+			</div>
+			
+			
+			
+			<div class="row" id="titleShow" style="display:none">
+			</div>
+			<div class="row" id="inputShow" style="display:none">
+			</div>
+			
+			
+			
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-12">
+					<span class="require">*</span><span>合同付款约定：</span>
+				</div>				
+			</div>
+			<div class="row">
+				<div class="col-xs-12 col-sm-12">
+					<input type="text" class="form-control" placeholder="请填写合同中付款的约定" id="payment" readonly>
+				</div>				
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-12">
+					<p>合同内容：</p>
+				</div>				
+			</div>
+			<div class="row">
+				<div class="col-xs-12 col-sm-12">
+					<textarea class="form-control" id="content" readonly></textarea> 
+				</div>				
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-4">
+					<span class="require">*</span><span>付款方式：</span>
+				</div>
+				<div class="col-xs-12 col-sm-4">
+					<span class="require">*</span><span>合同金额（元）：</span>
+				</div>
+				<div class="col-xs-12 col-sm-1">
+					
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>经办人：</span>
+				</div>		
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-4">
+					<select class="form-control" id="payType" readonly>
+						<option>银行承兑</option>
+						<option>商业承兑</option>
+						<option>电汇</option>
+						<option>现汇</option>
+					</select>
+				</div>
+				<div class="col-xs-12 col-sm-4">
+					<input type="text" class="form-control" id="amount" readonly>
+					
+				</div>
+				<div class="col-xs-12 col-sm-1">
+					
+					<div class="form-check form-switch" >
+					      <input class="form-check-input" style="width:40px;margin-right: 8px;" type="checkbox" id="amountflag" name="darkmode" readonly>
+					      <label class="form-check-label" for="mySwitch">暂估价</label>
+					    </div>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control" id="agentPer" readonly>
+				</div>		
+			</div>
+			
+			
+				<div class="row">
+				<div class="col-xs-12 col-sm-4">
+					<span>税率（%）：</span>
+				</div>
+				<div class="col-xs-12 col-sm-4">
+					<span class="require">*</span><span>税额（元）：</span>
+				</div>
+						
+				<div class="col-xs-12 col-sm-4">
+					<span class="require">*</span><span>不含税金额：</span>
+				</div>		
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-4">
+					<input type="text" class="form-control" id="taxRate" readonly>
+				</div>
+				<div class="col-xs-12 col-sm-4">
+					<input type="text" class="form-control" id="taxAmount" readonly>
+					
+				</div>
+				<div class="col-xs-12 col-sm-4">
+					<input type="text" class="form-control" id="taxNotAmount" readonly>
+				</div>		
+			</div>
+			
+			
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>签订日期：</span>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>开工日期：</span>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>竣工日期：</span>
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>实际完工日期：</span>
+				</div>		
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<input type="date" class="form-control"  id="enterDate" readonly>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="date" class="form-control"  id="startDate" readonly>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="date" class="form-control"  id="finishDate" readonly>
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<input type="date" class="form-control"  id="actFinishDate" readonly>
+				</div>		
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>对方单位：</span>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>对方地址：</span>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>对方签订人：</span>
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<p>对方联系方式：</p>
+				</div>		
+			</div>
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"  id="customerName" readonly>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"  id="customerAdress" readonly>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control" id="customerSigner" readonly>
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control" id="customerPhone" readonly>
+				</div>		
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>第一次付款比例（%）：</span>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>第一次付款金额（元）：</span>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>第一次款日期：</span>
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<span class="require">*</span><span>第一次付款类型：</span>
+				</div>		
+			</div>
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"  id="fristScale" readonly>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"  id="fristAmount" readonly>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="date" class="form-control"   id="fristDate" readonly>
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control" placeholder="如:预付款、全款等" id="fristType" readonly>
+				</div>		
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<p>第二次付款比例（%）：</p>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<p>第二次付款金额（元）：</p>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<p>第二次款日期：</p>
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<p>第二次付款类型：</p>
+				</div>		
+			</div>
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"   id="secondScale" readonly>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"  id="secondAmount" readonly>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="date" class="form-control"  id="secondDate" readonly>
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control" placeholder="如:进度款等"  id="secondType" readonly>
+				</div>		
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<p>第三次付款比例（%）：</p>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<p>第三次付款金额（元）：</p>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<p>第三次款日期：</p>
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<p>第三次付款类型：</p>
+				</div>		
+			</div>
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"  id="thirdScale" readonly>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"  id="thirdAmount" readonly>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="date" class="form-control"  id="thirdDate" readonly>
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"  placeholder="如:指标验证款等" id="thirdType" readonly>
+				</div>		
+			</div>
+			
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<p>第四次付款比例（%）：</p>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<p>第四次付款金额（元）：</p>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<p>第四次款日期：</p>
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<p>第四次付款类型：</p>
+				</div>		
+			</div>
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"  id="fourScale" readonly>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control" id="fourAmount" readonly>
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					<input type="date" class="form-control"  id="fourDate" readonly>
+				</div>
+				
+				<div class="col-xs-12 col-sm-3">
+					<input type="text" class="form-control"  placeholder="如:质保金等" id="fourType" readonly>
+				</div>		
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-2">
+					登记人
+				</div>
+				<div class="col-xs-12 col-sm-2">
+					状态
+				</div>
+
+
+			</div>
+			
+			<div class="row">
+				<div class="col-xs-12 col-sm-2">
+					<input type="text" class="form-control" id="addPerson" readonly>
+				</div>
+				<div class="col-xs-12 col-sm-2">
+					<input type="text" class="form-control" id="status" value="未提交" readonly>
+				</div>
+
+			</div>
+
+
+
+			<table class="table" id="htfjTab">
+				<caption ><span style="margin-right:10px;">合同、报告等附件</span>   </caption>
+				<tr>
+					<td width="80%">文件名称</td>
+					<td>操作</td>
+				</tr>
+
+			</table>
+
+
+			<table class="table" id="otherhtTab">
+				<caption ><span style="margin-right:10px;">对方合同文本</span>  </caption>
+				<tr>
+					<td width="80%">文件名称</td>
+					<td>操作</td>
+				</tr>
+
+
+			</table>
+
+
+			<div class="row">
+				<div class="col-xs-12 col-sm-3"></div>
+				<div class="col-xs-12 col-sm-3"></div>
+				<div class="col-xs-12 col-sm-3">
+				</div>
+				<div class="col-xs-12 col-sm-3">
+					
+					<button type="button" class="btn btn-primary"style="width:80px;" onclick="closeWin()">取消</button>
+				</div>
+			</div>
+			  
+			</div>
+			
+			<!--
+			
+			<div class="position-fixed top-0 end-0 p-3" >
+				<div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+					<div class="toast-header">
+						<strong class="me-auto">消息提醒</strong>
+						<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+					</div>
+					<div class="toast-body" id="MsgText">
+						这是一个Bootstrap 5弹窗示例。
+					</div>
+				</div>
+			</div>
+			-->
+			
+
+
+			
+			<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			    <div class="modal-dialog">
+			        <div class="modal-content">
+			            <div class="modal-header">
+			                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			                <h4 class="modal-title" id="myModalLabel">提示</h4>
+			            </div>
+			            <div class="modal-body" id="MsgText">
+			                这里是弹窗的内容。
+			            </div>
+			            <div class="modal-footer">
+							<button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+			                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+			                
+			            </div>
+			        </div><!-- /.modal-content -->
+			    </div><!-- /.modal-dialog -->
+			</div>
+			
+		</div> 
+		
+		<div style="display:none;">
+			<input type="text" class="form-control" id="maxFnumber" >
+			<input type="text" class="form-control" id="dataID" >
+			<a id="dowloadBtn">下载测试</a>
+		</div>
+		
+
+		 
+		
+		
+	</body>
+
+	
+
+	<!--
+	
+	<script src="../js/jquery-3.0.0.min.js"></script>
+	
+	<script src="../js/jquery-3.3.1.min.js"></script>
+	-->
+	<script>
+		$(document).ready(function(){
+			
+			var nowUrl=window.location.href;
+			
+			var url=nowUrl.substring(0,nowUrl.indexOf('htshow.html'));
+						
+			var id=getQueryVariable("ID");
+			
+			$("#dataID").val(id);
+						
+			var sessionid=getCookie("sessionidd");
+			var str=[{ "field": "session","op":"equal", "value": sessionid }]
+			var datastr= JSON.stringify(str);
+			
+			var queryData=[{ "field": "ID","op":"equal", "value": id }]
+			var queryStr=JSON.stringify(queryData);
+			
+			//获取项目信息
+			$.ajax({
+					type: "post",
+					async:false,
+					url: url+"imc/queryData",
+					data: {
+						req: "m735Req",
+						page: 1,
+						rows: 50,
+						sort: "ID",
+						order: "asc",
+						filterRules: [],
+						pid: ""
+					},
+					success: function(data) {	
+						var result=data.rows;
+						for(var i=0;i<result.length;i++){
+							var newOption = $('<option></option>')
+														.attr('value', result[i].项目名称) // 设置 value 属性
+														.text(result[i].项目名称);    // 设置显示文本
+							
+									// 将新的 option 追加到 select 元素中
+									$('#projectName').append(newOption);
+						}
+												
+					},
+					error:function(data){
+						dialogTest("获取项目表单信息失败！");
+					
+					}
+			})
+			
+			
+			$.ajax({
+					type: "post",
+					async:false,
+					url: url+"imc/queryData",
+					data: {
+						req: "m603Req",
+						page: 1,
+						rows: 50,
+						sort: "ID", 
+						order: "asc",
+						filterRules: queryStr,
+						pid: ""
+					},
+					success: function(data) {	
+						console.log(data);
+						$("#conFumber").val(data.rows[0].合同编码);
+						$("#companyName").val(data.rows[0].公司名称);
+						$("#conName").val(data.rows[0].合同名称);
+						$("#projectName").val(data.rows[0].项目名称);
+						
+						$("#signDate").val(data.rows[0].登记日期);
+						$("#sealFlag").val(data.rows[0].是否盖章);
+						$("#sealNum").val(data.rows[0].盖章份数);
+						$("#sealDate").val(data.rows[0].盖章日期=='-'?'':data.rows[0].盖章日期);
+						
+						$("#conType").val(data.rows[0].合同分类);
+						$("#proSource").val(data.rows[0].项目来源);
+						$("#orderNum").val(data.rows[0].开工令号);
+						$("#targetCon").val(data.rows[0].是否对方合同);
+						
+						$("#tenderNum").val(data.rows[0].招投标申请单号);
+						$("#planNum").val(data.rows[0].委外单号);
+						$("#payment").val(data.rows[0].合同付款约定);
+						$("#content").val(data.rows[0].合同内容);
+						
+						
+						$("#payType").val(data.rows[0].付款方式);
+						$("#amount").val(data.rows[0].合同金额);
+						$("#amountflag").val(data.rows[0].暂估价);
+						if(data.rows[0].暂估价=='yes')
+							document.getElementById("amountflag").checked=true;
+						$("#agentPer").val(data.rows[0].经办人);
+						
+						$("#enterDate").val(data.rows[0].签订日期);
+						$("#startDate").val(data.rows[0].工期起=='-'?'':data.rows[0].工期起);
+						$("#finishDate").val(data.rows[0].工期止=='-'?'':data.rows[0].工期止);
+						$("#actFinishDate").val(data.rows[0].实际完工日期);
+						
+						$("#customerName").val(data.rows[0].对方单位);
+						$("#customerAdress").val(data.rows[0].对方地址);
+						$("#customerSigner").val(data.rows[0].对方签订人);
+						$("#customerPhone").val(data.rows[0].对方联系方式);
+					
+						
+						$("#fristScale").val(data.rows[0].第一次付款比例);
+						$("#fristAmount").val(data.rows[0].第一次付款金额);
+						$("#fristDate").val(data.rows[0].第一次付款日期);
+						$("#fristType").val(data.rows[0].付款类型);
+						
+						$("#secondScale").val(data.rows[0].第二次付款比例=='-'?'':data.rows[0].第二次付款比例);
+						$("#secondAmount").val(data.rows[0].第二次付款金额=='-'?'':data.rows[0].第二次付款金额);
+						$("#secondDate").val(data.rows[0].第二次付款日期=='-'?'':data.rows[0].第二次付款日期);
+						$("#secondType").val(data.rows[0].第二次付款类型=='-'?'':data.rows[0].第二次付款类型);
+						
+						$("#thirdScale").val(data.rows[0].第三次付款比例=='-'?'':data.rows[0].第三次付款比例);
+						$("#thirdAmount").val(data.rows[0].第三次付款金额=='-'?'':data.rows[0].第三次付款金额);
+						$("#thirdDate").val(data.rows[0].第三次付款日期=='-'?'':data.rows[0].第三次付款日期);
+						$("#thirdType").val(data.rows[0].第三次付款类型=='-'?'':data.rows[0].第三次付款类型);
+						
+						$("#fourScale").val(data.rows[0].第四次付款比例=='-'?'':data.rows[0].第四次付款比例);
+						$("#fourAmount").val(data.rows[0].第四次付款金额=='-'?'':data.rows[0].第四次付款金额);
+						$("#fourDate").val(data.rows[0].第四次付款日期=='-'?'':data.rows[0].第四次付款日期);
+						$("#fourType").val(data.rows[0].第四次付款类型=='-'?'':data.rows[0].第四次付款类型);
+						
+						$("#addPerson").val(data.rows[0].登记人);
+						$("#status").val(data.rows[0].合同状态);
+						
+						
+						$("#taxRate").val(data.rows[0].税率);
+						$("#taxAmount").val(data.rows[0].税额);
+						$("#taxNotAmount").val(data.rows[0].不含税金额);
+						$("#costUnit").val(data.rows[0].费用归属单位);
+					
+						
+						if(data.rows[0].费用归属单位=='内部')
+						{
+							$("#fyzxTitle").text("费用走向：");
+							$("#fyjeTitle").text("费用金额：");
+							$("#fyzxInput").html('<select class="form-control" id="costTrend" readonly><option>维修费</option><option>研发费</option><option>信息费</option><option>专项费用</option><option>微机维修费</option></select>');
+							$("#fyjeInput").html('<input type="text" class="form-control"  id="costAmount" readonly>');	
+							$("#titleShow").html('<div class="col-xs-12 col-sm-6" ><p id="fyzxTitle">招投标编码：</p></div><div class="col-xs-12 col-sm-6"><p id="fyjeTitle">计划编号：</p></div>');	
+							$("#inputShow").html('<div class="col-xs-12 col-sm-6" id="fyzxInput"><input type="text" class="form-control"  id="tenderNum" readonly></div><div class="col-xs-12 col-sm-6" id="fyjeInput"><input type="text" class="form-control"  id="planNum" readonly></div>');	
+							
+							$('#titleShow').css('display', 'block');
+							$('#inputShow').css('display', 'block');
+							
+							$("#costTrend").val(data.rows[0].费用走向);
+							$("#costAmount").val(data.rows[0].费用金额);
+							$("#tenderNum").val(data.rows[0].招投标申请单号);
+							$("#planNum").val(data.rows[0].委外单号);
+						}else{
+							
+							$("#fyzxTitle").text("招投标编码：");
+							$("#fyjeTitle").text("计划编号：");
+							$("#fyzxInput").html('<input type="text" class="form-control"  id="tenderNum" readonly></div>');
+							$("#fyjeInput").html('<input type="text" class="form-control"  id="planNum" readonly></div>');	
+							$("#titleShow").html('');	
+							$("#inputShow").html('');	
+							
+							$('#titleShow').css('display', 'none');
+							$('#inputShow').css('display', 'none');
+							
+							$("#tenderNum").val(data.rows[0].招投标申请单号);
+							$("#planNum").val(data.rows[0].委外单号);
+											
+						}
+						
+						
+						getHtfjList();
+						getOtherHtList();
+												
+					},
+					error:function(data){
+						dialogTest("表单信息获取失败！");
+					
+					}
+				})
+			
+			
+			
+				
+				   
+					
+			
+			
+		})
+		
+		function changeHTID(){
+			
+			var conType=$("#conType").val();
+			var maxFnumber=$("#maxFnumber").val();
+			var str="SHTG-CDI-"+conType+"-"+maxFnumber;
+			$("#conFumber").val(str);
+			
+		}
+		
+		function getCookie(name){
+		  var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+		  if(arr=document.cookie.match(reg)){
+			return unescape(arr[2]);
+		  }else{
+			return null;
+		  }
+		}
+
+		
+		function formatDate(date) {
+		  const day = date.getDate().toString().padStart(2, '0');
+		  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // 月份是从0开始的
+		  const year = date.getFullYear();
+		  const hours = date.getHours().toString().padStart(2, '0');
+		  const minutes = date.getMinutes().toString().padStart(2, '0');
+		  const seconds = date.getSeconds().toString().padStart(2, '0');
+		 
+		  return `${year}-${month}-${day}`;
+		}
+
+		
+
+		
+
+		function downloadHtfj(tableId,rowId,fileName){
+
+			var str=[{ "field": "table_id","op":"equal", "value": String(tableId)},{ "field": "row_id","op":"equal", "value": String(rowId) }]
+			var datastr= JSON.stringify(str)
+			var nowUrl=window.location.href;
+			
+			var url=nowUrl.substring(0,nowUrl.indexOf('htshow.html'));
+			$.ajax({
+					type: "post",
+					async:false,
+					url: url+"imc/getAttachments",
+					data: {
+						req: "",
+						page: 1,
+						rows: 50,
+						sort: "ID",
+						order: "asc",
+						filterRules: datastr,
+						pid: ""
+					},
+					success: function(data) {
+						for(var j=0;j<data.rows.length;j++){
+							if(data.rows[j].fileName==fileName){
+								$("#dowloadBtn").attr("href",data.rows[j].downloadUrl);
+								document.getElementById("dowloadBtn").click();
+								break;
+							}
+						}
+					}
+				})
+
+
+		}
+
+	
+
+		function getOtherHtList(){
+			var id=$("#dataID").val();
+			var nowUrl=window.location.href;
+			
+			var url=nowUrl.substring(0,nowUrl.indexOf('htshow.html'));
+			var str=[{ "field": "tableId","op":"equal", "value": "604" },{ "field": "rowId","op":"equal", "value": id }]
+			var datastr= JSON.stringify(str)
+
+			$.ajax({
+					type: "post",
+					async:false,
+					url: url+"imc/queryData",
+					data: {
+						req: "m23Req",
+						page: 1,
+						rows: 50,
+						sort: "ID",
+						order: "asc",
+						filterRules: datastr,
+						pid: ""
+					},
+					success: function(data) {
+
+						if(data!=null){
+
+							var tabletmp=document.getElementById("otherhtTab");
+							for(var j=1;j<tabletmp.rows.length;j++){
+								tabletmp.deleteRow(j);
+							}
+
+							var showTmp='';
+							for(var i=0;i<data.rows.length;i++){
+								showTmp+='<tr><td>'+data.rows[i].fileName+'</td><td><button type="button" class="btn btn-success" onclick="downloadHtfj('+data.rows[i].tableId+','+data.rows[i].rowId+',\''+data.rows[i].fileName+'\')" style="width:60px;margin-right:10px;">下载</button></td></tr>';
+							}
+							$("#otherhtTab").append(showTmp);
+						}
+
+					}
+				})
+
+		}
+
+		function getHtfjList(){
+			var id=$("#dataID").val();
+			var nowUrl=window.location.href;
+			
+			var url=nowUrl.substring(0,nowUrl.indexOf('htshow.html'));
+
+
+
+			var str=[{ "field": "tableId","op":"equal", "value": "603" },{ "field": "rowId","op":"equal", "value": id }]
+			var datastr= JSON.stringify(str)
+
+			$.ajax({
+					type: "post",
+					async:false,
+					url: url+"imc/queryData",
+					data: {
+						req: "m23Req",
+						page: 1,
+						rows: 50,
+						sort: "ID",
+						order: "asc",
+						filterRules: datastr,
+						pid: ""
+					},
+					success: function(data) {
+
+						if(data!=null){
+
+							var tableObj=document.getElementById("htfjTab");
+							for(var j=1;j<tableObj.rows.length;j++){
+								tableObj.deleteRow(j);
+							}
+
+							var showStr='';
+							for(var i=0;i<data.rows.length;i++){
+								showStr+='<tr><td>'+data.rows[i].fileName+'</td><td><button type="button" class="btn btn-success" onclick="downloadHtfj('+data.rows[i].tableId+','+data.rows[i].rowId+',\''+data.rows[i].fileName+'\')" style="width:60px;margin-right:10px;">下载</button></td></tr>';
+							}
+							$("#htfjTab").append(showStr);
+						}
+
+					}
+				})
+
+		}
+		
+		function dialogTest(str){
+			
+			
+			document.getElementById("MsgText").innerHTML=str;
+					
+			$('#myModal').modal('show');
+		}
+		
+		function closeWin(){
+			
+			history.back();
+		}
+		
+		function getQueryVariable(name) {
+			var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+			var r = window.location.search.substr(1).match(reg);
+			if (r != null) return unescape(r[2]);
+			return null;
+		}
+		
+		
+		function generateUUID() {
+			var d = new Date().getTime(); //Timestamp
+			var d2 = (performance && performance.now && (performance.now()*1000)) || 0; //Time in microseconds since page-load or 0 if unsupported
+			return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+				var r = Math.random() * 16; //random number between 0 and 16
+				if(d > 0) { //Use timestamp until depleted
+					r = (d + r)%16 | 0;
+					d = Math.floor(d/16);
+				} else { //Use microseconds since page-load if supported
+					r = (d2 + r)%16 | 0;
+					d2 = Math.floor(d2/16);
+				}
+				return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+			});
+		}
+ 
+	
+		
+	</script>
+	<style type="text/css">
+	.form-control{
+		margin-bottom: 8px;
+	}
+	.require{
+		color:red;
+	}
+	.dropdown-menu-search {
+	  max-height: 340px;
+	  overflow-y: scroll;
+	  border-radius: 0;
+	  padding: 4px;
+	}
+	 
+	.dropdown-menu-search input {
+	  margin: 5px 0;
+	}
+	
+		</style>
+</html>

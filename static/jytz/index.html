@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>精益办通知</title>
+    <link rel="stylesheet" href="./CSS/notification.css">
+    <link rel="stylesheet" href="./CSS/select.css">
+    <script src="./JS/select.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h2>精益办通知</h2>
+        <form id="notificationForm">
+            <label for="title">标题：</label>
+            <input type="text" id="title" name="title" placeholder="请输入通知标题"><br>
+
+            <label for="source">来源：</label>
+            <input type="text" id="source" name="source" placeholder="请输入通知来源"><br>
+
+            <label for="requirements">工作要求：</label>
+            <textarea name="requirements" id="requirements" rows="5" placeholder="请输入工作要求" required></textarea>
+
+            <label for="date">时间：</label>
+            <input type="text" id="date" name="date" placeholder="请输入时间要求"><br>
+
+            <label for="persons">通知人员：</label>
+            <input type="text" id="persons" name="persons" placeholder="请选择需要通知的人员" onclick="openModal()"><br>
+
+            <button type="button" onclick="insertNotification()">发送</button>
+        </form>
+    </div>
+
+    <!-- 弹框 -->
+    <div id="personModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>选择人员</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+
+            <div class="tags" id="tags"></div>
+            <input type="text" id="searchInput" placeholder="输入搜索..." oninput="filterOptions()" />
+
+            <div class="options" id="options"></div>
+
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal()">取消</button>
+                <button class="btn-submit" onclick="submitSelection()">提交</button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

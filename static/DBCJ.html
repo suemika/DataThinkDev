@@ -1,0 +1,397 @@
+﻿<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+	<meta name="format-detection" contents="telephone=yes"/>
+	<title></title>
+	<link rel="stylesheet" href="https://www.shtggroup.com/staticResource/third/amissdk/cxd.css" />
+	<link rel="stylesheet" href="https://www.shtggroup.com/staticResource/third/amissdk/helper.css" />
+	<script type="text/javascript" src="https://www.shtggroup.com/staticResource/js/jquery.min.js"></script>
+	<script src="https://www.shtggroup.com/staticResource/third/amissdk/sdk.js"></script>
+	<style>
+		html,
+		body,
+		.app-wrapper{
+			position: relative;
+			width: 100%;
+			height: 100%;
+			margin: 0;
+			padding: 0;
+		}
+		.amis-scope{
+			background:white;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="root" class="app-wrapper"></div>
+
+	<script type="text/javascript">
+
+		function GetQueryString(name) {
+			name = name.replace(/[]/,"\[").replace(/[]/,"\[").replace(/[]/,"\\\]");
+			var regexS = "[\\?&]"+name+"=([^&#]*)";
+			var regex = new RegExp( regexS );
+			var results = regex.exec(window.location.href);
+			if( results == null )
+				return "";
+			else {
+				return results[1];
+			}
+		}
+
+		(function () {
+			//debugger
+			let openid = GetQueryString('openid');
+
+			let amis = amisRequire('amis/embed');
+				let amisJSON = {
+  "type": "page",
+  "body": [
+    {
+      "type": "wizard",
+      "steps": [
+        {
+          "title": "基础信息",
+          "body": [
+            {
+              "type": "input-text",
+              "label": "供户",
+              "name": "供户",
+              "id": "u:3b97566f003d",
+              "required": true
+            },
+            {
+              "type": "input-text",
+              "label": "物料名称",
+              "name": "物料名称",
+              "id": "u:63e07cdecfdc",
+              "required": true
+            },
+            {
+              "type": "input-number",
+              "label": "需取样包数",
+              "name": "需取样包数",
+              "keyboard": true,
+              "id": "u:dab69dd7251d",
+              "step": 1,
+              "required": true
+            }
+          ],
+          "id": "u:1f988ba1150c",
+          "mode": "normal",
+          "api": {
+                "method": "post",
+                "url": "/imc/customOpt",
+                "data": {
+                  "req": 486,
+                  "data": "{\"供户\": \"${供户}\", \"物料名称\": \"${物料名称}\", \"需取样包数\": \"${需取样包数}\",\"autoID\": \"${autoID}\", \"openid\": "+ '\"' + openid + '\"' +"}"
+                }
+              }
+        },
+        {
+          "title": "抽检方式",
+          "body": [
+          		{
+        "name": "cjtype",
+        "type": "radios",
+        "label": "抽检方式",
+        "options": [
+          {
+            "label": "多车次连续编号",
+            "value": "多车次连续编号"
+          },
+          {
+            "label": "多车次相同编号",
+            "value": "多车次相同编号"
+          }
+        ]
+      },{
+                      "type": "input-number",
+                      "label": "总到货包数",
+                      "name": "总到货包数",
+                      "keyboard": true,
+                      "id": "u:912d1fdecc3a",
+                      "step": 1,
+                      "required": true,
+				      "hiddenOn": "${cjtype == '多车次相同编号'}",
+				      "clearValueOnHidden": true
+                    },
+{
+                      "type": "crud",
+                      "syncLocation": false,
+	                  "hiddenOn": "${cjtype == '多车次连续编号'}",
+
+                      "api": {
+						"method": "post",
+						"url": "/imc/queryData",
+						"dataType": "form",
+						"data": {
+						  "req": "m640Req",
+						  "page": "${page}",
+						  "rows": "${perPage}",
+						  "sort": "${orderBy}",
+						  "order": "${orderDir}",
+						  "pid": "${ID}",
+						  "filterRules": "[{\"field\": \"pid\", \"op\": \"equal\", \"value\": \"${autoID}\"}]"
+						}
+					  },
+                      "columns": [
+                        {
+                          "name": "ID",
+                          "label": "ID",
+                          "type": "text",
+                          "id": "u:75a464e4a01b",
+							"hidden": true
+                        },
+                        {
+                          "name": "车牌号",
+                          "label": "车牌号",
+                          "type": "text",
+                          "id": "u:3744752de5b5"
+                        },
+                        {
+                          "type": "text",
+                          "label": "到货包数",
+                          "name": "到货包数",
+                          "id": "u:265abb54d7be"
+                        },
+                        {
+                          "type": "operation",
+                          "label": "操作",
+                          "buttons": [
+                            {
+                              "type": "button",
+                              "label": "删除",
+                              "actionType": "ajax",
+                              "level": "link",
+                              "className": "text-danger",
+                              "confirmText": "确定要删除？",
+                              "api": {
+								"method": "post",
+								"url": "/imc/customOpt",
+								"data": {
+								  "req": 489,
+								  "data": "{\"ID\": \"${ID}\"}"
+								}
+							  },
+                              "editorSetting": {
+                                "behavior": "delete"
+                              },
+                              "id": "u:5badb8b8dd01"
+                            },
+                            {
+                              "label": "编辑",
+                              "type": "button",
+                              "actionType": "dialog",
+                              "level": "link",
+                              "editorSetting": {
+                                "behavior": "update"
+                              },
+                              "dialog": {
+                                "title": "编辑",
+                                "body": {
+                                  "type": "form",
+                                  "api": {
+									"method": "post",
+									"url": "/imc/customOpt",
+									"data": {
+									  "req": 490,
+									  "data": "{\"ID\": \"${ID}\", \"车牌号\": \"${车牌号}\", \"到货包数\": \"${到货包数}\"}"
+									}
+								  },
+                                  "body": [
+                                    {
+                                      "name": "车牌号",
+                                      "label": "车牌号",
+                                      "type": "input-text"
+                                    },
+                                    {
+                                      "label": "到货包数",
+                                      "name": "到货包数",
+                                      "type": "input-number"
+                                    }
+                                  ]
+                                }
+                              },
+                              "id": "u:25d2d5387164"
+                            }
+                          ],
+                          "id": "u:7e445c7292f7"
+                        }
+                      ],
+                      "bulkActions": [],
+                      "itemActions": [],
+                      "headerToolbar": [
+                        {
+                          "label": "新增",
+                          "type": "button",
+                          "actionType": "dialog",
+                          "level": "primary",
+                          "editorSetting": {
+                            "behavior": "create"
+                          },
+                          "dialog": {
+                            "title": "新增",
+                            "body": {
+                              "type": "form",
+                              "api": {
+								"method": "post",
+								"url": "/imc/customOpt",
+								"data": {
+								  "req": 488,
+								  "data": "{\"autoID\": \"${autoID}\", \"车牌号\": \"${车牌号}\", \"到货包数\": \"${到货包数}\"}"
+								}
+							  },
+                              "body": [
+                                {
+                                  "type": "input-text",
+                                  "name": "车牌号",
+                                  "label": "车牌号",
+									"required": true
+                                },
+                                {
+                                  "type": "input-text",
+                                  "name": "到货包数",
+                                  "label": "到货包数",
+									"required": true
+                                }
+                              ]
+                            }
+                          },
+                          "id": "u:e48489062c2c"
+                        },
+                        "bulkActions"
+                      ],
+                      "id": "u:2e8ccd5eef49"
+                    }
+          ],
+          "mode": "normal",
+          "id": "u:1084d14e86cf",
+		  "api": {
+			"method": "post",
+			"url": "/imc/customOpt",
+			"data": {
+			  "req": 487,
+			  "data": "{\"autoID\": \"${autoID}\", \"总到货包数\": \"${总到货包数}\", \"cjtype\": \"${cjtype}\"}"
+			}
+		  }
+        }
+      ],
+      "id": "u:877b2e1964be",
+      "mode": "horizontal",
+      "startStep": "",
+		"onEvent": {
+			"submitSucc": {
+			  "weight": 0,
+			  "actions": [
+				{
+				  "args": {
+					"msg": "抽检编号:${event.data.result.msg}",
+					"title": "抽检编号"
+				  },
+				  "actionType": "confirmDialog"
+				}, {
+				  "args": {},
+				  "actionType": "refresh"
+				}
+			  ]
+			},
+
+  		}
+    },
+    {
+      "type": "crud",
+      "syncLocation": false,
+		"headerToolbar": [
+      "reload"
+    ],
+      "api": {
+				"method": "post",
+				"url": "/imc/queryData",
+				"dataType": "form",
+				"data": {
+				  "req": "m639Req",
+				  "page": "${page}",
+				  "rows": "${perPage}",
+				  "sort": "${orderBy}",
+				  "order": "${orderDir}",
+				  "pid": "${ID}",
+				  "filterRules": "[{\"field\": \"openid\", \"op\": \"equal\", \"value\": \""+openid+"\"}]"
+				}
+			  },
+      "columns": [
+        {
+          "name": "物料名称",
+          "label": "物料名称",
+          "type": "text",
+          "id": "u:f6ccd321c609"
+        },
+        {
+          "name": "供户名称",
+          "label": "供户名称",
+          "type": "text",
+          "id": "u:8ec09b29f285"
+        },
+        {
+          "type": "text",
+          "label": "抽样方式",
+          "name": "抽样方式",
+          "id": "u:a6e2deeb32f3"
+        },
+		{
+          "type": "html",
+          "label": "抽样结果",
+          "name": "抽样结果",
+          "id": "u:a6e2deeb32f1"
+        },
+        {
+          "type": "text",
+          "label": "到货总包数",
+          "name": "到货总包数",
+          "id": "u:0fd41ecf8fb3"
+        },
+        {
+          "type": "text",
+          "label": "需取样包数",
+          "name": "需取样包数",
+          "id": "u:8a5f860d533a"
+        },
+        {
+          "type": "text",
+          "label": "创建时间",
+          "name": "创建时间",
+          "id": "u:1d4cdb6fd671"
+        }
+      ],
+      "bulkActions": [],
+      "itemActions": [],
+      "id": "u:bccd2749037c"
+    }
+  ],
+  "id": "u:799f77055b6b",
+  "title": "Hello world",
+  "asideResizor": false,
+  "pullRefresh": {
+    "disabled": true
+  },
+  "regions": [
+    "body"
+  ],
+  "toolbar": [],
+  "data": {
+    "cjtype": "多车次连续编号"
+  }
+}
+
+				let amisScoped = amis.embed('#root', amisJSON, {}, {
+					theme: 'cxd'
+				});
+		})();
+
+	</script>
+</body>
+
+</html>

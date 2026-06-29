@@ -1,0 +1,13 @@
+#create docker container for imcflask
+docker run --restart=always -it -p 80:8080 --name imc9 --privileged=true -v /data/DataThinkDev/:/data imcflask
+
+#create docker image for imcflask
+sudo docker build -t 'imcflask' .
+
+
+
+docker run --restart=always -it -p 85:8080 --name imc5 --privileged=true -v /data/DataThinkDev/:/data imcflask
+docker run --restart=always -it -p 86:8080 --name imc6 --privileged=true -v /data/DataThinkDev/:/data imcflask
+docker run --restart=always -it -p 87:8080 --name imc7 --privileged=true -v /data/DataThinkDev/:/data imcflask
+docker run --restart=always -it -p 88:8080 --name imc8 --privileged=true -v /data/DataThinkDev/:/data imcflask
+docker run --restart=always -it -p 89:8080 --name imc9 --privileged=true -v /data/DataThinkDev/:/data imcflask
