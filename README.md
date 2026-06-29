@@ -21,6 +21,7 @@
 | 📝 职称评审 | `title_assessment/` | 职称申报与评审管理 |
 | ✅ 智能质检 | `smart_quality/` | 智能质量检查 |
 | 🔍 来料检验 | `inbound_inspection/` | 入库物料检验 |
+| 📦 发货通知单台账 | `imes_zbs/` | 钢材发货通知单CRUD管理，支持新增/编辑/审核/复制 |
 
 ## 快速开始
 
@@ -67,6 +68,7 @@ DataThinkDev/
 │   ├── title_assessment/   # 职称评审
 │   ├── smart_quality/      # 智能质检
 │   ├── inbound_inspection/ # 来料检验
+│   ├── imes_zbs/           # 发货通知单台账
 │   └── vendor/             # 共享前端依赖
 └── static/                 # 其他静态资源
 ```
