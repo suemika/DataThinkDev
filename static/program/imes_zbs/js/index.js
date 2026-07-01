@@ -219,6 +219,7 @@ function renderTable() {
             '<input type="checkbox" class="form-check-input item-checkbox"' +
             ' data-key="' + uniqueKey + '"' +
             ' data-original-key="' + escapeHtml(originalKey) + '"' +
+            (isAudited ? ' disabled' : '') +
             (selectedItems.has(uniqueKey) ? ' checked' : '') + '></td>';
 
         DISPLAY_COLS.forEach(col => {
@@ -238,8 +239,9 @@ function renderTable() {
         tr.innerHTML = cellsHtml;
         tbody.appendChild(tr);
 
-        // 行点击切换选择
+        // 行点击切换选择（已审核行不可选）
         tr.addEventListener('click', function (e) {
+            if (isAudited) return;
             if (e.target.tagName === 'BUTTON' || e.target.closest('button') ||
                 e.target.tagName === 'INPUT' || e.target.closest('.checkbox-container')) return;
             toggleRowSelection(tr, uniqueKey, tr.querySelector('.item-checkbox'));
@@ -284,6 +286,7 @@ function toggleRowSelection(row, key, checkbox) {
 
 function toggleAllSelection(isChecked) {
     document.querySelectorAll('.item-checkbox').forEach(cb => {
+        if (cb.disabled) return;  // 已审核行不可选
         const key = cb.dataset.key;
         const row = cb.closest('tr');
         if (isChecked) {
@@ -313,10 +316,12 @@ function updateBatchActions() {
     }
 
     const checkboxes = document.querySelectorAll('.item-checkbox');
-    const totalSelectable = checkboxes.length;
+    let totalSelectable = 0;
 
     let selectedSelectableCount = 0;
     checkboxes.forEach(cb => {
+        if (cb.disabled) return;  // 已审核行不计入可选数量
+        totalSelectable++;
         if (selectedItems.has(cb.dataset.key)) selectedSelectableCount++;
     });
 

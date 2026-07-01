@@ -198,8 +198,9 @@ body::after {
     box-shadow: none;
 }
 .btn-secondary:hover {
-    background: rgba(0, 0, 0, 0.08);
-    border-color: rgba(0, 0, 0, 0.15);
+    background: #3a3a3c;
+    color: #fff;
+    border-color: #3a3a3c;
     transform: translateY(-1px);
 }
 
@@ -421,17 +422,6 @@ body::after {
     background: rgba(0, 113, 227, 0.1);
 }
 
-/* 已审核行编辑按钮禁用态 */
-.action-btn-edit:disabled {
-    background: rgba(0, 0, 0, 0.04);
-    color: var(--text-tertiary);
-    cursor: not-allowed;
-    opacity: 0.5;
-}
-.action-btn-edit:disabled:hover {
-    transform: none;
-    box-shadow: none;
-}
 
 /* ===== 复选框 ===== */
 .checkbox-container { text-align: center; vertical-align: middle; }
@@ -507,6 +497,19 @@ body::after {
     background: var(--primary-color);
     color: #fff;
     box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+}
+
+/* 已审核行编辑按钮禁用态（必须在 :hover 之后，CSS层叠优先） */
+.action-btn-edit:disabled {
+    background: rgba(0, 0, 0, 0.06);
+    color: #8e8e93;
+    cursor: not-allowed;
+}
+.action-btn-edit:disabled:hover {
+    transform: none;
+    box-shadow: none;
+    background: rgba(0, 0, 0, 0.06);
+    color: #8e8e93;
 }
 
 .action-btn-audit {
