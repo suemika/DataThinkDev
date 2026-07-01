@@ -103,7 +103,7 @@ function addReturnTop() {
 
     const mainElement = document.querySelector('main');
     if (mainElement) {
-        mainElement.innerHTML += modalHTML;
+        mainElement.insertAdjacentHTML('beforeend', modalHTML);
     }
 }
 

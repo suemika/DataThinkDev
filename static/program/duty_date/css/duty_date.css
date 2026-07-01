@@ -59,35 +59,29 @@
     background-color: rgba(0, 123, 255, 0.61) !important;
 }
 
-.duty-event {
-    background: linear-gradient(135deg, #4a6cf7, #6a82fb) !important;
+.duty-event,
+.holiday-event,
+.work-event,
+.holiday-only-event {
     border-radius: 6px !important;
     padding: 4px 8px !important;
     font-size: 13px !important;
     font-weight: 600 !important;
+}
+
+.duty-event {
+    background: linear-gradient(135deg, #4a6cf7, #6a82fb) !important;
     transition: all 0.3s ease !important;
 }
 .holiday-event {
     background: linear-gradient(135deg, #fc5c7d, #ff8a5c) !important;
-    border-radius: 6px !important;
-    padding: 4px 8px !important;
-    font-size: 13px !important;
-    font-weight: 600 !important;
 }
 .work-event {
     background: linear-gradient(135deg, #10b981, #34d399) !important;
-    border-radius: 6px !important;
-    padding: 4px 8px !important;
-    font-size: 13px !important;
-    font-weight: 600 !important;
 }
 /* JS 引用了 holiday-only-event 但没有样式 — 补充 */
 .holiday-only-event {
     background: var(--dt-warning) !important;
-    border-radius: 6px !important;
-    padding: 4px 8px !important;
-    font-size: 13px !important;
-    font-weight: 600 !important;
 }
 
 /* ---- 高亮样式 ---- */
@@ -113,7 +107,7 @@
     display: grid;
     grid-template-columns: 1fr 1.8fr;
     gap: 20px;
-    height: calc(100vh - 120px);
+    height: 100%;
     margin-bottom: 1rem;
 }
 

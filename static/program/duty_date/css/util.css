@@ -53,6 +53,7 @@ body {
 
 main {
     flex: 1;
+    min-height: 0;
 }
 
 .background-container {
@@ -486,11 +487,7 @@ footer {
     }
 }
 
-.spinner-border {
-    width: 3rem;
-    height: 3rem;
-    animation: spin 0.75s linear infinite;
-}
+/* .spinner-border 已在上面统一定义，此处删除重复声明 */
 
 .diamond-loader {
     width: 50px;
