@@ -92,6 +92,14 @@
                         </div>
                         <span>已选择 <span class="batch-count" id="selectedCount">0</span> 条</span>
                     </div>
+                    <div class="batch-btns" id="batchBtns" style="display:none;">
+                        <button type="button" class="btn btn-danger btn-sm me-2" id="batchDeleteBtn" disabled>
+                            <i class="bi bi-trash me-1"></i>批量删除
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm" id="batchAuditBtn" disabled>
+                            <i class="bi bi-check-lg me-1"></i>批量审核
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -100,9 +108,7 @@
                     <table class="table table-hover" id="data-table">
                         <thead>
                         <tr>
-                            <th scope="col" width="50">
-                                <input type="checkbox" id="headerCheckbox" class="form-check-input">
-                            </th>
+                            <th scope="col" width="50">选择</th>
                             <th scope="col" data-sort="发货通知单号">
                                 发货通知单号 <i class="bi bi-arrow-down-up sort-icon"></i>
                             </th>
@@ -115,12 +121,13 @@
                             <th scope="col" data-sort="车号">车号</th>
                             <th scope="col" data-sort="重量">重量</th>
                             <th scope="col" data-sort="日期">日期</th>
+                            <th scope="col" data-sort="审核状态">审核状态</th>
                             <th scope="col" width="165">操作</th>
                         </tr>
                         </thead>
                         <tbody id="table-body">
                         <tr id="empty-state-row">
-                            <td colspan="12" class="empty-state">
+                            <td colspan="13" class="empty-state">
                                 <i class="bi bi-inbox"></i>
                                 <p class="mb-0">暂无数据</p>
                                 <small>请点击"刷新"按钮加载数据，或点击"新增"添加记录</small>

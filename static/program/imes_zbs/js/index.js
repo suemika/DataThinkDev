@@ -14,6 +14,7 @@ let sortDirection = 'asc';
 let currentFilter = '';
 let auditTargetKey = null;
 let deleteTargetKey = null;
+let hasPermission = false;  // 后台权限：true=可删除/审核
 
 // --- 显示列配置 ---
 const DISPLAY_COLS = [
@@ -26,7 +27,8 @@ const DISPLAY_COLS = [
     { key: '收货单位', label: '收货单位', sortable: true },
     { key: '车号', label: '车号', sortable: true },
     { key: '重量', label: '重量', sortable: true },
-    { key: '日期', label: '日期', sortable: true }
+    { key: '日期', label: '日期', sortable: true },
+    { key: '审核状态', label: '审核状态', sortable: true }
 ];
 
 // --- 编辑弹窗中所有字段 ---
@@ -50,7 +52,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (typeof util !== 'undefined' && util.loading && typeof util.loading.show === 'function') {
             util.loading.show();
         }
-        refreshData();
+        // 先获取用户权限，再加载数据
+        fetchUserInfo().then(() => refreshData());
     }, 100);
 
     // 搜索框回车
@@ -61,19 +64,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 全选（表头 + 批量栏联动）
-    const headerCheckbox = document.getElementById('headerCheckbox');
+    // 全选（批量操作栏）
     const checkAll = document.getElementById('checkAll');
-    if (headerCheckbox) {
-        headerCheckbox.addEventListener('change', function () {
-            toggleAllSelection(this.checked);
-            if (checkAll) checkAll.checked = this.checked;
-        });
-    }
     if (checkAll) {
         checkAll.addEventListener('change', function () {
             toggleAllSelection(this.checked);
-            if (headerCheckbox) headerCheckbox.checked = this.checked;
         });
     }
 
@@ -95,7 +90,22 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('clearBtn')?.addEventListener('click', clearSearch);
     document.getElementById('saveBtn')?.addEventListener('click', submitForm);
     document.getElementById('confirmDeleteBtn')?.addEventListener('click', confirmDelete);
+    document.getElementById('confirmAuditBtn')?.addEventListener('click', confirmAudit);
+    document.getElementById('batchDeleteBtn')?.addEventListener('click', batchDelete);
+    document.getElementById('batchAuditBtn')?.addEventListener('click', batchAudit);
 });
+
+// ==================== 获取当前用户权限 ====================
+async function fetchUserInfo() {
+    try {
+        const response = await fetchDataFromAPI('802', { action: 'getUserInfo' });
+        if (response && response.data && response.data.status === 0) {
+            hasPermission = response.data.data.hasPermission === true;
+        }
+    } catch (error) {
+        console.error('获取用户权限失败:', error);
+    }
+}
 
 // ==================== 数据查询 (action: query) ====================
 async function refreshData() {
@@ -194,30 +204,36 @@ function renderTable() {
 
     pageData.forEach((row, idx) => {
         const globalIdx = start + idx;
-        const key = row['发货通知单号'] || ('__idx_' + globalIdx);
+        const originalKey = row['发货通知单号'] || '';
+        const uniqueKey = 'row_' + globalIdx;  // 纯索引，确保唯一
+
+        const isAudited = row['审核状态'] === '已审核';
 
         const tr = document.createElement('tr');
-        tr.className = 'selectable' + (selectedItems.has(key) ? ' selected' : '');
-        tr.dataset.key = key;
+        tr.className = 'selectable' + (selectedItems.has(uniqueKey) ? ' selected' : '') + (isAudited ? ' audited' : '');
+        tr.dataset.key = uniqueKey;
         tr.dataset.index = globalIdx;
 
         let cellsHtml = '';
         cellsHtml += '<td class="checkbox-container" data-label="选择">' +
-            '<input type="checkbox" class="form-check-input item-checkbox" data-key="' + escapeHtml(key) + '"' +
-            (selectedItems.has(key) ? ' checked' : '') + '></td>';
+            '<input type="checkbox" class="form-check-input item-checkbox"' +
+            ' data-key="' + uniqueKey + '"' +
+            ' data-original-key="' + escapeHtml(originalKey) + '"' +
+            (selectedItems.has(uniqueKey) ? ' checked' : '') + '></td>';
 
         DISPLAY_COLS.forEach(col => {
             const val = row[col.key] || '';
             cellsHtml += '<td data-label="' + col.label + '" title="' + escapeHtml(val) + '">' + escapeHtml(val) + '</td>';
         });
 
-        // 操作列
-        cellsHtml += '<td data-label="操作"><div class="action-btns">' +
-            '<button class="action-btn action-btn-edit edit-btn" data-key="' + escapeHtml(key) + '">' +
+        // 操作列 — 按钮仍用原始 key 查找数据
+        let actionBtns = '<button type="button" class="action-btn action-btn-edit edit-btn" data-key="' + escapeHtml(originalKey) + '"' +
+            (isAudited ? ' disabled title="已审核，不可编辑"' : '') + '>' +
             '<i class="bi bi-pencil-square"></i><span>编辑</span></button>' +
-            '<button class="action-btn action-btn-copy copy-btn" data-key="' + escapeHtml(key) + '">' +
-            '<i class="bi bi-copy"></i><span>复制</span></button>' +
-            '</div></td>';
+            '<button type="button" class="action-btn action-btn-copy copy-btn" data-key="' + escapeHtml(originalKey) + '">' +
+            '<i class="bi bi-copy"></i><span>复制</span></button>';
+
+        cellsHtml += '<td data-label="操作"><div class="action-btns">' + actionBtns + '</div></td>';
 
         tr.innerHTML = cellsHtml;
         tbody.appendChild(tr);
@@ -226,7 +242,7 @@ function renderTable() {
         tr.addEventListener('click', function (e) {
             if (e.target.tagName === 'BUTTON' || e.target.closest('button') ||
                 e.target.tagName === 'INPUT' || e.target.closest('.checkbox-container')) return;
-            toggleRowSelection(tr, key, tr.querySelector('.item-checkbox'));
+            toggleRowSelection(tr, uniqueKey, tr.querySelector('.item-checkbox'));
         });
     });
 
@@ -287,6 +303,15 @@ function updateBatchActions() {
     const selectedCountSpan = document.getElementById('selectedCount');
     if (selectedCountSpan) selectedCountSpan.textContent = selectedItems.size;
 
+    // 批量按钮状态
+    const batchBtns = document.getElementById('batchBtns');
+    if (batchBtns && hasPermission) {
+        batchBtns.style.display = 'flex';
+        const hasSelection = selectedItems.size > 0;
+        document.getElementById('batchDeleteBtn').disabled = !hasSelection;
+        document.getElementById('batchAuditBtn').disabled = !hasSelection;
+    }
+
     const checkboxes = document.querySelectorAll('.item-checkbox');
     const totalSelectable = checkboxes.length;
 
@@ -295,26 +320,23 @@ function updateBatchActions() {
         if (selectedItems.has(cb.dataset.key)) selectedSelectableCount++;
     });
 
-    const headerCheckbox = document.getElementById('headerCheckbox');
     const checkAll = document.getElementById('checkAll');
 
+    if (!checkAll) return;
+
     if (totalSelectable === 0) {
-        [headerCheckbox, checkAll].forEach(el => {
-            if (el) { el.checked = false; el.indeterminate = false; el.disabled = true; }
-        });
+        checkAll.checked = false;
+        checkAll.indeterminate = false;
+        checkAll.disabled = true;
     } else {
-        [headerCheckbox, checkAll].forEach(el => {
-            if (el) {
-                el.disabled = false;
-                if (selectedSelectableCount === totalSelectable) {
-                    el.checked = true; el.indeterminate = false;
-                } else if (selectedSelectableCount > 0) {
-                    el.checked = false; el.indeterminate = true;
-                } else {
-                    el.checked = false; el.indeterminate = false;
-                }
-            }
-        });
+        checkAll.disabled = false;
+        if (selectedSelectableCount === totalSelectable) {
+            checkAll.checked = true; checkAll.indeterminate = false;
+        } else if (selectedSelectableCount > 0) {
+            checkAll.checked = false; checkAll.indeterminate = true;
+        } else {
+            checkAll.checked = false; checkAll.indeterminate = false;
+        }
     }
 }
 
@@ -411,6 +433,12 @@ function clearForm() {
 function showEditModal(key) {
     const row = findRowByKey(key);
     if (!row) { showMsg('未找到该记录', true); return; }
+
+    // 已审核记录不允许编辑
+    if (row['审核状态'] === '已审核') {
+        showMsg('已审核的记录不允许编辑', true);
+        return;
+    }
 
     document.getElementById('edit-mode').value = 'edit';
     document.getElementById('edit-original-key').value = key;
@@ -542,15 +570,86 @@ async function confirmDelete() {
     }
 }
 
+// ==================== 批量删除 ====================
+async function batchDelete() {
+    if (selectedItems.size === 0) {
+        showMsg('请先勾选要删除的记录', true);
+        return;
+    }
+    if (!confirm('确认删除选中的 ' + selectedItems.size + ' 条记录？此操作不可恢复！')) return;
+
+    const keys = [];
+    document.querySelectorAll('.item-checkbox:checked').forEach(cb => {
+        const k = cb.dataset.originalKey;
+        if (k) keys.push(k);
+    });
+    showLoading();
+    try {
+        const response = await fetchDataFromAPI('802', { action: 'batchDelete', keys: keys });
+        if (response && response.data && response.data.status === 0) {
+            showMsg(response.data.msg || '批量删除成功');
+            selectedItems.clear();
+            await refreshData();
+        } else {
+            showMsg(response?.data?.msg || '批量删除失败', true);
+        }
+    } catch (error) {
+        console.error('批量删除失败:', error);
+        showMsg('批量删除失败：' + (error.message || '网络异常'), true);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ==================== 批量审核 ====================
+async function batchAudit() {
+    if (selectedItems.size === 0) {
+        showMsg('请先勾选要审核的记录', true);
+        return;
+    }
+    if (!confirm('确认审核选中的 ' + selectedItems.size + ' 条记录？')) return;
+
+    const keys = [];
+    document.querySelectorAll('.item-checkbox:checked').forEach(cb => {
+        const k = cb.dataset.originalKey;
+        if (k) keys.push(k);
+    });
+    showLoading();
+    try {
+        const response = await fetchDataFromAPI('802', { action: 'batchAudit', keys: keys });
+        if (response && response.data && response.data.status === 0) {
+            showMsg(response.data.msg || '批量审核成功');
+            selectedItems.clear();
+            await refreshData();
+        } else {
+            showMsg(response?.data?.msg || '批量审核失败', true);
+        }
+    } catch (error) {
+        console.error('批量审核失败:', error);
+        showMsg('批量审核失败：' + (error.message || '网络异常'), true);
+    } finally {
+        hideLoading();
+    }
+}
+
 // ==================== 复制 (action: insert) ====================
 async function copyRecord(key) {
     const row = findRowByKey(key);
     if (!row) return;
 
     const copiedData = { ...row };
-    copiedData['发货通知单号'] = (copiedData['发货通知单号'] || '') + '-副本';
+    // 复制时清除审核状态
+    delete copiedData['审核状态'];
+    // 自动去重：已有 原单号-副本 则在后面加序号：-副本2、-副本3...
+    const baseName = (copiedData['发货通知单号'] || '');
+    let copyName = baseName + '-副本';
+    let counter = 1;
+    while (currentData.some(r => (r['发货通知单号'] || '') === copyName)) {
+        counter++;
+        copyName = baseName + '-副本' + counter;
+    }
+    copiedData['发货通知单号'] = copyName;
 
-    showLoading();
     try {
         const response = await fetchDataFromAPI('802', {
             action: 'insert',
@@ -558,16 +657,18 @@ async function copyRecord(key) {
         });
 
         if (response && response.data && response.data.status === 0) {
-            showMsg(response.data.msg || '复制成功');
-            await refreshData();
+            showMsg('复制成功');
+            // 不刷新整个页面，直接本地追加新记录
+            currentData.unshift(copiedData);
+            currentPage = 1;
+            renderTable();
+            renderPagination();
         } else {
             showMsg(response?.data?.msg || '复制失败', true);
         }
     } catch (error) {
         console.error('复制失败:', error);
         showMsg('复制失败：' + (error.message || '网络异常'), true);
-    } finally {
-        hideLoading();
     }
 }
 

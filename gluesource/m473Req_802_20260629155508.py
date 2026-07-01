@@ -22,6 +22,12 @@ class Servlet:
                 return self._delete()
             elif self.action == 'audit':
                 return self._audit()
+            elif self.action == 'getUserInfo':
+                return self._get_user_info()
+            elif self.action == 'batchDelete':
+                return self._batch_delete()
+            elif self.action == 'batchAudit':
+                return self._batch_audit()
             else:
                 return {"status": 1, "msg": "未知操作: " + self.action, "data": []}
         except Exception as e:
@@ -35,7 +41,7 @@ class Servlet:
 
         cols = [
             '发货通知单号', '批号', '定尺', '规格', '产品名称1', '牌号', '许可证号',
-            '执行标准', '发货状态', '合同号', '收货单位', '日期', '请发日期', '车号',
+            '执行标准', '发货状态', '审核状态', '合同号', '收货单位', '日期', '请发日期', '车号',
             '各支理重', '各支实重', '各支件数', '重量', '支数', '件数', '炉号',
             '屈服强度', '抗拉强度', '强屈比', '断后伸长率', '最大应力下的总伸长率',
             '超强比', '冷弯180度', '反弯', '冲击功1', '冲击功2', '冲击功3',
@@ -91,7 +97,7 @@ class Servlet:
         main_db = DBROUTE(31)
         user_name = userid  # 默认用 userid
         try:
-            sql_name = "SELECT 工资编号+'-'+ISNULL(JEI.姓名,'测试') 姓名" +                        " FROM [精益办].dbo.JYB_EmployeeInfo JEI WHERE 工资编号= '" + userid + "'"
+            sql_name = "SELECT 工资编号+'-'+ISNULL(JEI.姓名,'测试') 姓名" + " FROM [精益办].dbo.JYB_EmployeeInfo JEI WHERE 工资编号= '" + userid + "'"
             records_name = main_db.ExecQuery(sql_name)
             if records_name and records_name[0][0]:
                 user_name = str(records_name[0][0])
@@ -133,7 +139,8 @@ class Servlet:
         if not set_clauses:
             return {"status": 1, "msg": "没有要更新的字段", "data": []}
 
-        sql = 'UPDATE ' + self.table + ' SET ' + ','.join(set_clauses) +               ' WHERE "发货通知单号" = \'' + key.replace("'", "''") + '\''
+        sql = 'UPDATE ' + self.table + ' SET ' + ','.join(set_clauses) + ' WHERE "发货通知单号" = \'' + key.replace("'",
+                                                                                                                    "''") + '\''
         self.db.ExecNonQuery(sql)
 
         return {"status": 0, "msg": "更新成功", "data": []}
@@ -155,7 +162,51 @@ class Servlet:
         if not key:
             return {"status": 1, "msg": "缺少主键", "data": []}
 
-        sql = 'UPDATE ' + self.table +               ' SET "发货状态" = \'已审核\' WHERE "发货通知单号" = \'' + key.replace("'", "''") + '\''
+        sql = 'UPDATE ' + self.table + ' SET "审核状态" = \'已审核\' WHERE "发货通知单号" = \'' + key.replace("'",
+                                                                                                              "''") + '\''
         self.db.ExecNonQuery(sql)
 
         return {"status": 0, "msg": "审核成功", "data": []}
+
+    # ==================== 获取当前用户权限 ====================
+    def _get_user_info(self):
+        userid = '011980'
+        # userid = str(getUserid(getSessionidd()))
+        has_permission = (userid == '011980')
+        return {"status": 0, "msg": "获取成功", "data": {"hasPermission": has_permission}}
+
+    # ==================== 批量删除 ====================
+    def _batch_delete(self):
+        keys = self.json_obj.get('keys', [])
+        if not keys:
+            return {"status": 1, "msg": "请选择要删除的记录", "data": []}
+
+        success_count = 0
+        for key in keys:
+            try:
+                safe_key = str(key).replace("'", "''")
+                sql = 'DELETE FROM ' + self.table + ' WHERE "发货通知单号" = \'' + safe_key + '\''
+                self.db.ExecNonQuery(sql)
+                success_count += 1
+            except Exception:
+                pass
+
+        return {"status": 0, "msg": "成功删除 " + str(success_count) + " / " + str(len(keys)) + " 条", "data": []}
+
+    # ==================== 批量审核 ====================
+    def _batch_audit(self):
+        keys = self.json_obj.get('keys', [])
+        if not keys:
+            return {"status": 1, "msg": "请选择要审核的记录", "data": []}
+
+        success_count = 0
+        for key in keys:
+            try:
+                safe_key = str(key).replace("'", "''")
+                sql = 'UPDATE ' + self.table + ' SET "审核状态" = \'已审核\' WHERE "发货通知单号" = \'' + safe_key + '\''
+                self.db.ExecNonQuery(sql)
+                success_count += 1
+            except Exception:
+                pass
+
+        return {"status": 0, "msg": "成功审核 " + str(success_count) + " / " + str(len(keys)) + " 条", "data": []}
