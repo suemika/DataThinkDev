@@ -58,5 +58,6 @@ static/amissdk*/
 static/resource/
 
 # Node modules (Vue projects)
-imes_zbs_vue/node_modules/
+static/program/imes_zbs_vue/node_modules/
+static/program/imes_zbs_vue/dist/
 
