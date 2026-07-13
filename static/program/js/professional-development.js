@@ -31,11 +31,11 @@ async function fetchWatermark() {
     const urlParams = new URLSearchParams(window.location.search);
     const pValue = urlParams.get('p');
 
-    if (!pValue) {
-        console.error(Com_Parameter.UrlParamsInfo);
-        showErrorMessage();
-        return redirectToErrorPage();
-    }
+    // if (!pValue) {
+    //     console.error(Com_Parameter.UrlParamsInfo);
+    //     showErrorMessage();
+    //     return redirectToErrorPage();
+    // }
 
     try {
         const response = await fetchDataFromAPI('556', pValue);

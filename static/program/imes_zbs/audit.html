@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>石横特钢 | 发货通知单台账</title>
+    <title>石横特钢 | 发货通知单台账 · 审核</title>
     <script>
         const randomVersion = Math.random();
         document.write('<link rel="icon" href="../vendor/logo.png?v=' + randomVersion + '" type="image/png">');
@@ -15,7 +15,7 @@
         document.write('<script src="../util/util_link.js?v=' + randomVersion + '"><\/script>');
         document.write('<script src="../vendor/bootstrap5/js/bootstrap.bundle.min.js?v=' + randomVersion + '"><\/script>');
         document.write('<script src="../vendor/elementui/js/jquery-3.7.0.min.js?v=' + randomVersion + '"><\/script>');
-        document.write('<script src="./js/index.js?v=' + randomVersion + '"><\/script>');
+        document.write('<script src="./js/audit.js?v=' + randomVersion + '"><\/script>');
     </script>
 </head>
 <body>
@@ -35,7 +35,7 @@
 
 <header class="background-container">
     <img id="header-img" src="" alt="ST">
-    <h2 class="h2-container">发货通知单台账</h2>
+    <h2 class="h2-container">发货通知单台账 · 审核</h2>
 </header>
 
 <main class="container">
@@ -49,9 +49,6 @@
             <div class="card-body">
                 <div class="toolbar-row">
                     <div class="toolbar-actions">
-                        <button type="button" class="btn btn-primary" id="addBtn">
-                            <i class="bi bi-plus-lg me-1"></i>新增
-                        </button>
                         <button type="button" class="btn btn-secondary" id="refreshBtn">
                             <i class="bi bi-arrow-clockwise me-1"></i>刷新
                         </button>
@@ -86,11 +83,18 @@
             <div class="batch-actions" id="batchActions" style="display:none;">
                 <div class="d-flex justify-content-between align-items-center w-100">
                     <div class="batch-info">
+                        <div class="check-all-container">
+                            <input type="checkbox" id="checkAll" class="form-check-input">
+                            <label for="checkAll" class="form-check-label mb-0">全选</label>
+                        </div>
                         <span>已选择 <span class="batch-count" id="selectedCount">0</span> 条</span>
                     </div>
                     <div class="batch-btns" id="batchBtns">
-                        <button type="button" class="btn btn-danger btn-sm" id="batchDeleteBtn" disabled>
+                        <button type="button" class="btn btn-danger btn-sm me-2" id="batchDeleteBtn" disabled>
                             <i class="bi bi-trash me-1"></i>批量删除
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm" id="batchAuditBtn" disabled>
+                            <i class="bi bi-check-lg me-1"></i>批量审核
                         </button>
                     </div>
                 </div>
@@ -115,7 +119,7 @@
                             <th scope="col" data-sort="重量">重量</th>
                             <th scope="col" data-sort="日期">日期</th>
                             <th scope="col" data-sort="审核状态">审核状态</th>
-                            <th scope="col" width="165">操作</th>
+                            <th scope="col" width="100">操作</th>
                         </tr>
                         </thead>
                         <tbody id="table-body">
@@ -123,7 +127,7 @@
                             <td colspan="13" class="empty-state">
                                 <i class="bi bi-inbox"></i>
                                 <p class="mb-0">暂无数据</p>
-                                <small>请点击"刷新"按钮加载数据，或点击"新增"添加记录</small>
+                                <small>请点击"刷新"按钮加载数据</small>
                             </td>
                         </tr>
                         </tbody>
@@ -154,49 +158,46 @@
     </div>
 </main>
 
-<!-- ==================== 新增/编辑 Modal ==================== -->
-<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true" data-bs-backdrop="static">
+<!-- ==================== 查看详情 Modal ==================== -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" id="editModalLabel">
-                    <i class="bi bi-plus-circle me-2"></i>新增发货通知单
+                <h4 class="modal-title" id="detailModalLabel">
+                    <i class="bi bi-eye me-2"></i>查看详情
                 </h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="editForm">
-                    <input type="hidden" id="edit-mode" value="add">
-                    <input type="hidden" id="edit-original-key" value="">
-
+                <form id="detailForm">
                     <!-- 基本信息 -->
                     <h6 class="form-section-title"><i class="bi bi-info-circle me-1"></i>基本信息</h6>
                     <div class="modal-form-row">
                         <div class="modal-form-col col-12 col-md-4">
-                            <label class="form-label">发货通知单号 <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="edit-发货通知单号" required>
+                            <label class="form-label">发货通知单号</label>
+                            <input type="text" class="form-control" id="detail-发货通知单号" readonly>
                         </div>
                         <div class="modal-form-col col-12 col-md-4">
                             <label class="form-label">合同号</label>
-                            <input type="text" class="form-control" id="edit-合同号">
+                            <input type="text" class="form-control" id="detail-合同号" readonly>
                         </div>
                     </div>
                     <div class="modal-form-row">
                         <div class="modal-form-col col-12 col-md-3">
                             <label class="form-label">收货单位</label>
-                            <input type="text" class="form-control" id="edit-收货单位">
+                            <input type="text" class="form-control" id="detail-收货单位" readonly>
                         </div>
                         <div class="modal-form-col col-12 col-md-3">
                             <label class="form-label">车号</label>
-                            <input type="text" class="form-control" id="edit-车号">
+                            <input type="text" class="form-control" id="detail-车号" readonly>
                         </div>
                         <div class="modal-form-col col-12 col-md-3">
                             <label class="form-label">日期</label>
-                            <input type="date" class="form-control" id="edit-日期">
+                            <input type="text" class="form-control" id="detail-日期" readonly>
                         </div>
                         <div class="modal-form-col col-12 col-md-3">
                             <label class="form-label">请发日期</label>
-                            <input type="date" class="form-control" id="edit-请发日期">
+                            <input type="text" class="form-control" id="detail-请发日期" readonly>
                         </div>
                     </div>
 
@@ -205,37 +206,37 @@
                     <div class="modal-form-row">
                         <div class="modal-form-col col-12 col-md-3">
                             <label class="form-label">批号</label>
-                            <input type="text" class="form-control" id="edit-批号">
+                            <input type="text" class="form-control" id="detail-批号" readonly>
                         </div>
                         <div class="modal-form-col col-12 col-md-3">
                             <label class="form-label">规格</label>
-                            <input type="text" class="form-control" id="edit-规格">
+                            <input type="text" class="form-control" id="detail-规格" readonly>
                         </div>
                         <div class="modal-form-col col-12 col-md-3">
                             <label class="form-label">定尺</label>
-                            <input type="text" class="form-control" id="edit-定尺">
+                            <input type="text" class="form-control" id="detail-定尺" readonly>
                         </div>
                         <div class="modal-form-col col-12 col-md-3">
                             <label class="form-label">产品名称</label>
-                            <input type="text" class="form-control" id="edit-产品名称1">
+                            <input type="text" class="form-control" id="detail-产品名称1" readonly>
                         </div>
                     </div>
                     <div class="modal-form-row">
                         <div class="modal-form-col col-12 col-md-3">
                             <label class="form-label">牌号</label>
-                            <input type="text" class="form-control" id="edit-牌号">
+                            <input type="text" class="form-control" id="detail-牌号" readonly>
                         </div>
                         <div class="modal-form-col col-12 col-md-3">
                             <label class="form-label">许可证号</label>
-                            <input type="text" class="form-control" id="edit-许可证号">
+                            <input type="text" class="form-control" id="detail-许可证号" readonly>
                         </div>
                         <div class="modal-form-col col-12 col-md-3">
                             <label class="form-label">执行标准</label>
-                            <input type="text" class="form-control" id="edit-执行标准">
+                            <input type="text" class="form-control" id="detail-执行标准" readonly>
                         </div>
                         <div class="modal-form-col col-12 col-md-3">
                             <label class="form-label">炉号</label>
-                            <input type="text" class="form-control" id="edit-炉号">
+                            <input type="text" class="form-control" id="detail-炉号" readonly>
                         </div>
                     </div>
 
@@ -244,41 +245,41 @@
                     <div class="modal-form-row">
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">重量</label>
-                            <input type="text" class="form-control" id="edit-重量">
+                            <input type="text" class="form-control" id="detail-重量" readonly>
                         </div>
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">支数</label>
-                            <input type="text" class="form-control" id="edit-支数">
+                            <input type="text" class="form-control" id="detail-支数" readonly>
                         </div>
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">件数</label>
-                            <input type="text" class="form-control" id="edit-件数">
+                            <input type="text" class="form-control" id="detail-件数" readonly>
                         </div>
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">总重量</label>
-                            <input type="text" class="form-control" id="edit-总重量">
+                            <input type="text" class="form-control" id="detail-总重量" readonly>
                         </div>
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">总件数</label>
-                            <input type="text" class="form-control" id="edit-总件数">
+                            <input type="text" class="form-control" id="detail-总件数" readonly>
                         </div>
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">米重</label>
-                            <input type="text" class="form-control" id="edit-米重">
+                            <input type="text" class="form-control" id="detail-米重" readonly>
                         </div>
                     </div>
                     <div class="modal-form-row">
                         <div class="modal-form-col col-12 col-md-4">
                             <label class="form-label">各支理重</label>
-                            <input type="text" class="form-control" id="edit-各支理重">
+                            <input type="text" class="form-control" id="detail-各支理重" readonly>
                         </div>
                         <div class="modal-form-col col-12 col-md-4">
                             <label class="form-label">各支实重</label>
-                            <input type="text" class="form-control" id="edit-各支实重">
+                            <input type="text" class="form-control" id="detail-各支实重" readonly>
                         </div>
                         <div class="modal-form-col col-12 col-md-4">
                             <label class="form-label">各支件数</label>
-                            <input type="text" class="form-control" id="edit-各支件数">
+                            <input type="text" class="form-control" id="detail-各支件数" readonly>
                         </div>
                     </div>
 
@@ -287,53 +288,53 @@
                     <div class="modal-form-row">
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">屈服强度</label>
-                            <input type="text" class="form-control" id="edit-屈服强度">
+                            <input type="text" class="form-control" id="detail-屈服强度" readonly>
                         </div>
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">抗拉强度</label>
-                            <input type="text" class="form-control" id="edit-抗拉强度">
+                            <input type="text" class="form-control" id="detail-抗拉强度" readonly>
                         </div>
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">强屈比</label>
-                            <input type="text" class="form-control" id="edit-强屈比">
+                            <input type="text" class="form-control" id="detail-强屈比" readonly>
                         </div>
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">断后伸长率</label>
-                            <input type="text" class="form-control" id="edit-断后伸长率">
+                            <input type="text" class="form-control" id="detail-断后伸长率" readonly>
                         </div>
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">最大应力总伸长率</label>
-                            <input type="text" class="form-control" id="edit-最大应力下的总伸长率">
+                            <input type="text" class="form-control" id="detail-最大应力下的总伸长率" readonly>
                         </div>
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">超强比</label>
-                            <input type="text" class="form-control" id="edit-超强比">
+                            <input type="text" class="form-control" id="detail-超强比" readonly>
                         </div>
                     </div>
                     <div class="modal-form-row">
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">下屈服强度</label>
-                            <input type="text" class="form-control" id="edit-下屈服强度">
+                            <input type="text" class="form-control" id="detail-下屈服强度" readonly>
                         </div>
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">断面收缩率</label>
-                            <input type="text" class="form-control" id="edit-断面收缩率">
+                            <input type="text" class="form-control" id="detail-断面收缩率" readonly>
                         </div>
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">试样尺寸</label>
-                            <input type="text" class="form-control" id="edit-试样尺寸">
+                            <input type="text" class="form-control" id="detail-试样尺寸" readonly>
                         </div>
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">冷弯180度</label>
-                            <input type="text" class="form-control" id="edit-冷弯180度">
+                            <input type="text" class="form-control" id="detail-冷弯180度" readonly>
                         </div>
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">反弯</label>
-                            <input type="text" class="form-control" id="edit-反弯">
+                            <input type="text" class="form-control" id="detail-反弯" readonly>
                         </div>
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">弯曲类型</label>
-                            <input type="text" class="form-control" id="edit-弯曲类型">
+                            <input type="text" class="form-control" id="detail-弯曲类型" readonly>
                         </div>
                     </div>
 
@@ -342,33 +343,33 @@
                     <div class="modal-form-row">
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">冲击功1</label>
-                            <input type="text" class="form-control" id="edit-冲击功1">
+                            <input type="text" class="form-control" id="detail-冲击功1" readonly>
                         </div>
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">冲击功2</label>
-                            <input type="text" class="form-control" id="edit-冲击功2">
+                            <input type="text" class="form-control" id="detail-冲击功2" readonly>
                         </div>
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">冲击功3</label>
-                            <input type="text" class="form-control" id="edit-冲击功3">
+                            <input type="text" class="form-control" id="detail-冲击功3" readonly>
                         </div>
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">冲击功平均值</label>
-                            <input type="text" class="form-control" id="edit-冲击功平均值">
+                            <input type="text" class="form-control" id="detail-冲击功平均值" readonly>
                         </div>
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">冲击功</label>
-                            <input type="text" class="form-control" id="edit-冲击功">
+                            <input type="text" class="form-control" id="detail-冲击功" readonly>
                         </div>
                         <div class="modal-form-col col-6 col-md-2">
                             <label class="form-label">D类型</label>
-                            <input type="text" class="form-control" id="edit-D类型">
+                            <input type="text" class="form-control" id="detail-D类型" readonly>
                         </div>
                     </div>
                     <div class="modal-form-row">
                         <div class="modal-form-col col-12 col-md-3">
                             <label class="form-label">试验温度</label>
-                            <input type="text" class="form-control" id="edit-试验温度">
+                            <input type="text" class="form-control" id="detail-试验温度" readonly>
                         </div>
                     </div>
 
@@ -377,103 +378,122 @@
                     <div class="modal-form-row">
                         <div class="modal-form-col col-4 col-md-2">
                             <label class="form-label">C</label>
-                            <input type="text" class="form-control" id="edit-C">
+                            <input type="text" class="form-control" id="detail-C" readonly>
                         </div>
                         <div class="modal-form-col col-4 col-md-2">
                             <label class="form-label">MN</label>
-                            <input type="text" class="form-control" id="edit-MN">
+                            <input type="text" class="form-control" id="detail-MN" readonly>
                         </div>
                         <div class="modal-form-col col-4 col-md-2">
                             <label class="form-label">P</label>
-                            <input type="text" class="form-control" id="edit-P">
+                            <input type="text" class="form-control" id="detail-P" readonly>
                         </div>
                         <div class="modal-form-col col-4 col-md-2">
                             <label class="form-label">S</label>
-                            <input type="text" class="form-control" id="edit-S">
+                            <input type="text" class="form-control" id="detail-S" readonly>
                         </div>
                         <div class="modal-form-col col-4 col-md-2">
                             <label class="form-label">SI</label>
-                            <input type="text" class="form-control" id="edit-SI">
+                            <input type="text" class="form-control" id="detail-SI" readonly>
                         </div>
                         <div class="modal-form-col col-4 col-md-2">
                             <label class="form-label">CU</label>
-                            <input type="text" class="form-control" id="edit-CU">
+                            <input type="text" class="form-control" id="detail-CU" readonly>
                         </div>
                     </div>
                     <div class="modal-form-row">
                         <div class="modal-form-col col-4 col-md-2">
                             <label class="form-label">NI</label>
-                            <input type="text" class="form-control" id="edit-NI">
+                            <input type="text" class="form-control" id="detail-NI" readonly>
                         </div>
                         <div class="modal-form-col col-4 col-md-2">
                             <label class="form-label">CR</label>
-                            <input type="text" class="form-control" id="edit-CR">
+                            <input type="text" class="form-control" id="detail-CR" readonly>
                         </div>
                         <div class="modal-form-col col-4 col-md-2">
                             <label class="form-label">MO</label>
-                            <input type="text" class="form-control" id="edit-MO">
+                            <input type="text" class="form-control" id="detail-MO" readonly>
                         </div>
                         <div class="modal-form-col col-4 col-md-2">
                             <label class="form-label">V</label>
-                            <input type="text" class="form-control" id="edit-V">
+                            <input type="text" class="form-control" id="detail-V" readonly>
                         </div>
                         <div class="modal-form-col col-4 col-md-2">
                             <label class="form-label">B</label>
-                            <input type="text" class="form-control" id="edit-B">
+                            <input type="text" class="form-control" id="detail-B" readonly>
                         </div>
                         <div class="modal-form-col col-4 col-md-2">
                             <label class="form-label">N</label>
-                            <input type="text" class="form-control" id="edit-N">
+                            <input type="text" class="form-control" id="detail-N" readonly>
                         </div>
                     </div>
                     <div class="modal-form-row">
                         <div class="modal-form-col col-4 col-md-2">
                             <label class="form-label">ALT</label>
-                            <input type="text" class="form-control" id="edit-ALT">
+                            <input type="text" class="form-control" id="detail-ALT" readonly>
                         </div>
                         <div class="modal-form-col col-4 col-md-2">
                             <label class="form-label">TI</label>
-                            <input type="text" class="form-control" id="edit-TI">
+                            <input type="text" class="form-control" id="detail-TI" readonly>
                         </div>
                         <div class="modal-form-col col-4 col-md-2">
                             <label class="form-label">NB</label>
-                            <input type="text" class="form-control" id="edit-NB">
+                            <input type="text" class="form-control" id="detail-NB" readonly>
                         </div>
                         <div class="modal-form-col col-4 col-md-2">
                             <label class="form-label">ALS</label>
-                            <input type="text" class="form-control" id="edit-ALS">
+                            <input type="text" class="form-control" id="detail-ALS" readonly>
                         </div>
                         <div class="modal-form-col col-4 col-md-2">
                             <label class="form-label">CEQ</label>
-                            <input type="text" class="form-control" id="edit-CEQ">
+                            <input type="text" class="form-control" id="detail-CEQ" readonly>
                         </div>
                         <div class="modal-form-col col-4 col-md-2">
                             <label class="form-label">CMN6</label>
-                            <input type="text" class="form-control" id="edit-CMN6">
+                            <input type="text" class="form-control" id="detail-CMN6" readonly>
                         </div>
                     </div>
                     <div class="modal-form-row">
                         <div class="modal-form-col col-12 col-md-4">
                             <label class="form-label">CE</label>
-                            <input type="text" class="form-control" id="edit-CE">
+                            <input type="text" class="form-control" id="detail-CE" readonly>
                         </div>
                         <div class="modal-form-col col-12 col-md-4">
                             <label class="form-label">技术规范</label>
-                            <input type="text" class="form-control" id="edit-技术规范">
+                            <input type="text" class="form-control" id="detail-技术规范" readonly>
                         </div>
                         <div class="modal-form-col col-12 col-md-4">
                             <label class="form-label">实物标记</label>
-                            <input type="text" class="form-control" id="edit-实物标记">
+                            <input type="text" class="form-control" id="detail-实物标记" readonly>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-1"></i>取消
+                    <i class="bi bi-x-circle me-1"></i>关闭
                 </button>
-                <button type="button" class="btn btn-primary" id="saveBtn">
-                    <i class="bi bi-check-circle me-1"></i>保存
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 审核确认 Modal ==================== -->
+<div class="modal fade" id="auditModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-check-circle me-2"></i>审核确认</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p>确认审核通过该记录？</p>
+                <p class="text-muted" style="font-size:0.85rem;" id="audit-record-info"></p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success" id="confirmAuditBtn">
+                    <i class="bi bi-check-lg me-1"></i>确认审核
                 </button>
             </div>
         </div>

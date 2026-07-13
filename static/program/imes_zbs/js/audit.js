@@ -1,7 +1,7 @@
 /**
- * 发货通知单台账 - 业务逻辑
+ * 发货通知单台账 - 审核页
  * 功能代号: 802  数据表: IMES_PES2.T_SH_ZBS_FHTZTP
- * 所有操作统一走 fetchDataFromAPI('802', {action: 'xxx', ...})
+ * 审核人员专用：只读查看 + 审核操作，不可修改数据
  */
 
 // --- 全局状态 ---
@@ -12,6 +12,7 @@ let pageSize = 50;
 let sortField = '';
 let sortDirection = 'asc';
 let currentFilter = '';
+let auditTargetKey = null;
 let deleteTargetKey = null;
 
 // --- 显示列配置 ---
@@ -29,7 +30,7 @@ const DISPLAY_COLS = [
     { key: '审核状态', label: '审核状态', sortable: true }
 ];
 
-// --- 编辑弹窗中所有字段 ---
+// --- 详情弹窗中所有字段 (与填报页编辑弹窗一致) ---
 const FORM_FIELDS = [
     '发货通知单号', '合同号', '收货单位', '车号', '日期', '请发日期',
     '批号', '规格', '定尺', '产品名称1', '牌号', '执行标准', '炉号',
@@ -50,7 +51,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (typeof util !== 'undefined' && util.loading && typeof util.loading.show === 'function') {
             util.loading.show();
         }
-        // 加载数据
         refreshData();
     }, 100);
 
@@ -59,6 +59,14 @@ document.addEventListener('DOMContentLoaded', function () {
     if (searchBox) {
         searchBox.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') searchData();
+        });
+    }
+
+    // 全选
+    const checkAll = document.getElementById('checkAll');
+    if (checkAll) {
+        checkAll.addEventListener('change', function () {
+            toggleAllSelection(this.checked);
         });
     }
 
@@ -74,16 +82,16 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // 按钮事件
-    document.getElementById('addBtn')?.addEventListener('click', showAddModal);
     document.getElementById('refreshBtn')?.addEventListener('click', refreshData);
     document.getElementById('searchBtn')?.addEventListener('click', searchData);
     document.getElementById('clearBtn')?.addEventListener('click', clearSearch);
-    document.getElementById('saveBtn')?.addEventListener('click', submitForm);
+    document.getElementById('confirmAuditBtn')?.addEventListener('click', confirmAudit);
     document.getElementById('confirmDeleteBtn')?.addEventListener('click', confirmDelete);
+    document.getElementById('batchAuditBtn')?.addEventListener('click', batchAudit);
     document.getElementById('batchDeleteBtn')?.addEventListener('click', batchDelete);
 });
 
-// ==================== 数据查询 (action: query) ====================
+// ==================== 数据查询 ====================
 async function refreshData() {
     showLoading();
     try {
@@ -125,7 +133,6 @@ function searchData() {
     const input = document.getElementById('search-box').value.trim();
     currentFilter = input;
 
-    // 客户端二次过滤（服务端已按 keyword 查过，这里做更细的过滤）
     refreshData().then(() => {
         const kw = input.toLowerCase().replace(/\s+/g, '');
         if (kw && currentData.length > 0) {
@@ -187,7 +194,7 @@ function renderTable() {
     pageData.forEach((row, idx) => {
         const globalIdx = start + idx;
         const originalKey = row['发货通知单号'] || '';
-        const uniqueKey = 'row_' + globalIdx;  // 纯索引，确保唯一
+        const uniqueKey = 'row_' + globalIdx;
 
         const isAudited = row['审核状态'] === '已审核';
 
@@ -201,7 +208,6 @@ function renderTable() {
             '<input type="checkbox" class="form-check-input item-checkbox"' +
             ' data-key="' + uniqueKey + '"' +
             ' data-original-key="' + escapeHtml(originalKey) + '"' +
-            (isAudited ? ' disabled' : '') +
             (selectedItems.has(uniqueKey) ? ' checked' : '') + '></td>';
 
         DISPLAY_COLS.forEach(col => {
@@ -209,21 +215,24 @@ function renderTable() {
             cellsHtml += '<td data-label="' + col.label + '" title="' + escapeHtml(val) + '">' + escapeHtml(val) + '</td>';
         });
 
-        // 操作列 — 按钮仍用原始 key 查找数据
-        let actionBtns = '<button type="button" class="action-btn action-btn-edit edit-btn" data-key="' + escapeHtml(originalKey) + '"' +
-            (isAudited ? ' disabled title="已审核，不可编辑"' : '') + '>' +
-            '<i class="bi bi-pencil-square"></i><span>编辑</span></button>' +
-            '<button type="button" class="action-btn action-btn-copy copy-btn" data-key="' + escapeHtml(originalKey) + '">' +
-            '<i class="bi bi-copy"></i><span>复制</span></button>';
-
-        cellsHtml += '<td data-label="操作"><div class="action-btns">' + actionBtns + '</div></td>';
+        // 操作列：查看 + 删除按钮 + 审核按钮/状态
+        let actionHtml = '<button type="button" class="action-btn action-btn-view detail-btn" data-key="' + escapeHtml(originalKey) + '">' +
+            '<i class="bi bi-eye"></i><span>查看</span></button>' +
+            '<button type="button" class="action-btn action-btn-delete delete-btn ms-1" data-key="' + escapeHtml(originalKey) + '">' +
+            '<i class="bi bi-trash"></i><span>删除</span></button>';
+        if (isAudited) {
+            actionHtml += '<span class="badge bg-success ms-1">已审核</span>';
+        } else {
+            actionHtml += '<button type="button" class="action-btn action-btn-audit audit-btn ms-1" data-key="' + escapeHtml(originalKey) + '">' +
+                '<i class="bi bi-check-lg"></i><span>审核</span></button>';
+        }
+        cellsHtml += '<td data-label="操作">' + actionHtml + '</td>';
 
         tr.innerHTML = cellsHtml;
         tbody.appendChild(tr);
 
-        // 行点击切换选择（已审核行不可选）
+        // 行点击切换选择
         tr.addEventListener('click', function (e) {
-            if (isAudited) return;
             if (e.target.tagName === 'BUTTON' || e.target.closest('button') ||
                 e.target.tagName === 'INPUT' || e.target.closest('.checkbox-container')) return;
             toggleRowSelection(tr, uniqueKey, tr.querySelector('.item-checkbox'));
@@ -238,11 +247,17 @@ function renderTable() {
         });
     });
 
-    // 绑定操作按钮
-    tbody.querySelectorAll('.edit-btn').forEach(btn =>
-        btn.addEventListener('click', function (e) { e.stopPropagation(); showEditModal(this.dataset.key); }));
-    tbody.querySelectorAll('.copy-btn').forEach(btn =>
-        btn.addEventListener('click', function (e) { e.stopPropagation(); copyRecord(this.dataset.key); }));
+    // 绑定审核按钮
+    tbody.querySelectorAll('.audit-btn').forEach(btn =>
+        btn.addEventListener('click', function (e) { e.stopPropagation(); showAuditModal(this.dataset.key); }));
+
+    // 绑定查看按钮
+    tbody.querySelectorAll('.detail-btn').forEach(btn =>
+        btn.addEventListener('click', function (e) { e.stopPropagation(); showDetailModal(this.dataset.key); }));
+
+    // 绑定删除按钮
+    tbody.querySelectorAll('.delete-btn').forEach(btn =>
+        btn.addEventListener('click', function (e) { e.stopPropagation(); showDeleteModal(this.dataset.key); }));
 
     // 表头排序
     document.querySelectorAll('#data-table thead th[data-sort]').forEach(th => {
@@ -268,7 +283,6 @@ function toggleRowSelection(row, key, checkbox) {
 
 function toggleAllSelection(isChecked) {
     document.querySelectorAll('.item-checkbox').forEach(cb => {
-        if (cb.disabled) return;  // 已审核行不可选
         const key = cb.dataset.key;
         const row = cb.closest('tr');
         if (isChecked) {
@@ -288,12 +302,39 @@ function updateBatchActions() {
     const selectedCountSpan = document.getElementById('selectedCount');
     if (selectedCountSpan) selectedCountSpan.textContent = selectedItems.size;
 
-    // 批量删除按钮状态
-    const batchBtns = document.getElementById('batchBtns');
-    if (batchBtns) {
-        batchBtns.style.display = 'flex';
-        const hasSelection = selectedItems.size > 0;
-        document.getElementById('batchDeleteBtn').disabled = !hasSelection;
+    const batchAuditBtn = document.getElementById('batchAuditBtn');
+    if (batchAuditBtn) {
+        batchAuditBtn.disabled = selectedItems.size === 0;
+    }
+    const batchDeleteBtn = document.getElementById('batchDeleteBtn');
+    if (batchDeleteBtn) {
+        batchDeleteBtn.disabled = selectedItems.size === 0;
+    }
+
+    const checkboxes = document.querySelectorAll('.item-checkbox');
+    let totalSelectable = 0;
+    let selectedSelectableCount = 0;
+    checkboxes.forEach(cb => {
+        totalSelectable++;
+        if (selectedItems.has(cb.dataset.key)) selectedSelectableCount++;
+    });
+
+    const checkAll = document.getElementById('checkAll');
+    if (!checkAll) return;
+
+    if (totalSelectable === 0) {
+        checkAll.checked = false;
+        checkAll.indeterminate = false;
+        checkAll.disabled = true;
+    } else {
+        checkAll.disabled = false;
+        if (selectedSelectableCount === totalSelectable) {
+            checkAll.checked = true; checkAll.indeterminate = false;
+        } else if (selectedSelectableCount > 0) {
+            checkAll.checked = false; checkAll.indeterminate = true;
+        } else {
+            checkAll.checked = false; checkAll.indeterminate = false;
+        }
     }
 }
 
@@ -371,88 +412,57 @@ function goToPage(page) {
     document.getElementById('table-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// ==================== 新增/编辑弹窗 ====================
-function showAddModal() {
-    document.getElementById('edit-mode').value = 'add';
-    document.getElementById('edit-original-key').value = '';
-    document.getElementById('editModalLabel').innerHTML = '<i class="bi bi-plus-circle me-2"></i>新增发货通知单';
-    clearForm();
-    new bootstrap.Modal(document.getElementById('editModal')).show();
-}
-
-function clearForm() {
-    FORM_FIELDS.forEach(f => {
-        const el = document.getElementById('edit-' + f);
-        if (el) el.value = '';
-    });
-}
-
-function showEditModal(key) {
+// ==================== 查看详情 ====================
+function showDetailModal(key) {
     const row = findRowByKey(key);
-    if (!row) { showMsg('未找到该记录', true); return; }
-
-    // 已审核记录不允许编辑
-    if (row['审核状态'] === '已审核') {
-        showMsg('已审核的记录不允许编辑', true);
-        return;
-    }
-
-    document.getElementById('edit-mode').value = 'edit';
-    document.getElementById('edit-original-key').value = key;
-    document.getElementById('editModalLabel').innerHTML = '<i class="bi bi-pencil-square me-2"></i>编辑发货通知单';
-    fillForm(row);
-    new bootstrap.Modal(document.getElementById('editModal')).show();
-}
-
-function fillForm(row) {
+    if (!row) return;
+    document.getElementById('detailModalLabel').innerHTML = '<i class="bi bi-eye me-2"></i>查看详情 — ' + escapeHtml(key);
     FORM_FIELDS.forEach(f => {
-        const el = document.getElementById('edit-' + f);
+        const el = document.getElementById('detail-' + f);
         if (el) el.value = row[f] || '';
     });
+    new bootstrap.Modal(document.getElementById('detailModal')).show();
 }
 
-// ==================== 提交表单 (action: insert / update) ====================
-async function submitForm() {
-    const mode = document.getElementById('edit-mode').value;
-    const formData = {};
-    FORM_FIELDS.forEach(f => {
-        const el = document.getElementById('edit-' + f);
-        if (el) formData[f] = el.value;
-    });
+// ==================== 审核 ====================
+function showAuditModal(key) {
+    const row = findRowByKey(key);
+    if (!row) return;
+    auditTargetKey = key;
+    document.getElementById('audit-record-info').textContent =
+        '发货通知单号：' + (row['发货通知单号'] || key);
+    new bootstrap.Modal(document.getElementById('auditModal')).show();
+}
 
-    if (!formData['发货通知单号']) {
-        showMsg('请输入发货通知单号', true);
-        return;
-    }
+async function confirmAudit() {
+    if (!auditTargetKey) return;
+    const row = findRowByKey(auditTargetKey);
+    if (!row) return;
 
     showLoading();
     try {
-        let params;
-        if (mode === 'add') {
-            params = { action: 'insert', data: formData };
-        } else {
-            const originalKey = document.getElementById('edit-original-key').value;
-            params = { action: 'update', key: originalKey, data: formData };
-        }
-
-        const response = await fetchDataFromAPI('802', params);
+        const response = await fetchDataFromAPI('802', {
+            action: 'audit',
+            key: auditTargetKey
+        });
 
         if (response && response.data && response.data.status === 0) {
-            showMsg(response.data.msg || '操作成功');
-            bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+            showMsg(response.data.msg || '审核成功');
+            bootstrap.Modal.getInstance(document.getElementById('auditModal')).hide();
+            auditTargetKey = null;
             await refreshData();
         } else {
-            showMsg(response?.data?.msg || '操作失败', true);
+            showMsg(response?.data?.msg || '审核失败', true);
         }
     } catch (error) {
-        console.error('提交失败:', error);
-        showMsg('操作失败：' + (error.message || '网络异常'), true);
+        console.error('审核失败:', error);
+        showMsg('审核失败：' + (error.message || '网络异常'), true);
     } finally {
         hideLoading();
     }
 }
 
-// ==================== 删除 (action: delete) ====================
+// ==================== 删除 ====================
 function showDeleteModal(key) {
     const row = findRowByKey(key);
     if (!row) return;
@@ -520,45 +530,50 @@ async function batchDelete() {
     }
 }
 
-// ==================== 复制 (action: insert) ====================
-async function copyRecord(key) {
-    const row = findRowByKey(key);
-    if (!row) return;
-
-    const copiedData = { ...row };
-    // 复制时清除审核状态
-    delete copiedData['审核状态'];
-    // 自动去重：已有 原单号-副本 则在后面加序号：-副本2、-副本3...
-    const baseName = (copiedData['发货通知单号'] || '');
-    let copyName = baseName + '-副本';
-    let counter = 1;
-    while (currentData.some(r => (r['发货通知单号'] || '') === copyName)) {
-        counter++;
-        copyName = baseName + '-副本' + counter;
+// ==================== 批量审核 ====================
+async function batchAudit() {
+    if (selectedItems.size === 0) {
+        showMsg('请先勾选要审核的记录', true);
+        return;
     }
-    copiedData['发货通知单号'] = copyName;
 
-    try {
-        const response = await fetchDataFromAPI('802', {
-            action: 'insert',
-            data: copiedData
-        });
-
-        if (response && response.data && response.data.status === 0) {
-            showMsg('复制成功');
-            // 复制后清空选择
-            selectedItems.clear();
-            // 不刷新整个页面，直接本地追加新记录
-            currentData.unshift(copiedData);
-            currentPage = 1;
-            renderTable();
-            renderPagination();
+    // 过滤已审核的记录
+    const keys = [];
+    const skipped = [];
+    document.querySelectorAll('.item-checkbox:checked').forEach(cb => {
+        const k = cb.dataset.originalKey;
+        if (!k) return;
+        const row = findRowByKey(k);
+        if (row && row['审核状态'] === '已审核') {
+            skipped.push(k);
         } else {
-            showMsg(response?.data?.msg || '复制失败', true);
+            keys.push(k);
+        }
+    });
+
+    if (keys.length === 0) {
+        showMsg('选中的记录均已审核，无需重复审核', true);
+        return;
+    }
+
+    const msg = '确认审核选中的 ' + keys.length + ' 条记录？' +
+        (skipped.length > 0 ? '\n（已跳过 ' + skipped.length + ' 条已审核记录）' : '');
+    if (!confirm(msg)) return;
+    showLoading();
+    try {
+        const response = await fetchDataFromAPI('802', { action: 'batchAudit', keys: keys });
+        if (response && response.data && response.data.status === 0) {
+            showMsg(response.data.msg || '批量审核成功');
+            selectedItems.clear();
+            await refreshData();
+        } else {
+            showMsg(response?.data?.msg || '批量审核失败', true);
         }
     } catch (error) {
-        console.error('复制失败:', error);
-        showMsg('复制失败：' + (error.message || '网络异常'), true);
+        console.error('批量审核失败:', error);
+        showMsg('批量审核失败：' + (error.message || '网络异常'), true);
+    } finally {
+        hideLoading();
     }
 }
 
@@ -591,13 +606,8 @@ function hideLoading() {
 
 // 挂载到全局
 window.goToPage = goToPage;
-window.showAddModal = showAddModal;
-window.showEditModal = showEditModal;
-window.submitForm = submitForm;
-window.showDeleteModal = showDeleteModal;
-window.confirmDelete = confirmDelete;
-window.copyRecord = copyRecord;
 window.refreshData = refreshData;
 window.searchData = searchData;
 window.clearSearch = clearSearch;
 window.toggleRowSelection = toggleRowSelection;
+window.toggleAllSelection = toggleAllSelection;

@@ -7,10 +7,10 @@ async function fetchData() {
     const urlParams = new URLSearchParams(window.location.search);
     pValue = urlParams.get('p');
 
-    if (!pValue) {
-        showErrorMessage();
-        return redirectToErrorPage();
-    }
+    // if (!pValue) {
+    //     showErrorMessage();
+    //     return redirectToErrorPage();
+    // }
 
     try {
         const response = await fetchDataFromAPI('556', pValue);
