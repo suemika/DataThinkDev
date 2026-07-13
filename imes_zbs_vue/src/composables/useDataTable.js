@@ -99,6 +99,21 @@ export function useDataTable() {
   }
 
   async function saveRecord(mode, formData, originalKey) {
+    // 单号重复检查
+    const newKey = formData['发货通知单号']
+    if (newKey) {
+      const duplicate = currentData.value.find(row => {
+        const rowKey = row['发货通知单号'] || ''
+        if (mode === 'edit' && rowKey === originalKey) {
+          return false
+        }
+        return rowKey === newKey
+      })
+      if (duplicate) {
+        return { success: false, msg: '发货通知单号「' + newKey + '」已存在，请勿重复添加' }
+      }
+    }
+
     let params
     if (mode === 'add') {
       params = { action: 'insert', data: { ...formData } }

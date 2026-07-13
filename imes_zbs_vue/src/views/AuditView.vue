@@ -201,7 +201,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, inject } from 'vue'
+import { ref, reactive, onMounted, inject, watch } from 'vue'
 import { Modal } from 'bootstrap'
 import { DISPLAY_COLS, FORM_SECTIONS } from '@/utils/constants'
 import { useDataTable } from '@/composables/useDataTable'
@@ -261,6 +261,15 @@ function toggleAll(event) {
   }
   selectedItems.value = newSet
 }
+
+// 同步全选 checkbox 状态
+watch([pageData, selectedItems], () => {
+  if (!checkAllRef.value) return
+  const allChecked = pageData.value.length > 0 && pageData.value.every((r, i) => selectedItems.value.has(rowKey(r, i)))
+  const someChecked = pageData.value.some((r, i) => selectedItems.value.has(rowKey(r, i)))
+  checkAllRef.value.checked = allChecked
+  checkAllRef.value.indeterminate = !allChecked && someChecked
+})
 
 function showDetail(row) {
   Object.keys(detailData).forEach(k => delete detailData[k])

@@ -210,7 +210,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, inject } from 'vue'
+import { ref, onMounted, inject, watch } from 'vue'
 import { Modal } from 'bootstrap'
 import { DISPLAY_COLS } from '@/utils/constants'
 import { useDataTable } from '@/composables/useDataTable'
@@ -283,6 +283,16 @@ function toggleAll(event) {
   selectedItems.value = newSet
 }
 
+// 同步全选 checkbox 状态：单行切换 / 切页时自动更新
+watch([pageData, selectedItems], () => {
+  if (!checkAllRef.value) return
+  const selectable = pageData.value.filter(r => r['审核状态'] !== '已审核')
+  const allChecked = selectable.length > 0 && selectable.every((r, i) => selectedItems.value.has(rowKey(r, i)))
+  const someChecked = selectable.some((r, i) => selectedItems.value.has(rowKey(r, i)))
+  checkAllRef.value.checked = allChecked
+  checkAllRef.value.indeterminate = !allChecked && someChecked
+})
+
 function openAddModal() {
   formMode.value = 'add'
   editingRow.value = null
@@ -306,6 +316,23 @@ async function handleFormSave(result) {
     showMsg(result.msg, true)
     return
   }
+
+  // 单号重复检查
+  const newKey = result.data['发货通知单号']
+  if (newKey) {
+    const duplicate = currentData.value.find(row => {
+      const rowKey = row['发货通知单号'] || ''
+      if (formMode.value === 'edit' && rowKey === originalKey.value) {
+        return false // 编辑模式下跳过自身
+      }
+      return rowKey === newKey
+    })
+    if (duplicate) {
+      showMsg('发货通知单号「' + newKey + '」已存在，请勿重复添加', true)
+      return
+    }
+  }
+
   loading.value = true
   try {
     const res = await saveRecord(formMode.value, result.data, originalKey.value)
@@ -369,18 +396,29 @@ async function batchDelete() {
     showMsg('请先勾选要删除的记录', true)
     return
   }
-  if (!confirm('确认删除选中的 ' + selectedItems.value.size + ' 条记录？此操作不可恢复！')) return
 
   const keys = []
-  document.querySelectorAll('.form-check-input:checked').forEach(cb => {
-    const tr = cb.closest('tr')
-    if (tr) {
-      const keyCell = tr.querySelectorAll('td')[1]
-      if (keyCell) keys.push(keyCell.textContent.trim())
+  const rows = pageData.value
+  selectedItems.value.forEach(key => {
+    for (let i = 0; i < rows.length; i++) {
+      if (rowKey(rows[i], i) === key && rows[i]['发货通知单号'] && rows[i]['审核状态'] !== '已审核') {
+        keys.push(rows[i]['发货通知单号'])
+        break
+      }
     }
   })
 
-  if (keys.length === 0) return
+  if (keys.length === 0) {
+    showMsg('所选记录均已审核，不可删除', true)
+    return
+  }
+
+  const skipped = selectedItems.value.size - keys.length
+  const msg = skipped > 0
+    ? '确认删除选中的 ' + keys.length + ' 条记录？（已跳过 ' + skipped + ' 条已审核记录）此操作不可恢复！'
+    : '确认删除选中的 ' + keys.length + ' 条记录？此操作不可恢复！'
+  if (!confirm(msg)) return
+
   loading.value = true
   try {
     const res = await batchDeleteRecords(keys)
