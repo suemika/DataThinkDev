@@ -134,6 +134,7 @@
                         type="checkbox"
                         class="form-check-input"
                         :checked="selectedItems.has(rowKey(row, idx))"
+                        :disabled="row['审核状态'] === '已审核'"
                         @click.stop
                         @change="toggleRow(row, idx)"
                       />
@@ -240,6 +241,7 @@ function rowKey(row, idx) {
 }
 
 function toggleRow(row, idx, event) {
+  if (row['审核状态'] === '已审核') return
   if (event && (event.target.tagName === 'BUTTON' || event.target.closest('button'))) return
   const key = rowKey(row, idx)
   const newSet = new Set(selectedItems.value)
