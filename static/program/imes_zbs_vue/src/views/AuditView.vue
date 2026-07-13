@@ -256,17 +256,20 @@ function toggleAll(event) {
   const newSet = new Set()
   if (checked) {
     pageData.value.forEach((row, idx) => {
-      newSet.add(rowKey(row, idx))
+      if (row['审核状态'] !== '已审核') {
+        newSet.add(rowKey(row, idx))
+      }
     })
   }
   selectedItems.value = newSet
 }
 
-// 同步全选 checkbox 状态
+// 同步全选 checkbox 状态（只统计未审核行）
 watch([pageData, selectedItems], () => {
   if (!checkAllRef.value) return
-  const allChecked = pageData.value.length > 0 && pageData.value.every((r, i) => selectedItems.value.has(rowKey(r, i)))
-  const someChecked = pageData.value.some((r, i) => selectedItems.value.has(rowKey(r, i)))
+  const selectable = pageData.value.filter(r => r['审核状态'] !== '已审核')
+  const allChecked = selectable.length > 0 && selectable.every((r, i) => selectedItems.value.has(rowKey(r, i)))
+  const someChecked = selectable.some((r, i) => selectedItems.value.has(rowKey(r, i)))
   checkAllRef.value.checked = allChecked
   checkAllRef.value.indeterminate = !allChecked && someChecked
 })
