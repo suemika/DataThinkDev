@@ -100,7 +100,9 @@
               <table class="table table-hover">
                 <thead>
                   <tr>
-                    <th scope="col" width="50">选择</th>
+                    <th scope="col" width="50">
+                      <input type="checkbox" class="form-check-input" @change="toggleAll" ref="checkAllRef" />
+                    </th>
                     <th
                       v-for="col in displayCols"
                       :key="col.key"
@@ -234,6 +236,7 @@ const toastRef = inject('toast')
 const formModalRef = ref(null)
 const deleteModalRef = ref(null)
 const tableCardRef = ref(null)
+const checkAllRef = ref(null)
 const formMode = ref('add')
 const editingRow = ref(null)
 const originalKey = ref('')
@@ -263,6 +266,19 @@ function toggleRow(row, idx, event) {
     newSet.delete(key)
   } else {
     newSet.add(key)
+  }
+  selectedItems.value = newSet
+}
+
+function toggleAll(event) {
+  const checked = event.target.checked
+  const newSet = new Set()
+  if (checked) {
+    pageData.value.forEach((row, idx) => {
+      if (row['审核状态'] !== '已审核') {
+        newSet.add(rowKey(row, idx))
+      }
+    })
   }
   selectedItems.value = newSet
 }
