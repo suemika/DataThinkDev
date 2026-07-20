@@ -31,7 +31,7 @@ export const FORM_SECTIONS = [
     fields: [
       { key: '批号', col: 'col-12 col-md-3' },
       { key: '规格', col: 'col-12 col-md-3' },
-      { key: '定尺(mm)', col: 'col-12 col-md-3' },
+      { key: '定尺', label: '定尺(mm)', col: 'col-12 col-md-3' },
       { key: '产品名称1', col: 'col-12 col-md-3' },
       { key: '牌号', col: 'col-12 col-md-3' },
       { key: '许可证号', col: 'col-12 col-md-3' },

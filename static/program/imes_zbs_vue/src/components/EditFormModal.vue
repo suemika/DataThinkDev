@@ -18,7 +18,7 @@
               <div class="modal-form-row">
                 <div v-for="field in section.fields" :key="field.key" :class="field.col" class="modal-form-col">
                   <label class="form-label">
-                    {{ field.key }}
+                    {{ field.label || field.key }}
                     <span v-if="field.required" class="text-danger">*</span>
                   </label>
                   <input

@@ -73,6 +73,34 @@ DataThinkDev/
 └── static/                 # 其他静态资源
 ```
 
+## 部署
+
+| 项目 | 信息 |
+|------|------|
+| **服务器** | 192.168.1.8（CentOS 8，x86_64） |
+| **主机名** | web_docker_C8_2_1_8 |
+| **部署路径** | `/data/DataThinkDev/` |
+| **容器镜像** | `imcflask20250618` |
+| **容器名** | imc1 ~ imc205（多实例） |
+| **挂载** | `/data/DataThinkDev` → 容器内 `/data` |
+
+### 连接方式
+
+```bash
+# 安装 sshpass（macOS）
+brew install hudochenkov/sshpass/sshpass
+
+# SSH 连接
+sshpass -p '1234Qwer.' ssh -o StrictHostKeyChecking=no root@192.168.1.8
+```
+
+| 连接信息 | 值 |
+|----------|-----|
+| **用户** | `root` |
+| **IP** | `192.168.1.8` |
+| **端口** | `22` |
+| **认证** | 密码 |
+
 ## License
 
 MIT

@@ -186,10 +186,8 @@ class Servlet:
 
     # ==================== 获取当前用户权限 ====================
     def _get_user_info(self):
-        userid = '011980'
-        # userid = str(getUserid(getSessionidd()))
-        has_permission = (userid == '011980')
-        return {"status": 0, "msg": "获取成功", "data": {"hasPermission": has_permission}}
+        userid = str(getUserid(getSessionidd()))
+        return {"status": 0, "msg": "获取成功", "data": {"hasPermission": userid}}
 
     # ==================== 页面权限检查 ====================
     def _check_permission(self):
@@ -197,19 +195,26 @@ class Servlet:
            page: 'index' 台账填报页, 'audit' 审核页
         """
         page = self.json_obj.get('page', 'index')
-        # TODO: 替换为实际从 session 获取用户并查询权限表
-        userid = '011980'
-        # userid = str(getUserid(getSessionidd()))
+        userid = str(getUserid(getSessionidd()))
 
-        # 不同页面对应不同权限组（示例，请根据实际权限表调整）
         if page == 'audit':
-            # 审核页：只有审核人员
-            audit_users = ['011980']  # 替换为实际审核人员列表/权限查询
-            has_permission = userid in audit_users
+            # 审核页：仅 pid=175 的人员可审核
+            main_db = DBROUTE(1)
+            try:
+                sql = "SELECT userid FROM Main.dbo.tbGroupUser WHERE pid=175 AND userid='" + userid.replace("'", "''") + "'"
+                records = main_db.ExecQuery(sql)
+                has_permission = records and len(records) > 0
+            except Exception:
+                has_permission = False
         else:
-            # 台账页：填报人员
-            index_users = ['011980']  # 替换为实际填报人员列表/权限查询
-            has_permission = userid in index_users
+            # 台账页：pid=175 或 pid=176 的人员可查看
+            main_db = DBROUTE(1)
+            try:
+                sql = "SELECT userid FROM Main.dbo.tbGroupUser WHERE pid IN (175,176) AND userid='" + userid.replace("'", "''") + "'"
+                records = main_db.ExecQuery(sql)
+                has_permission = records and len(records) > 0
+            except Exception:
+                has_permission = False
 
         return {"status": 0, "msg": "权限检查完成", "data": {
             "hasPermission": has_permission,
