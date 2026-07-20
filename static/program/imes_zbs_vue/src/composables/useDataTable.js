@@ -1,13 +1,13 @@
 import { ref, computed } from 'vue'
 import { fetchDataFromAPI } from '@/api'
 
-export function useDataTable() {
+export function useDataTable(extraQueryParams = {}) {
   const currentData = ref([])
   const selectedItems = ref(new Set())
   const currentPage = ref(1)
   const pageSize = ref(50)
-  const sortField = ref('')
-  const sortDirection = ref('asc')
+  const sortField = ref('发货通知单号')
+  const sortDirection = ref('desc')
   const searchKeyword = ref('')
   const loading = ref(false)
   const error = ref('')
@@ -30,6 +30,8 @@ export function useDataTable() {
         sortField: sortField.value || '发货通知单号',
         sortDirection: sortDirection.value
       }
+      // 合并额外参数（如 page: 'index' 用于服务端过滤）
+      Object.assign(params, extraQueryParams)
       const response = await fetchDataFromAPI('802', params)
       if (response.data && response.data.status === 0) {
         const data = response.data.data || []
@@ -127,11 +129,19 @@ export function useDataTable() {
     return { success: false, msg: response.data?.msg || '操作失败' }
   }
 
-  async function copyRecord(key) {
+  async function copyRecord(key, operatorName = '') {
     const row = findRowByKey(key)
     if (!row) return { success: false, msg: '未找到该记录' }
     const copiedData = { ...row }
     delete copiedData['审核状态']
+    delete copiedData['更新时间']
+    delete copiedData['审核人']
+    delete copiedData['审核时间']
+    // 复制时自动填入当前操作人和时间，后端 _insert 见 key 已存在则不再覆盖
+    const now = new Date()
+    const pad = n => String(n).padStart(2, '0')
+    copiedData['操作人'] = operatorName
+    copiedData['操作时间'] = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`
     const baseName = copiedData['发货通知单号'] || ''
     let copyName = baseName + '-副本'
     let counter = 1

@@ -32,6 +32,9 @@
       <h2 class="h2-container">发货通知单台账</h2>
       <FeedbackButton />
     </header>
+    <div v-if="currentUserName" style="text-align: right; padding: 8px 20px 8px 0; color: #666; font-size: 0.85rem;">
+      <i class="bi bi-person-circle me-1"></i>{{ currentUserName }}
+    </div>
 
     <main class="container">
       <div class="container-fluid px-0">
@@ -221,6 +224,7 @@ import { fetchDataFromAPI } from '@/api'
 
 const headerLogoSrc = '/program/logo/font_logo.png'
 const hasPermission = ref(false)
+const currentUserName = ref('')
 const checking = ref(true)
 
 const displayCols = DISPLAY_COLS
@@ -230,7 +234,7 @@ const {
   searchKeyword, loading, pageData,
   refreshData, sortBy, findRowByKey,
   deleteRecord, batchDeleteRecords, saveRecord, copyRecord
-} = useDataTable()
+} = useDataTable({ page: 'index' })
 
 const toastRef = inject('toast')
 const formModalRef = ref(null)
@@ -379,7 +383,7 @@ async function confirmDelete() {
 
 async function handleCopy(key) {
   try {
-    const res = await copyRecord(key)
+    const res = await copyRecord(key, currentUserName.value)
     if (res.success) {
       showMsg(res.msg)
       selectedItems.value = new Set()
@@ -452,6 +456,8 @@ async function checkPermission() {
     const response = await fetchDataFromAPI('802', { action: 'checkPermission', page: 'index' })
     if (response.data && response.data.data && response.data.data.hasPermission) {
       hasPermission.value = true
+      currentUserName.value = response.data.data.userName || ''
+      console.log('[IndexView] checkPermission:', response.data.data)
     }
   } catch (e) {
     // 失败默认无权限
@@ -459,6 +465,7 @@ async function checkPermission() {
     checking.value = false
   }
 }
+
 
 onMounted(() => {
   checkPermission().then(() => {

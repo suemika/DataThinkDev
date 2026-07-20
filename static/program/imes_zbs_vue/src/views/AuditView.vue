@@ -33,6 +33,9 @@
       <h2 class="h2-container">发货通知单台账 · 审核</h2>
       <FeedbackButton />
     </header>
+    <div v-if="currentUserName" style="text-align: right; padding: 8px 20px 8px 0; color: #666; font-size: 0.85rem;">
+      <i class="bi bi-person-circle me-1"></i>{{ currentUserName }}
+    </div>
 
     <main class="container">
       <div class="container-fluid px-0">
@@ -185,7 +188,7 @@
               </h6>
               <div class="modal-form-row">
                 <div v-for="field in section.fields" :key="field.key" :class="field.col" class="modal-form-col">
-                  <label class="form-label">{{ field.key }}</label>
+                  <label class="form-label">{{ field.label || field.key }}</label>
                   <input type="text" class="form-control" :value="detailData[field.key] || ''" readonly />
                 </div>
               </div>
@@ -213,6 +216,7 @@ import { fetchDataFromAPI } from '@/api'
 const headerLogoSrc = '/program/logo/font_logo.png'
 
 const hasPermission = ref(false)
+const currentUserName = ref('')
 const checking = ref(true)
 const displayCols = DISPLAY_COLS
 const sections = FORM_SECTIONS
@@ -359,6 +363,8 @@ async function checkPermission() {
     const response = await fetchDataFromAPI('802', { action: 'checkPermission', page: 'audit' })
     if (response.data && response.data.data && response.data.data.hasPermission) {
       hasPermission.value = true
+      currentUserName.value = response.data.data.userName || ''
+      console.log('[AuditView] checkPermission:', response.data.data)
     }
   } catch (e) {
     // 失败默认无权限

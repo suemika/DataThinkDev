@@ -9,7 +9,12 @@ export const DISPLAY_COLS = [
   { key: '车号', label: '车号', sortable: true },
   { key: '重量', label: '重量', sortable: true },
   { key: '日期', label: '日期', sortable: true },
-  { key: '审核状态', label: '审核状态', sortable: true }
+  { key: '审核状态', label: '审核状态', sortable: true },
+  { key: '操作人', label: '操作人', sortable: true },
+  { key: '操作时间', label: '操作时间', sortable: true },
+  { key: '更新时间', label: '更新时间', sortable: true },
+  { key: '审核人', label: '审核人', sortable: true },
+  { key: '审核时间', label: '审核时间', sortable: true }
 ]
 
 export const FORM_SECTIONS = [

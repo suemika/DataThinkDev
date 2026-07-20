@@ -40,12 +40,19 @@ class Servlet:
         keyword = self.json_obj.get('keyword', '')
         sort_field = self.json_obj.get('sortField', '发货通知单号')
         sort_dir = self.json_obj.get('sortDirection', 'asc')
+        page = self.json_obj.get('page', '')
 
         # 动态获取表的所有列名（新增字段无需修改此处）
         cols = self._get_table_columns()
 
         sql = 'SELECT ' + ','.join(['"' + c + '"' for c in cols]) + ' FROM ' + self.table
         where_clauses = []
+
+        # 台账填报页：只返回当前用户填报的记录
+        if page == 'index':
+            userid = str(getUserid(getSessionidd()))
+            # 操作人格式为 "工资编号-姓名"，用 LIKE 前缀匹配
+            where_clauses.append('"操作人" LIKE \'' + userid + '%\'')
 
         if keyword:
             kw = keyword.replace("'", "''")
@@ -99,7 +106,8 @@ class Servlet:
                 '冲击功平均值', '冲击功', '米重', '实物标记', '弯曲类型', 'D类型',
                 '试验温度', '技术规范', 'C', 'MN', 'P', 'S', 'SI', 'CU', 'NI', 'CR',
                 'MO', 'V', 'B', 'CEQ', 'CMN6', 'CE', 'N', 'ALT', 'TI', 'NB', 'ALS',
-                '总重量', '总件数', '断面收缩率', '试样尺寸', '下屈服强度'
+                '总重量', '总件数', '断面收缩率', '试样尺寸', '下屈服强度',
+                '操作人', '操作时间', '更新时间', '审核人', '审核时间'
             ]
 
     # ==================== 新增 ====================
@@ -120,9 +128,13 @@ class Servlet:
         except Exception:
             pass
 
-        # 自动补入操作人员
-        if '操作人员' not in data:
-            data['操作人员'] = user_name
+        # 自动补入操作人、操作时间
+        import datetime
+        now_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        if '操作人' not in data:
+            data['操作人'] = user_name
+        if '操作时间' not in data:
+            data['操作时间'] = now_str
 
         cols = []
         values = []
@@ -155,6 +167,11 @@ class Servlet:
         if not set_clauses:
             return {"status": 1, "msg": "没有要更新的字段", "data": []}
 
+        # 自动补入更新时间
+        import datetime
+        now_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        set_clauses.append('"更新时间" = \'' + now_str + '\'')
+
         sql = 'UPDATE ' + self.table + ' SET ' + ','.join(set_clauses) + ' WHERE "发货通知单号" = \'' + key.replace("'",
                                                                                                                     "''") + '\''
         self.db.ExecNonQuery(sql)
@@ -178,9 +195,27 @@ class Servlet:
         if not key:
             return {"status": 1, "msg": "缺少主键", "data": []}
 
-        sql = 'UPDATE ' + self.table + ' SET "审核状态" = \'已审核\' WHERE "发货通知单号" = \'' + key.replace("'",
-                                                                                                              "''") + '\''
-        self.db.ExecNonQuery(sql)
+        # 获取当前审核人员
+        userid = str(getUserid(getSessionidd()))
+        main_db2 = DBROUTE(31)
+        auditor_name = userid
+        try:
+            sql_name = "SELECT 工资编号+'-'+ISNULL(JEI.姓名,'测试') 姓名 FROM [精益办].dbo.JYB_EmployeeInfo JEI WHERE 工资编号= '" + userid + "'"
+            records_name = main_db2.ExecQuery(sql_name)
+            if records_name and records_name[0][0]:
+                auditor_name = str(records_name[0][0])
+        except Exception:
+            pass
+        import datetime
+        now_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        # try full audit update with auditor info; fall back if columns missing
+        try:
+            sql = 'UPDATE ' + self.table + ' SET "审核状态" = \'已审核\', "审核人" = \'' + auditor_name.replace("'", "''") + '\', "审核时间" = \'' + now_str + '\' WHERE "发货通知单号" = \'' + key.replace("'", "''") + '\''
+            self.db.ExecNonQuery(sql)
+        except Exception:
+            sql = 'UPDATE ' + self.table + ' SET "审核状态" = \'已审核\' WHERE "发货通知单号" = \'' + key.replace("'", "''") + '\''
+            self.db.ExecNonQuery(sql)
 
         return {"status": 0, "msg": "审核成功", "data": []}
 
@@ -216,10 +251,22 @@ class Servlet:
             except Exception:
                 has_permission = False
 
+        # 获取用户姓名
+        main_db2 = DBROUTE(31)
+        user_name = userid
+        try:
+            sql_name = "SELECT 工资编号+'-'+ISNULL(JEI.姓名,'测试') 姓名 FROM [精益办].dbo.JYB_EmployeeInfo JEI WHERE 工资编号= '" + userid + "'"
+            records_name = main_db2.ExecQuery(sql_name)
+            if records_name and records_name[0][0]:
+                user_name = str(records_name[0][0])
+        except Exception:
+            pass
+
         return {"status": 0, "msg": "权限检查完成", "data": {
             "hasPermission": has_permission,
             "page": page,
-            "userid": userid
+            "userid": userid,
+            "userName": user_name
         }}
 
     # ==================== 批量删除 ====================
@@ -246,11 +293,25 @@ class Servlet:
         if not keys:
             return {"status": 1, "msg": "请选择要审核的记录", "data": []}
 
+        # 获取当前审核人员
+        userid = str(getUserid(getSessionidd()))
+        main_db2 = DBROUTE(31)
+        auditor_name = userid
+        try:
+            sql_name = "SELECT 工资编号+'-'+ISNULL(JEI.姓名,'测试') 姓名 FROM [精益办].dbo.JYB_EmployeeInfo JEI WHERE 工资编号= '" + userid + "'"
+            records_name = main_db2.ExecQuery(sql_name)
+            if records_name and records_name[0][0]:
+                auditor_name = str(records_name[0][0])
+        except Exception:
+            pass
+        import datetime
+        now_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
         success_count = 0
         for key in keys:
             try:
                 safe_key = str(key).replace("'", "''")
-                sql = 'UPDATE ' + self.table + ' SET "审核状态" = \'已审核\' WHERE "发货通知单号" = \'' + safe_key + '\''
+                sql = 'UPDATE ' + self.table + ' SET "审核状态" = \'已审核\', "审核人" = \'' + auditor_name.replace("'", "''") + '\', "审核时间" = \'' + now_str + '\' WHERE "发货通知单号" = \'' + safe_key + '\''
                 self.db.ExecNonQuery(sql)
                 success_count += 1
             except Exception:
