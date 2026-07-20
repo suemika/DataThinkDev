@@ -31,7 +31,7 @@ export const FORM_SECTIONS = [
     fields: [
       { key: '批号', col: 'col-12 col-md-3' },
       { key: '规格', col: 'col-12 col-md-3' },
-      { key: '定尺', col: 'col-12 col-md-3' },
+      { key: '定尺(mm)', col: 'col-12 col-md-3' },
       { key: '产品名称1', col: 'col-12 col-md-3' },
       { key: '牌号', col: 'col-12 col-md-3' },
       { key: '许可证号', col: 'col-12 col-md-3' },
@@ -66,7 +66,6 @@ export const FORM_SECTIONS = [
       { key: '超强比', col: 'col-6 col-md-2' },
       { key: '下屈服强度', col: 'col-6 col-md-2' },
       { key: '断面收缩率', col: 'col-6 col-md-2' },
-      { key: '试样尺寸', col: 'col-6 col-md-2' },
       { key: '冷弯180度', col: 'col-6 col-md-2' },
       { key: '反弯', col: 'col-6 col-md-2' },
       { key: '弯曲类型', col: 'col-6 col-md-2' }
@@ -81,6 +80,7 @@ export const FORM_SECTIONS = [
       { key: '冲击功3', col: 'col-6 col-md-2' },
       { key: '冲击功平均值', col: 'col-6 col-md-2' },
       { key: '冲击功', col: 'col-6 col-md-2' },
+      { key: '试样尺寸', col: 'col-6 col-md-2' },
       { key: 'D类型', col: 'col-6 col-md-2' },
       { key: '试验温度', col: 'col-12 col-md-3' }
     ]
