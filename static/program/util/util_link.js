@@ -157,15 +157,23 @@ function createFeedbackUI() {
     });
 
 
-    // 处理表单提交
+    // 处理表单提交（防重复点击）
+    let isSubmitting = false;
     document.getElementById('feedbackForm').addEventListener('submit', async function (event) {
         event.preventDefault(); // 阻止默认提交
+
+        // 防重复提交
+        if (isSubmitting) return;
+        isSubmitting = true;
+
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>提交中...';
+
         // 获取当前网页地址
-
         const formData = new FormData(this); // 获取表单数据
-
         formData.append('sourceAddress', getCurrentUrl());
-
         formData.append('fromName', 'feedbackForm');
 
         // 检查 userName 是否存在; 如果不存在则添加空字符串
@@ -185,8 +193,11 @@ function createFeedbackUI() {
         const modal = bootstrap.Modal.getInstance(document.getElementById('feedbackModal'));
         modal.hide();
 
-        // 清空表单
+        // 清空表单并恢复按钮
         this.reset();
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+        isSubmitting = false;
     });
 }
 
