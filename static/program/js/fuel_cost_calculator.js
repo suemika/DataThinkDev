@@ -109,6 +109,27 @@ $(document).ready(function () {
         $("#yearlyFuelCost95").text(result.yearlyFuelCost95);
         $("#yearlyElectricCost").text(result.yearlyElectricCost);
 
+        // 差距对比：所有价格均以电费为基准，在价格后面显示 + / - 多少
+        var diffMap = [
+            { el: "#perKmElectricCostDiff", current: "perKmElectricCost", baseline: "perKmElectricCost", cur: "电费", base: "电费" },
+            { el: "#perKmFuelCost92Diff",   current: "perKmFuelCost92",   baseline: "perKmElectricCost", cur: "92# 油费", base: "电费" },
+            { el: "#perKmFuelCost95Diff",   current: "perKmFuelCost95",   baseline: "perKmElectricCost", cur: "95# 油费", base: "电费" },
+            { el: "#dailyElectricCostDiff", current: "dailyElectricCost", baseline: "dailyElectricCost", cur: "电费", base: "电费" },
+            { el: "#dailyFuelCost92Diff",   current: "dailyFuelCost92",   baseline: "dailyElectricCost", cur: "92# 油费", base: "电费" },
+            { el: "#dailyFuelCost95Diff",   current: "dailyFuelCost95",   baseline: "dailyElectricCost", cur: "95# 油费", base: "电费" },
+            { el: "#monthlyElectricCostDiff", current: "monthlyElectricCost", baseline: "monthlyElectricCost", cur: "电费", base: "电费" },
+            { el: "#monthlyFuelCost92Diff",   current: "monthlyFuelCost92",   baseline: "monthlyElectricCost", cur: "92# 油费", base: "电费" },
+            { el: "#monthlyFuelCost95Diff",   current: "monthlyFuelCost95",   baseline: "monthlyElectricCost", cur: "95# 油费", base: "电费" },
+            { el: "#yearlyElectricCostDiff", current: "yearlyElectricCost", baseline: "yearlyElectricCost", cur: "电费", base: "电费" },
+            { el: "#yearlyFuelCost92Diff",   current: "yearlyFuelCost92",   baseline: "yearlyElectricCost", cur: "92# 油费", base: "电费" },
+            { el: "#yearlyFuelCost95Diff",   current: "yearlyFuelCost95",   baseline: "yearlyElectricCost", cur: "95# 油费", base: "电费" }
+        ];
+        $.each(diffMap, function () {
+            var current = parseFloat(result[this.current]);
+            var baseline = parseFloat(result[this.baseline]);
+            setDiff($(this.el), current, baseline, this.cur, this.base);
+        });
+
         // 更新柱状图
         updateChart();
 
@@ -252,6 +273,29 @@ function calculateCost(fuelConsumption, fuelPrice92, fuelPrice95, electricConsum
 // 计算费用的通用方法
 function calculateGenericCost(consumption, price, distance) {
     return (consumption / 100) * price * distance;
+}
+
+// 在价格后面显示差距：+ 表示比电费贵，- 表示比电费便宜；电费自身显示"基准"
+function setDiff($el, current, baseline, currentName, baselineName) {
+    var diff = current - baseline;
+    if (currentName === baselineName) {
+        $el
+            .text("基准")
+            .removeClass("plus minus")
+            .addClass("base")
+            .attr("title", "以" + currentName + "为对比基准");
+        return;
+    }
+    var abs = Math.abs(diff).toFixed(2);
+    var text = diff > 0 ? "+" + abs : diff < 0 ? "-" + abs : "±0.00";
+    var title = diff > 0 ? "比" + baselineName + "贵 " + abs + " 元"
+              : diff < 0 ? "比" + baselineName + "便宜 " + abs + " 元"
+              : "与" + baselineName + "持平";
+    $el
+        .text(text)
+        .removeClass("plus minus")
+        .addClass(diff > 0 ? "plus" : diff < 0 ? "minus" : "")
+        .attr("title", title);
 }
 
 // ===== 近3个月油价走势图 =====

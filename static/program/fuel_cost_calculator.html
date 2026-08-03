@@ -84,6 +84,10 @@
         .cost-fuel  { color: #ea580c; }
         .cost-elec  { color: #0284c7; }
         .cost-muted { color: #64748b; }
+        .cost-diff { font-size: .78rem; font-weight: 600; margin-left: 5px; white-space: nowrap; }
+        .cost-diff.plus  { color: #dc2626; }
+        .cost-diff.minus { color: #16a34a; }
+        .cost-diff.base  { color: #94a3b8; }
         .card-result .mileage { font-size: .8rem; color: #64748b; margin-top: 6px; }
         /* 输入框 */
         .form-label { font-weight: 600; font-size: .82rem; color: #475569; margin-bottom: 4px; }
@@ -238,9 +242,9 @@
                 <div class="period">📆 每天</div>
                 <div class="mileage">行驶 <strong id="dailyDistance">-</strong> 公里</div>
                 <hr class="my-2">
-                <div class="cost-item"><span class="cost-label">电费</span><br><span class="cost-value cost-elec" id="dailyElectricCost">-</span> 元</div>
-                <div class="cost-item"><span class="cost-label">92# 油费</span><br><span class="cost-value cost-fuel" id="dailyFuelCost92">-</span> 元</div>
-                <div class="cost-item"><span class="cost-label">95# 油费</span><br><span class="cost-value cost-fuel" id="dailyFuelCost95">-</span> 元</div>
+                <div class="cost-item"><span class="cost-label">电费</span><br><span class="cost-value cost-elec" id="dailyElectricCost">-</span> 元<span class="cost-diff" id="dailyElectricCostDiff"></span></div>
+                <div class="cost-item"><span class="cost-label">92# 油费</span><br><span class="cost-value cost-fuel" id="dailyFuelCost92">-</span> 元<span class="cost-diff" id="dailyFuelCost92Diff"></span></div>
+                <div class="cost-item"><span class="cost-label">95# 油费</span><br><span class="cost-value cost-fuel" id="dailyFuelCost95">-</span> 元<span class="cost-diff" id="dailyFuelCost95Diff"></span></div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3">
@@ -248,9 +252,9 @@
                 <div class="period">📅 每月</div>
                 <div class="mileage">行驶 <strong id="monthlyDistance">-</strong> 公里</div>
                 <hr class="my-2">
-                <div class="cost-item"><span class="cost-label">电费</span><br><span class="cost-value cost-elec" id="monthlyElectricCost">-</span> 元</div>
-                <div class="cost-item"><span class="cost-label">92# 油费</span><br><span class="cost-value cost-fuel" id="monthlyFuelCost92">-</span> 元</div>
-                <div class="cost-item"><span class="cost-label">95# 油费</span><br><span class="cost-value cost-fuel" id="monthlyFuelCost95">-</span> 元</div>
+                <div class="cost-item"><span class="cost-label">电费</span><br><span class="cost-value cost-elec" id="monthlyElectricCost">-</span> 元<span class="cost-diff" id="monthlyElectricCostDiff"></span></div>
+                <div class="cost-item"><span class="cost-label">92# 油费</span><br><span class="cost-value cost-fuel" id="monthlyFuelCost92">-</span> 元<span class="cost-diff" id="monthlyFuelCost92Diff"></span></div>
+                <div class="cost-item"><span class="cost-label">95# 油费</span><br><span class="cost-value cost-fuel" id="monthlyFuelCost95">-</span> 元<span class="cost-diff" id="monthlyFuelCost95Diff"></span></div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3">
@@ -258,18 +262,18 @@
                 <div class="period">📆 每年</div>
                 <div class="mileage">行驶 <strong id="yearlyDistance">-</strong> 公里</div>
                 <hr class="my-2">
-                <div class="cost-item"><span class="cost-label">电费</span><br><span class="cost-value cost-elec" id="yearlyElectricCost">-</span> 元</div>
-                <div class="cost-item"><span class="cost-label">92# 油费</span><br><span class="cost-value cost-fuel" id="yearlyFuelCost92">-</span> 元</div>
-                <div class="cost-item"><span class="cost-label">95# 油费</span><br><span class="cost-value cost-fuel" id="yearlyFuelCost95">-</span> 元</div>
+                <div class="cost-item"><span class="cost-label">电费</span><br><span class="cost-value cost-elec" id="yearlyElectricCost">-</span> 元<span class="cost-diff" id="yearlyElectricCostDiff"></span></div>
+                <div class="cost-item"><span class="cost-label">92# 油费</span><br><span class="cost-value cost-fuel" id="yearlyFuelCost92">-</span> 元<span class="cost-diff" id="yearlyFuelCost92Diff"></span></div>
+                <div class="cost-item"><span class="cost-label">95# 油费</span><br><span class="cost-value cost-fuel" id="yearlyFuelCost95">-</span> 元<span class="cost-diff" id="yearlyFuelCost95Diff"></span></div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="card card-result">
                 <div class="period">📍 每公里</div>
                 <hr class="my-2">
-                <div class="cost-item"><span class="cost-label">电费</span><br><span class="cost-value cost-elec" id="perKmElectricCost">-</span> 元</div>
-                <div class="cost-item"><span class="cost-label">92# 油费</span><br><span class="cost-value cost-fuel" id="perKmFuelCost92">-</span> 元</div>
-                <div class="cost-item"><span class="cost-label">95# 油费</span><br><span class="cost-value cost-fuel" id="perKmFuelCost95">-</span> 元</div>
+                <div class="cost-item"><span class="cost-label">电费</span><br><span class="cost-value cost-elec" id="perKmElectricCost">-</span> 元<span class="cost-diff" id="perKmElectricCostDiff"></span></div>
+                <div class="cost-item"><span class="cost-label">92# 油费</span><br><span class="cost-value cost-fuel" id="perKmFuelCost92">-</span> 元<span class="cost-diff" id="perKmFuelCost92Diff"></span></div>
+                <div class="cost-item"><span class="cost-label">95# 油费</span><br><span class="cost-value cost-fuel" id="perKmFuelCost95">-</span> 元<span class="cost-diff" id="perKmFuelCost95Diff"></span></div>
             </div>
         </div>
     </div>
